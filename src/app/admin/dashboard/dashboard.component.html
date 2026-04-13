@@ -1,0 +1,55 @@
+<div class="admin-dashboard">
+
+  <div class="dashboard-header">
+    <div class="header-left">
+      <h1>📊 Tableau de Bord Admin</h1>
+      <p class="subtitle">Gestion complète de votre plateforme wholesale</p>
+    </div>
+    <button class="btn btn-logout" (click)="logout()">Déconnexion</button>
+  </div>
+
+  
+  <div class="dashboard-tabs">
+    <button 
+      *ngFor="let tab of tabs"
+      class="tab-btn"
+      [class.active]="activeTab === tab.id"
+      (click)="switchTab(tab.id)"
+    >
+      {{ tab.icon }} {{ tab.label }}
+    </button>
+  </div>
+
+ 
+  <div *ngIf="loading" class="loading">
+    <p>⏳ Chargement du tableau de bord...</p>
+  </div>
+
+ 
+  <div *ngIf="!loading" class="dashboard-content">
+    
+   
+    <div *ngIf="activeTab === 'overview'" class="tab-content">
+      <app-admin-overview [stats]="dashboardStats"></app-admin-overview>
+    </div>
+
+    <div *ngIf="activeTab === 'products'" class="tab-content">
+      <app-admin-products></app-admin-products>
+    </div>
+
+    
+    <div *ngIf="activeTab === 'stocks'" class="tab-content">
+      <app-admin-stocks></app-admin-stocks>
+    </div>
+
+    <div *ngIf="activeTab === 'orders'" class="tab-content">
+      <app-admin-orders></app-admin-orders>
+    </div>
+
+   
+    <div *ngIf="activeTab === 'ai'" class="tab-content">
+      <app-admin-ai></app-admin-ai>
+    </div>
+
+  </div>
+</div>

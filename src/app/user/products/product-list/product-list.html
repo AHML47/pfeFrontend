@@ -1,0 +1,90 @@
+<!-- En-tête -->
+<div class="products-header">
+  <div class="header-content">
+    <div class="header-text">
+      <h1>Nos Produits</h1>
+      <p class="header-subtitle">Découvrez notre large gamme de produits de qualité</p>
+    </div>
+    <div class="results-count">
+      {{ filteredProducts.length }} résultat(s)
+    </div>
+  </div>
+</div>
+
+<!-- Layout principal: Sidebar + Contenu -->
+<div class="products-container">
+  <!-- Sidebar des filtres -->
+  <aside class="filters-sidebar">
+    <div class="sidebar-section">
+      <h3 class="sidebar-title">🔍 Recherche</h3>
+      <input
+        type="text"
+        class="search-input"
+        placeholder="Rechercher..."
+        [(ngModel)]="searchQuery"
+      />
+    </div>
+
+    <div class="sidebar-section">
+      <h3 class="sidebar-title">📂 Catégories</h3>
+      <div class="category-list">
+        <button
+          *ngFor="let cat of uniqueCategories"
+          [class.active]="selectedCategory === cat"
+          (click)="selectedCategory = cat"
+          class="category-link"
+        >
+          <span class="category-dot"></span>
+          {{ cat || 'Tous les produits' }}
+        </button>
+      </div>
+    </div>
+
+    <button class="reset-btn" (click)="resetFilters()">🔄 Réinitialiser</button>
+  </aside>
+
+  <!-- Grille de produits -->
+  <main class="products-main">
+    <!-- Message si aucun produit -->
+    <div class="no-products" *ngIf="filteredProducts.length === 0">
+      <div class="empty-icon">🛍️</div>
+      <p>Aucun produit ne correspond à votre recherche</p>
+      <button class="reset-link" (click)="resetFilters()">Afficher tous les produits</button>
+    </div>
+
+    <!-- Grille de produits -->
+    <div class="products-grid" *ngIf="filteredProducts.length > 0">
+      <div class="product-card" *ngFor="let p of filteredProducts">
+        <!-- Image -->
+        <div class="card-img">
+          <img [src]="p.image" [alt]="p.name" />
+          <span class="stock-badge" [class.low]="p.stock <= 10">
+            {{ p.stock <= 10 ? '⚠️ Stock faible' : '✅ En stock' }}
+          </span>
+        </div>
+
+        <!-- Contenu -->
+        <div class="card-body">
+          <div class="product-cat">{{ p.category }}</div>
+          <h3 class="product-name">{{ p.name }}</h3>
+          <p class="product-desc">{{ p.description }}</p>
+
+          <!-- Footer -->
+          <div class="card-footer">
+            <div class="price-section">
+              <span class="product-price">{{ p.price | number:'1.1-2' }} TND</span>
+            </div>
+            <div class="btn-group">
+              <button class="add-btn" (click)="addToCart(p)" title="Ajouter au panier">
+                <span class="btn-icon">🛒</span>
+              </button>
+              <button class="view-btn" (click)="goToDetails(p.id)" title="Voir détails">
+                <span class="btn-icon">→</span>
+              </button>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </main>
+</div>

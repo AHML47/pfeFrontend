@@ -1,0 +1,134 @@
+<div class="products-container">
+  <div class="products-header">
+    <h2>📦 Gestion des Produits</h2>
+    <button class="btn btn-primary" (click)="openAddModal()">
+      ➕ Ajouter un produit
+    </button>
+  </div>
+
+  <!-- Filters -->
+  <div class="filters">
+    <div class="search-box">
+      <input 
+        type="text" 
+        placeholder="Rechercher par nom ou SKU..."
+        [(ngModel)]="searchQuery"
+        (keyup)="onSearch()"
+        class="search-input"
+      />
+    </div>
+    <button 
+      class="btn btn-secondary"
+      [class.active]="filterActive"
+      (click)="toggleFilterActive()"
+    >
+      {{ filterActive ? '✓ Produits actifs' : 'Voir tous' }}
+    </button>
+  </div>
+
+  <!-- Products Table -->
+  <div class="table-container">
+    <div *ngIf="filteredProducts.length === 0" class="empty-state">
+      <p>Aucun produit trouvé</p>
+    </div>
+
+    <table *ngIf="filteredProducts.length > 0" class="products-table">
+      <thead>
+        <tr>
+          <th>Nom</th>
+          <th>SKU</th>
+          <th>Catégorie</th>
+          <th>Prix</th>
+          <th>Stock</th>
+          <th>Statut</th>
+          <th>Actions</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr *ngFor="let product of filteredProducts">
+          <td><strong>{{ product.name }}</strong></td>
+          <td><code>{{ product.sku }}</code></td>
+          <td>{{ product.category }}</td>
+          <td>{{ product.price | number:'1.2-2' }} TND</td>
+          <td>
+            <span class="stock-badge">{{ getStockQuantity(product.id) }} unités</span>
+          </td>
+          <td>
+            <span class="status-badge" [class]="product.active ? 'status-active' : 'status-inactive'">
+              {{ product.active ? '✓ Actif' : '✗ Inactif' }}
+            </span>
+          </td>
+          <td class="actions">
+            <button class="btn btn-sm btn-edit" (click)="openEditModal(product)">
+              ✏️ Éditer
+            </button>
+            <button class="btn btn-sm btn-delete" (click)="deleteProduct(product.id)">
+              🗑️ Supprimer
+            </button>
+            <button 
+              class="btn btn-sm" 
+              [class]="product.active ? 'btn-disable' : 'btn-enable'"
+              (click)="toggleStatus(product)"
+            >
+              {{ product.active ? '❌ Désactiver' : '✓ Activer' }}
+            </button>
+          </td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+</div>
+
+<!-- Modal Ajout/Édition -->
+<div *ngIf="showModal" class="modal-overlay" (click)="closeModal()">
+  <div class="modal" (click)="$event.stopPropagation()">
+    <div class="modal-header">
+      <h3>{{ modalMode === 'add' ? '➕ Ajouter un produit' : '✏️ Modifier le produit' }}</h3>
+      <button class="btn-close" (click)="closeModal()">✕</button>
+    </div>
+
+    <form (ngSubmit)="saveProduct()" class="modal-body">
+      <div class="form-group">
+        <label>Nom du produit *</label>
+        <input type="text" [(ngModel)]="form.name" name="name" class="form-control" placeholder="Ex: Huile d'olive premium" required />
+      </div>
+
+      <div class="form-group">
+        <label>Description</label>
+        <textarea [(ngModel)]="form.description" name="description" class="form-control" placeholder="Description du produit..." rows="3"></textarea>
+      </div>
+
+      <div class="form-row">
+        <div class="form-group">
+          <label>SKU (Code) *</label>
+          <input type="text" [(ngModel)]="form.sku" name="sku" class="form-control" placeholder="HUILE-001" required />
+        </div>
+        <div class="form-group">
+          <label>Prix (TND) *</label>
+          <input type="number" [(ngModel)]="form.price" name="price" class="form-control" placeholder="45" required step="0.01" />
+        </div>
+      </div>
+
+      <div class="form-row">
+        <div class="form-group">
+          <label>Catégorie</label>
+          <input type="text" [(ngModel)]="form.category" name="category" class="form-control" placeholder="Huiles, Condiments..." />
+        </div>
+        <div class="form-group">
+          <label>Stock Minimum</label>
+          <input type="number" [(ngModel)]="form.minimumStock" name="minimumStock" class="form-control" placeholder="20" />
+        </div>
+      </div>
+
+      <div class="form-group">
+        <label>Image URL</label>
+        <input type="text" [(ngModel)]="form.image" name="image" class="form-control" placeholder="/assets/products/huile.jpg" />
+      </div>
+
+      <div class="modal-footer">
+        <button type="button" class="btn btn-secondary" (click)="closeModal()">Annuler</button>
+        <button type="submit" class="btn btn-primary">{{ modalMode === 'add' ? 'Ajouter' : 'Modifier' }}</button>
+      </div>
+    </form>
+  </div>
+</div>

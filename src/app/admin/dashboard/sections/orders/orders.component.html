@@ -1,0 +1,166 @@
+<div class="orders-container">
+
+  <!-- Filters -->
+  <div class="filters-section">
+    <input 
+      type="text" 
+      placeholder="Rechercher par numéro ou client..."
+      [(ngModel)]="searchQuery"
+      (input)="applyFilters()"
+      class="search-input"
+    />
+
+    <select 
+      [(ngModel)]="filterStatus"
+      (change)="applyFilters()"
+      class="filter-select"
+    >
+      <option value="">Tous les statuts</option>
+      <option value="pending">⏳ En attente</option>
+      <option value="confirmed">✅ Confirmée</option>
+      <option value="preparation">🔄 Préparation</option>
+      <option value="shipped">📦 Expédiée</option>
+      <option value="delivered">✓ Livrée</option>
+      <option value="cancelled">❌ Annulée</option>
+    </select>
+  </div>
+
+  <!-- Orders Table -->
+  <div class="card">
+    <div class="card-header">
+      <h3>📋 Commandes ({{ filteredOrders.length }})</h3>
+    </div>
+
+    <div *ngIf="filteredOrders.length === 0" class="empty-state">
+      <p>Aucune commande trouvée</p>
+    </div>
+
+    <table *ngIf="filteredOrders.length > 0" class="orders-table">
+      <thead>
+        <tr>
+          <th>Numéro</th>
+          <th>Client</th>
+          <th>Date</th>
+          <th>Articles</th>
+          <th>Total</th>
+          <th>Statut</th>
+          <th>Actions</th>
+        </tr>
+      </thead>
+
+      <tbody>
+        <tr *ngFor="let order of filteredOrders">
+          <td><strong>{{ order.id }}</strong></td>
+          <td>{{ order.userName }}</td>
+          <td>{{ order.createdAt | date:'dd/MM/yyyy HH:mm' }}</td>
+          <td>{{ order.items.length }} article(s)</td>
+          <td><strong>{{ order.totalPrice | number:'1.2-2' }} TND</strong></td>
+
+          <td>
+            <span class="status-badge" [class]="getStatusColor(order.status)">
+              {{ getStatusLabel(order.status) }}
+            </span>
+          </td>
+
+          <td class="actions-cell">
+            <button class="btn btn-sm btn-view" (click)="viewDetails(order)">
+              👁️ Voir
+            </button>
+          </td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+</div>
+
+<!-- Modal -->
+<div *ngIf="showDetailModal && selectedOrder" class="modal-overlay" (click)="closeModal()">
+  <div class="modal" (click)="$event.stopPropagation()">
+
+    <div class="modal-header">
+      <h3>📋 {{ selectedOrder.id }}</h3>
+      <button class="btn-close" (click)="closeModal()">✕</button>
+    </div>
+
+    <div class="modal-body">
+      <div class="info-section">
+        <h4>👤 Client</h4>
+        <p><strong>{{ selectedOrder.userName }}</strong></p>
+        <p>{{ selectedOrder.userEmail }}</p>
+      </div>
+
+      <div class="info-section">
+        <h4>📍 Livraison</h4>
+        <p>{{ selectedOrder.deliveryAddress }}</p>
+      </div>
+
+      <div class="info-section">
+        <h4>📦 Articles ({{ selectedOrder.items.length }})</h4>
+        <table class="items-table">
+          <thead>
+            <tr>
+              <th>Produit</th>
+              <th>Quantité</th>
+              <th>Prix</th>
+              <th>Total</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr *ngFor="let item of selectedOrder.items">
+              <td>{{ item.productName }}</td>
+              <td>{{ item.quantity }}</td>
+              <td>{{ item.price | number:'1.2-2' }} TND</td>
+              <td><strong>{{ (item.quantity * item.price) | number:'1.2-2' }} TND</strong></td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+
+      <div class="total-section">
+        <span>Sous-total:</span>
+        <strong>{{ selectedOrder.totalPrice | number:'1.2-2' }} TND</strong>
+      </div>
+
+      <div class="info-section">
+        <h4>📊 Gestion du Statut</h4>
+
+        <div class="current-status">
+          <p>Statut actuel:</p>
+          <span class="status-badge" [class]="getStatusColor(selectedOrder.status)">
+            {{ getStatusLabel(selectedOrder.status) }}
+          </span>
+        </div>
+
+        <div *ngIf="getNextStatusOptions(selectedOrder.status).length > 0" class="status-actions">
+          <p>Changer le statut vers:</p>
+          <div class="button-group">
+            <button 
+              *ngFor="let nextStatus of getNextStatusOptions(selectedOrder.status)"
+              class="btn btn-sm btn-status"
+              (click)="changeStatus(selectedOrder, nextStatus)"
+            >
+              {{ getStatusLabel(nextStatus) }}
+            </button>
+          </div>
+        </div>
+
+        <div *ngIf="selectedOrder.status !== 'cancelled' && selectedOrder.status !== 'delivered'" class="cancel-action">
+          <button class="btn btn-sm btn-danger" (click)="cancelOrder(selectedOrder)">
+            ❌ Annuler la commande
+          </button>
+        </div>
+      </div>
+
+      <div class="info-section info-dates">
+        <div><small>Créée: {{ selectedOrder.createdAt | date:'dd/MM/yyyy HH:mm' }}</small></div>
+        <div><small>Mise à jour: {{ selectedOrder.updatedAt | date:'dd/MM/yyyy HH:mm' }}</small></div>
+      </div>
+
+    </div>
+
+    <div class="modal-footer">
+      <button class="btn btn-secondary" (click)="closeModal()">Fermer</button>
+    </div>
+
+  </div>
+</div>

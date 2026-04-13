@@ -1,0 +1,132 @@
+<div class="ai-container">
+
+  <div class="ai-header">
+    <div>
+      <h2>🤖 Intelligence Artificielle</h2>
+      <p>Recommandations intelligentes pour optimiser votre plateforme</p>
+    </div>
+    <button class="btn btn-refresh" (click)="generateNewRecommendations()">
+      🔄 Regénérer
+    </button>
+  </div>
+
+  <!-- Stats -->
+  <div class="stats-row">
+    <div class="stat-card">
+      <div class="stat-value">{{ activeRecommendations.length }}</div>
+      <div class="stat-label">Recommandations actives</div>
+    </div>
+    <div class="stat-card alert">
+      <div class="stat-value alert-value">{{ urgentRecommendations.length }}</div>
+      <div class="stat-label">Actions urgentes</div>
+    </div>
+    <div class="stat-card">
+      <div class="stat-value">{{ history.length }}</div>
+      <div class="stat-label">Actions complétées</div>
+    </div>
+  </div>
+
+  <!-- Urgent Recommendations -->
+  <div *ngIf="urgentRecommendations.length > 0" class="card urgent-section">
+    <div class="card-header">
+      <h3>🚨 Actions Urgentes ({{ urgentRecommendations.length }})</h3>
+    </div>
+
+    <div class="recommendations-grid">
+      <div *ngFor="let rec of urgentRecommendations" class="rec-card urgent">
+        <div class="rec-header">
+          <div class="rec-type">{{ getTypeIcon(rec.type) }} {{ getTypeLabel(rec.type) }}</div>
+          <span class="confidence-badge" [class]="'confidence-' + getConfidenceColor(rec.confidence)">
+            {{ rec.confidence }}%
+          </span>
+        </div>
+
+        <div class="rec-title">{{ rec.title }}</div>
+        <div class="rec-product">📦 {{ rec.productName }}</div>
+        <div class="rec-description">{{ rec.description }}</div>
+
+        <div class="rec-action-box">
+          <div class="action-label">Recommandé:</div>
+          <div class="action-text">{{ rec.suggestedAction }}</div>
+        </div>
+
+        <div class="rec-buttons">
+          <button class="btn btn-sm btn-accept" (click)="acceptRecommendation(rec)">
+            ✓ Accepter
+          </button>
+          <button class="btn btn-sm btn-dismiss" (click)="dismissRecommendation(rec)">
+            ✕ Ignorer
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Active Recommendations -->
+  <div class="card">
+    <div class="card-header">
+      <h3>💡 Recommandations Actives ({{ activeRecommendations.length }})</h3>
+    </div>
+
+    <div *ngIf="activeRecommendations.length === 0" class="empty-state">
+      <p>✅ Aucune recommandation pour le moment!<br/>
+      Les recommandations seront générées basées sur vos données.</p>
+    </div>
+
+    <div *ngIf="activeRecommendations.length > 0" class="recommendations-grid">
+      <div *ngFor="let rec of activeRecommendations" class="rec-card">
+        <div class="rec-header">
+          <div class="rec-type">{{ getTypeIcon(rec.type) }} {{ getTypeLabel(rec.type) }}</div>
+          <span class="confidence-badge" [class]="'confidence-' + getConfidenceColor(rec.confidence)">
+            {{ rec.confidence }}%
+          </span>
+        </div>
+
+        <div class="rec-title">{{ rec.title }}</div>
+        <div class="rec-product">📦 {{ rec.productName }}</div>
+        <div class="rec-description">{{ rec.description }}</div>
+
+        <div class="rec-action-box">
+          <div class="action-label">Recommandé:</div>
+          <div class="action-text">{{ rec.suggestedAction }}</div>
+        </div>
+
+        <div class="rec-buttons">
+          <button class="btn btn-sm btn-accept" (click)="acceptRecommendation(rec)">
+            ✓ Accepter
+          </button>
+          <button class="btn btn-sm btn-dismiss" (click)="dismissRecommendation(rec)">
+            ✕ Ignorer
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- History Section -->
+  <div class="card">
+    <div class="card-header clickable" (click)="toggleHistory()">
+      <h3>📊 Historique des Actions {{ showHistory ? '▼' : '▶' }}</h3>
+      <span class="count-badge">{{ history.length }}</span>
+    </div>
+
+    <div *ngIf="showHistory" class="history-list">
+      <div *ngIf="history.length === 0" class="empty-state">
+        <p>Aucune action enregistrée encore</p>
+      </div>
+
+      <div *ngFor="let h of history" class="history-item">
+        <div class="history-date">{{ h.date | date:'dd/MM/yyyy HH:mm' }}</div>
+        <div class="history-content">
+          <div class="history-product">{{ h.recommendation.productName }}</div>
+          <div class="history-action">
+            <span class="action-badge" [class]="'action-' + h.action">
+              {{ h.action === 'accepted' ? '✓ Acceptée' : (h.action === 'rejected' ? '✗ Rejetée' : '⊘ Ignorée') }}
+            </span>
+          </div>
+          <div *ngIf="h.result" class="history-result">{{ h.result }}</div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>

@@ -1,0 +1,126 @@
+<div class="cart-container">
+  <h1>🛒 Mon Panier</h1>
+
+  <!-- Cart Empty -->
+  <div *ngIf="cartItems.length === 0" class="alert alert-info mt-5">
+    <p>Votre panier est vide</p>
+    <button class="btn btn-primary mt-3" (click)="continueShopping()">
+      Continuer vos achats
+    </button>
+  </div>
+
+  <!-- Cart Items -->
+  <div *ngIf="cartItems.length > 0" class="cart-content">
+    <div class="cart-items">
+      <div class="cart-item" *ngFor="let item of cartItems">
+        <div class="item-image">
+          <img [src]="item.image" [alt]="item.name" />
+        </div>
+
+        <div class="item-details">
+          <h4>{{ item.name }}</h4>
+          <p class="price">{{ item.price | number:'1.2-2' }} TND</p>
+        </div>
+
+        <div class="item-quantity">
+          <label>Quantité:</label>
+          <input
+            type="number"
+            [(ngModel)]="item.quantity"
+            (change)="updateQuantity(item.id, item.quantity)"
+            min="1"
+            class="qty-input"
+          />
+        </div>
+
+        <div class="item-subtotal">
+          <p>{{ (item.price * item.quantity) | number:'1.2-2' }} TND</p>
+        </div>
+
+        <button class="btn btn-danger btn-sm" (click)="removeItem(item.id)">
+          🗑️
+        </button>
+      </div>
+    </div>
+
+    <!-- Cart Summary -->
+    <div class="cart-summary">
+      <div class="summary-row">
+        <span>Sous-total:</span>
+        <span>{{ totalPrice | number:'1.2-2' }} TND</span>
+      </div>
+      <div class="summary-row">
+        <span>Frais de livraison:</span>
+        <span>Gratuit</span>
+      </div>
+      <div class="summary-row total">
+        <span>Total:</span>
+        <span>{{ totalPrice | number:'1.2-2' }} TND</span>
+      </div>
+
+      <button
+        class="btn btn-success btn-lg w-100 mt-4"
+        (click)="checkout()"
+        [disabled]="loading"
+      >
+        {{ loading ? 'Traitement...' : 'Passer la commande' }}
+      </button>
+
+      <button
+        class="btn btn-outline-secondary w-100 mt-2"
+        (click)="continueShopping()"
+      >
+        Continuer vos achats
+      </button>
+
+      <button
+        class="btn btn-outline-danger w-100 mt-2"
+        (click)="clearCart()"
+      >
+        Vider le panier
+      </button>
+    </div>
+  </div>
+
+  <!-- Modal de Confirmation -->
+  <div *ngIf="showModal" class="modal-overlay" (click)="closeModal()">
+    <div class="modal-content" (click)="$event.stopPropagation()">
+      <!-- Icône de succès -->
+      <div class="success-icon">✅</div>
+
+      <!-- Message de succès -->
+      <h2>Commande passée avec succès !</h2>
+      <p class="success-message">Merci pour votre achat. Vous recevrez une confirmation par email dans quelques instants.</p>
+
+      <!-- Récapitulatif de la commande -->
+      <div class="order-summary" *ngIf="orderCreated">
+        <div class="summary-item">
+          <span class="label">Numéro de commande:</span>
+          <span class="value">{{ orderCreated.id }}</span>
+        </div>
+        <div class="summary-item">
+          <span class="label">Date:</span>
+          <span class="value">{{ orderCreated.createdAt | date:'dd/MM/yyyy HH:mm' }}</span>
+        </div>
+        <div class="summary-item">
+          <span class="label">Statut:</span>
+          <span class="value">En attente de confirmation</span>
+        </div>
+        <div class="summary-item total">
+          <span class="label">Total payé:</span>
+          <span class="value">{{ orderCreated.totalPrice | number:'1.2-2' }} TND</span>
+        </div>
+      </div>
+
+      <!-- Boutons d'action -->
+      <div class="modal-actions">
+        <button class="btn btn-primary" (click)="followOrder()">
+          Suivre ma commande
+        </button>
+        <button class="btn btn-outline-secondary" (click)="continueShopping()">
+          Continuer mes achats
+        </button>
+      </div>
+    </div>
+  </div>
+</div>

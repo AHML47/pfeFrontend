@@ -1,0 +1,58 @@
+<div class="container mt-5">
+  <button class="btn btn-secondary mb-4" (click)="goBack()">
+    ← Retour aux produits
+  </button>
+
+  <div *ngIf="product" class="row">
+    <!-- Image Section -->
+    <div class="col-md-5">
+      <div class="product-image-container">
+        <img [src]="product.image" [alt]="product.name" class="product-image">
+      </div>
+    </div>
+
+    <!-- Details Section -->
+    <div class="col-md-7">
+      <h1>{{ product.name }}</h1>
+      <p class="category-badge">{{ product.category }}</p>
+
+      <div class="price-section">
+        <h2 class="price">{{ product.price | number:'1.2-2' }} TND</h2>
+      </div>
+
+      <p class="description">{{ product.description }}</p>
+
+      <!-- Stock Status -->
+      <div class="stock-info">
+        <span [class.in-stock]="product.stock > 0"
+              [class.low-stock]="product.stock <= 10 && product.stock > 0"
+              [class.out-of-stock]="product.stock === 0">
+          {{ product.stock > 0 ? 'En stock: ' + product.stock + ' articles' : 'Rupture de stock' }}
+        </span>
+      </div>
+
+      <!-- Quantity Selector -->
+      <div class="quantity-section mt-4">
+        <label>Quantité:</label>
+        <div class="quantity-selector">
+          <button class="btn btn-outline-primary" (click)="decreaseQuantity()">-</button>
+          <input type="number" [(ngModel)]="quantity" class="quantity-input" [max]="product.stock">
+          <button class="btn btn-outline-primary" (click)="increaseQuantity()">+</button>
+        </div>
+      </div>
+
+      <!-- Add to Cart Button -->
+      <div class="mt-5">
+        <button class="btn btn-success btn-lg w-100"
+                (click)="addToCart()"
+                [disabled]="product.stock === 0">
+          🛒 Ajouter au panier
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <div *ngIf="!product" class="alert alert-warning mt-5">
+    Produit non trouvé
+  </div>
+</div>

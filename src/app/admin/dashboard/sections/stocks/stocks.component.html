@@ -1,0 +1,145 @@
+<div class="stocks-container">
+  <!-- Stats Stock -->
+  <div class="stock-stats">
+    <div class="stat-item">
+      <div class="stat-label">📦 Produits suivis</div>
+      <div class="stat-value">{{ getStats().totalProducts }}</div>
+    </div>
+    <div class="stat-item">
+      <div class="stat-label">🏭 Stock total</div>
+      <div class="stat-value">{{ getStats().totalQuantity }}</div>
+      <div class="stat-unit">unités</div>
+    </div>
+    <div class="stat-item">
+      <div class="stat-label">⚠️ Faible stock</div>
+      <div class="stat-value" [class.alert]="getStats().productsLowStock > 0">{{ getStats().productsLowStock }}</div>
+    </div>
+    <div class="stat-item">
+      <div class="stat-label">🔴 Rupture</div>
+      <div class="stat-value" [class.critical]="getStats().productsOutOfStock > 0">{{ getStats().productsOutOfStock }}</div>
+    </div>
+  </div>
+
+  <!-- Header -->
+  <div class="section-header">
+    <h2>📊 Gestion des Stocks</h2>
+    <button class="btn btn-primary" (click)="openBatchModal()">
+      ➕ Ajouter un lot d'achat
+    </button>
+  </div>
+
+  <!-- Alertes Stock -->
+  <div class="card">
+    <div class="card-header">
+      <h3>⚠️ Alertes Stock ({{ activeAlerts.length }})</h3>
+    </div>
+
+    <div *ngIf="activeAlerts.length === 0" class="empty-state">
+      <p>✅ Aucune alerte - Tous les stocks sont bons!</p>
+    </div>
+
+    <div *ngIf="activeAlerts.length > 0" class="alerts-grid">
+      <div *ngFor="let alert of activeAlerts" class="alert-card" [class]="'severity-' + alert.severity">
+        <div class="alert-title">{{ alert.productName }}</div>
+        <div class="alert-info">
+          <span>Stock actuel: <strong>{{ alert.currentStock }}</strong></span>
+          <span>Minimum: <strong>{{ alert.minimumStock }}</strong></span>
+        </div>
+        <div class="alert-severity">{{ getSeverity(alert.severity) }}</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Table des stocks -->
+  <div class="card">
+    <div class="card-header">
+      <h3>📋 État des Stocks</h3>
+    </div>
+
+    <table class="stocks-table">
+      <thead>
+        <tr>
+          <th>Produit</th>
+          <th>Stock</th>
+          <th>Minimum</th>
+          <th>Status</th>
+          <th>Actions</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr *ngFor="let stock of stocks">
+          <td><strong>{{ stock.productName }}</strong></td>
+          <td>{{ stock.quantity }} unités</td>
+          <td>{{ getProduct(stock.productId)?.minimumStock || 'N/A' }}</td>
+          <td>
+            <span *ngIf="stock.quantity > getProduct(stock.productId)?.minimumStock!" class="badge badge-ok">✓ OK</span>
+            <span *ngIf="stock.quantity <= getProduct(stock.productId)?.minimumStock! && stock.quantity > 0" class="badge badge-warning">⚠️ Faible</span>
+            <span *ngIf="stock.quantity === 0" class="badge badge-danger">🔴 Rupture</span>
+          </td>
+          <td>
+            <button class="btn btn-sm btn-info">📊 Historique</button>
+          </td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+</div>
+
+<!-- Modal - Ajouter lot d'achat -->
+<div *ngIf="showBatchModal" class="modal-overlay" (click)="closeBatchModal()">
+  <div class="modal" (click)="$event.stopPropagation()">
+    <div class="modal-header">
+      <h3>➕ Ajouter un lot d'achat</h3>
+      <button class="btn-close" (click)="closeBatchModal()">✕</button>
+    </div>
+
+    <form (ngSubmit)="saveBatch()" class="modal-body">
+      <div class="form-group">
+        <label>Produit *</label>
+        <select [(ngModel)]="batchForm.productId" name="productId" class="form-control" required>
+          <option value="">-- Sélectionnez un produit --</option>
+          <option *ngFor="let product of products" [value]="product.id">
+            {{ product.name }} ({{ product.sku }})
+          </option>
+        </select>
+      </div>
+
+      <div class="form-row">
+        <div class="form-group">
+          <label>Quantité *</label>
+          <input type="number" [(ngModel)]="batchForm.quantity" name="quantity" class="form-control" placeholder="100" required min="1" />
+        </div>
+        <div class="form-group">
+          <label>Prix unitaire d'achat *</label>
+          <input type="number" [(ngModel)]="batchForm.purchasePrice" name="purchasePrice" class="form-control" placeholder="25" required step="0.01" min="0" />
+        </div>
+      </div>
+
+      <div class="form-group">
+        <label>Fournisseur</label>
+        <input type="text" [(ngModel)]="batchForm.supplier" name="supplier" class="form-control" placeholder="Fournisseur XYZ" />
+      </div>
+
+      <div class="form-group">
+        <label>Remarques</label>
+        <textarea [(ngModel)]="batchForm.notes" name="notes" class="form-control" placeholder="Notes sur ce lot..." rows="3"></textarea>
+      </div>
+
+      <div class="cost-summary">
+        <div class="summary-item">
+          <span>Quantité:</span>
+          <strong>{{ batchForm.quantity }} unités</strong>
+        </div>
+        <div class="summary-item">
+          <span>Coût total:</span>
+          <strong>{{ (batchForm.quantity * batchForm.purchasePrice) | number:'1.2-2' }} TND</strong>
+        </div>
+      </div>
+
+      <div class="modal-footer">
+        <button type="button" class="btn btn-secondary" (click)="closeBatchModal()">Annuler</button>
+        <button type="submit" class="btn btn-primary">Ajouter le lot</button>
+      </div>
+    </form>
+  </div>
+</div>

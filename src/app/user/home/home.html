@@ -1,0 +1,90 @@
+<!-- HERO SECTION -->
+<section class="hero-section">
+  <div class="hero-content">
+    <div class="hero-text">
+      <h1 class="hero-title">DeliverWholesale</h1>
+      <p class="hero-subtitle">Vos produits wholesale préférés livrés rapidement</p>
+      <button class="btn btn-hero" routerLink="/user/products">
+        Découvrir nos produits
+      </button>
+    </div>
+    
+  </div>
+</section>
+
+<!-- STATISTICS SECTION -->
+<section class="stats-section">
+  <div class="stats-container">
+    <div class="stat-item" *ngFor="let stat of stats">
+      <div class="stat-number">{{ stat.number }}</div>
+      <div class="stat-label">{{ stat.label }}</div>
+    </div>
+  </div>
+</section>
+
+<!-- CATEGORIES SECTION -->
+<section class="categories-section">
+  <div class="container">
+    <h2 class="section-title">Nos Catégories</h2>
+    <p class="section-subtitle">Explorez nos différentes catégories de produits</p>
+
+    <div class="categories-grid">
+      <div class="category-card" *ngFor="let cat of categories; let i = index" [style]="'--index: ' + i" (click)="navigateToCategory(cat.name)">
+        <div class="category-icon">{{ cat.icon }}</div>
+        <h3>{{ cat.name }}</h3>
+        <p>{{ cat.count }}</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- FEATURED PRODUCTS SECTION -->
+<section class="featured-section">
+  <div class="container">
+    <h2 class="section-title">Produits en Vedette</h2>
+    <p class="section-subtitle">Nos meilleurs produits populaires</p>
+
+    <div class="products-grid">
+      <div *ngFor="let product of featuredProducts" class="product-wrapper">
+        <app-product-card [product]="product"></app-product-card>
+      </div>
+    </div>
+
+    <div class="see-all-container">
+      <button class="btn btn-outline" routerLink="/user/products">
+        Voir tous les produits →
+      </button>
+    </div>
+  </div>
+</section>
+
+<!-- ADVANTAGES SECTION -->
+<section class="advantages-section">
+  <div class="container">
+    <h2 class="section-title">Pourquoi Nous Choisir</h2>
+
+    <div class="advantages-grid">
+      <div class="advantage-card" *ngFor="let adv of advantages">
+        <div class="adv-icon">{{ adv.icon }}</div>
+        <h3>{{ adv.title }}</h3>
+        <p>{{ adv.description }}</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- CTA SECTION -->
+<section class="cta-section">
+  <div class="cta-content">
+    <h2>Prêt à Commencer?</h2>
+    <p>Rejoignez des milliers de clients satisfaits</p>
+    <button class="btn btn-cta" routerLink="/user/products">
+      Commander Maintenant
+    </button>
+  </div>
+</section>
+
+<!-- FLOATING ADMIN BUTTON -->
+<a routerLink="/admin/login" class="floating-admin-btn" title="Accès Admin">
+  ⚙️
+</a>

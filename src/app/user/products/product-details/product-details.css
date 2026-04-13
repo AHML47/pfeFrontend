@@ -1,0 +1,150 @@
+.product-image-container {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: #f5f5f5;
+  border-radius: 12px;
+  overflow: hidden;
+  height: 400px;
+}
+
+.product-image {
+  max-width: 100%;
+  max-height: 100%;
+  object-fit: cover;
+}
+
+h1 {
+  font-size: 32px;
+  font-weight: 700;
+  margin-bottom: 10px;
+  color: #333;
+}
+
+.category-badge {
+  display: inline-block;
+  background: #667eea;
+  color: white;
+  padding: 6px 12px;
+  border-radius: 20px;
+  font-size: 12px;
+  font-weight: 600;
+  margin-bottom: 20px;
+  text-transform: uppercase;
+}
+
+.price-section {
+  padding: 20px 0;
+  border-top: 2px solid #eee;
+  border-bottom: 2px solid #eee;
+  margin: 20px 0;
+}
+
+.price {
+  font-size: 36px;
+  font-weight: 700;
+  color: #10b981;
+  margin: 0;
+}
+
+.description {
+  font-size: 16px;
+  color: #666;
+  line-height: 1.6;
+  margin: 20px 0;
+}
+
+.stock-info {
+  padding: 12px;
+  border-radius: 8px;
+  font-weight: 600;
+  margin: 20px 0;
+}
+
+.in-stock {
+  background: #d1fae5;
+  color: #065f46;
+}
+
+.low-stock {
+  background: #fef3c7;
+  color: #92400e;
+}
+
+.out-of-stock {
+  background: #fee2e2;
+  color: #991b1b;
+}
+
+.quantity-section {
+  display: flex;
+  align-items: center;
+  gap: 15px;
+}
+
+.quantity-section label {
+  font-weight: 600;
+  margin-bottom: 0;
+}
+
+.quantity-selector {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  border: 2px solid #ddd;
+  border-radius: 8px;
+  padding: 5px;
+}
+
+.quantity-selector button {
+  padding: 5px 12px;
+  font-size: 16px;
+  border: none;
+  cursor: pointer;
+}
+
+.quantity-input {
+  width: 60px;
+  border: none;
+  text-align: center;
+  font-weight: 600;
+  font-size: 16px;
+}
+
+.quantity-input:focus {
+  outline: none;
+}
+
+.btn-success {
+  background: linear-gradient(135deg, #10b981 0%, #059669 100%);
+  border: none;
+  font-weight: 600;
+  padding: 15px;
+  font-size: 18px;
+  transition: all 0.3s ease;
+}
+
+.btn-success:hover:not(:disabled) {
+  transform: translateY(-2px);
+  box-shadow: 0 8px 25px rgba(16, 185, 129, 0.3);
+}
+
+.btn-success:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+@media (max-width: 768px) {
+  .product-image-container {
+    height: 300px;
+    margin-bottom: 30px;
+  }
+
+  h1 {
+    font-size: 24px;
+  }
+
+  .price {
+    font-size: 28px;
+  }
+}

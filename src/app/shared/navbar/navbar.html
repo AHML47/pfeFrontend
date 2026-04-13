@@ -1,0 +1,56 @@
+<nav class="navbar navbar-expand-lg navbar-dark custom-navbar px-4">
+  <a class="navbar-brand fw-bold brand-text">🛍️ DeliverWholesale</a>
+
+  <div class="collapse navbar-collapse">
+    <ul class="navbar-nav ms-auto gap-2">
+      <li class="nav-item">
+        <a routerLink="/user/home" routerLinkActive="active" class="nav-link nav-link-custom">
+          <span class="icon">🏠</span> Home
+        </a>
+      </li>
+      <li class="nav-item">
+        <a routerLink="/user/products" routerLinkActive="active" class="nav-link nav-link-custom">
+          <span class="icon">📦</span> Produits
+        </a>
+      </li>
+      <li class="nav-item">
+        <a routerLink="/user/orders" routerLinkActive="active" class="nav-link nav-link-custom">
+          <span class="icon">🛒</span> Commandes
+        </a>
+      </li>
+
+      <!-- Cart Button -->
+      <li class="nav-item">
+        <a routerLink="/user/cart" routerLinkActive="active" class="nav-link nav-link-custom cart-link">
+          <span class="icon">🛍️</span>
+          <span class="cart-badge" *ngIf="cartCount > 0">{{ cartCount }}</span>
+        </a>
+      </li>
+
+      <!-- Auth Section -->
+      <li class="nav-item" *ngIf="authService.isLoggedIn()">
+        <div class="user-info">
+          <span class="icon">👤</span>
+          <span class="user-name">{{ (authService.currentUser | async)?.name }}</span>
+        </div>
+      </li>
+
+      <li class="nav-item">
+        <button
+          *ngIf="authService.isLoggedIn()"
+          class="nav-link nav-link-custom btn-logout"
+          (click)="logout()"
+        >
+          <span class="icon">🚪</span> Déconnexion
+        </button>
+        <a
+          *ngIf="!authService.isLoggedIn()"
+          routerLink="/user/login"
+          class="nav-link nav-link-custom"
+        >
+          <span class="icon">🔐</span> Connexion
+        </a>
+      </li>
+    </ul>
+  </div>
+</nav>
