@@ -3,8 +3,8 @@ import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { StockService } from '../../../../shared/services/stock.service';
 import { ProductService } from '../../../../shared/services/product.service';
-import { StockBatch } from '../../../../shared/models/stock.model';
 import { Product } from '../../../../shared/models/product.model';
+import { Transaction, TypeMouvement } from '../../../../shared/models/stock.model';
 
 @Component({
   selector: 'app-admin-stocks',
@@ -14,10 +14,20 @@ import { Product } from '../../../../shared/models/product.model';
   styleUrls: ['./stocks.component.css']
 })
 export class AdminStocksComponent implements OnInit {
+
   stocks: any[] = [];
   products: Product[] = [];
   activeAlerts: any[] = [];
-  showBatchModal: boolean = false;
+
+  stats: any = {};
+
+  showBatchModal = false;
+  showHistoryModal = false;
+
+  modalMode: 'add' | 'edit' = 'add';
+
+  selectedHistory: Transaction[] = [];
+  selectedProductName = '';
 
   batchForm = {
     productId: '',
@@ -34,30 +44,121 @@ export class AdminStocksComponent implements OnInit {
 
   ngOnInit() {
     this.loadData();
+    this.loadStats();
   }
 
+  // ======================
+  // STATS
+  // ======================
+  loadStats() {
+    this.stockService.getAllStocks().subscribe(stocks => {
+
+      const totalQuantity = stocks.reduce((sum, s) => sum + (s.quantity || 0), 0);
+
+      this.stats = {
+        totalProducts: this.products.length,
+        totalQuantity: totalQuantity,
+        productsLowStock: this.products.filter(p =>
+          (p.stockActuel || 0) < (p.minimumStock || 0)
+        ).length,
+        productsOutOfStock: this.products.filter(p =>
+          (p.stockActuel || 0) === 0
+        ).length
+      };
+    });
+  }
+
+  // ======================
+  // LOAD DATA
+  // ======================
   loadData() {
-    this.stocks = this.stockService.getAllStocks();
-    this.products = this.productService.getAllProducts();
-    this.activeAlerts = this.stockService.getActiveAlerts();
+
+    this.stockService.getAllStocks().subscribe(data => {
+      this.stocks = data;
+    });
+
+    this.productService.getAllProducts().subscribe(data => {
+      this.products = data;
+      this.loadStats();
+    });
+
+    this.stockService.getActiveAlerts().subscribe(data => {
+      this.activeAlerts = data;
+    });
   }
 
-  getStats() {
-    return this.stockService.getStockStats();
-  }
-
+  // ======================
+  // PRODUCT FINDER
+  // ======================
   getProduct(productId: string): Product | undefined {
-    return this.products.find(p => p.id === productId);
+    return this.products.find(p => p.id === +productId);
   }
 
-  openBatchModal() {
+  // ======================
+  // MODALS
+  // ======================
+  openAddModal() {
+    this.modalMode = 'add';
     this.resetBatchForm();
+    this.showBatchModal = true;
+  }
+
+  openEditModal(stock: any) {
+    this.modalMode = 'edit';
+
+    this.batchForm = {
+      productId: stock.productId,
+      quantity: stock.quantity,
+      purchasePrice: 0,
+      supplier: '',
+      notes: ''
+    };
+
     this.showBatchModal = true;
   }
 
   closeBatchModal() {
     this.showBatchModal = false;
-    this.resetBatchForm();
+  }
+
+  deleteStock(id: number) {
+    console.log("Delete stock:", id);
+    // TODO backend delete
+  }
+
+  // ======================
+  // FORM CHANGE
+  // ======================
+  onProductChange() {
+    const product = this.products.find(p => p.id === +this.batchForm.productId);
+    if (product) {
+      this.batchForm.purchasePrice = (product as any).prixAchat || 0;
+    }
+  }
+
+  // ======================
+  // SAVE STOCK (ACHAT LOT)
+  // ======================
+  saveBatch() {
+
+    const product = this.products.find(p => p.id === +this.batchForm.productId);
+    if (!product) return;
+
+    const achat = {
+      produitId: this.batchForm.productId,
+      quantiteAchetee: this.batchForm.quantity,
+      prixAchatUnitaire: this.batchForm.purchasePrice,
+      fournisseur: this.batchForm.supplier,
+      numeroLot: this.batchForm.notes,
+      dateAchat: new Date()
+    };
+
+    this.stockService.addAchatLot(achat).subscribe(() => {
+      this.loadData();
+      this.loadStats();
+      this.closeBatchModal();
+      this.resetBatchForm();
+    });
   }
 
   resetBatchForm() {
@@ -70,35 +171,31 @@ export class AdminStocksComponent implements OnInit {
     };
   }
 
-  saveBatch() {
-    if (!this.batchForm.productId || this.batchForm.quantity <= 0 || this.batchForm.purchasePrice <= 0) {
-      alert('Veuillez remplir tous les champs obligatoires');
-      return;
-    }
+  // ======================
+  // HISTORY
+  // ======================
+  openHistoryModal(productId: string) {
 
-    const product = this.products.find(p => p.id === this.batchForm.productId);
-    if (!product) return;
+    const product = this.getProduct(productId);
+    this.selectedProductName = product?.nom || '';
 
-    this.stockService.addStockBatch({
-      productId: this.batchForm.productId,
-      productName: product.name,
-      quantity: this.batchForm.quantity,
-      purchasePrice: this.batchForm.purchasePrice,
-      supplier: this.batchForm.supplier,
-      notes: this.batchForm.notes,
-      batchDate: new Date()
+    this.stockService.getTransactionsByProduit(productId).subscribe(data => {
+      this.selectedHistory = data;
+      this.showHistoryModal = true;
     });
-
-    alert('Lot d\'achat ajouté avec succès!');
-    this.closeBatchModal();
-    this.loadData();
   }
 
-  getProductName(productId: string): string {
-    return this.products.find(p => p.id === productId)?.name || 'Inconnu';
+  closeHistoryModal() {
+    this.showHistoryModal = false;
+    this.selectedHistory = [];
   }
 
-  getSeverity(severity: string): string {
-    return severity === 'critical' ? '🔴 CRITIQUE' : '🟡 ALERTE';
+  getTypeMouvement(type: TypeMouvement) {
+    const map: any = {
+      ENTREE: '📥 Entrée',
+      SORTIE: '📤 Sortie',
+      AJUSTEMENT: '⚙️ Ajustement'
+    };
+    return map[type] || type;
   }
 }

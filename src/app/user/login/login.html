@@ -28,6 +28,7 @@
 
     <!-- ========== CLIENT LOGIN MODE ========== -->
     <ng-container *ngIf="!isAdminMode">
+
       <!-- Mode Toggle -->
       <div class="mode-toggle">
         <button
@@ -90,72 +91,88 @@
 
       <!-- REGISTER FORM -->
       <form *ngIf="isRegisterMode" (ngSubmit)="register()" novalidate #registerForm="ngForm">
-      <div class="form-group">
-        <label for="register-name">Nom complet</label>
-        <input
-          type="text"
-          id="register-name"
-          [(ngModel)]="registerName"
-          name="registerName"
-          class="form-control"
-          placeholder="Votre nom"
-          [disabled]="loading"
-        />
-      </div>
 
-      <div class="form-group">
-        <label for="register-email">Email</label>
-        <input
-          type="email"
-          id="register-email"
-          [(ngModel)]="registerEmail"
-          name="registerEmail"
-          class="form-control"
-          placeholder="votre@email.com"
-          [disabled]="loading"
-        />
-      </div>
+        <div class="form-group">
+          <label for="register-name">Nom complet</label>
+          <input
+            type="text"
+            id="register-name"
+            [(ngModel)]="registerName"
+            name="registerName"
+            class="form-control"
+            placeholder="Votre nom"
+            [disabled]="loading"
+          />
+        </div>
 
-      <div class="form-group">
-        <label for="register-password">Mot de passe</label>
-        <input
-          type="password"
-          id="register-password"
-          [(ngModel)]="registerPassword"
-          name="registerPassword"
-          class="form-control"
-          placeholder="Entrez votre mot de passe"
-          [disabled]="loading"
-        />
-      </div>
+        <div class="form-group">
+          <label for="register-email">Email</label>
+          <input
+            type="email"
+            id="register-email"
+            [(ngModel)]="registerEmail"
+            name="registerEmail"
+            class="form-control"
+            placeholder="votre@email.com"
+            [disabled]="loading"
+          />
+        </div>
 
-      <div class="form-group">
-        <label for="register-confirm">Confirmer le mot de passe</label>
-        <input
-          type="password"
-          id="register-confirm"
-          [(ngModel)]="registerConfirmPassword"
-          name="registerConfirmPassword"
-          class="form-control"
-          placeholder="Confirmez votre mot de passe"
-          [disabled]="loading"
-        />
-      </div>
+        <!-- ✅ ADRESSE AJOUTÉE ICI -->
+        <div class="form-group">
+          <label for="register-address">Adresse</label>
+          <input
+            type="text"
+            id="register-address"
+            [(ngModel)]="registerAddress"
+            name="registerAddress"
+            class="form-control"
+            placeholder="Votre adresse complète"
+            [disabled]="loading"
+          />
+        </div>
 
-      <button type="submit" class="btn btn-login w-100" [disabled]="loading">
-        {{ loading ? 'Création du compte...' : 'Créer un compte' }}
-      </button>
-    </form>
+        <div class="form-group">
+          <label for="register-password">Mot de passe</label>
+          <input
+            type="password"
+            id="register-password"
+            [(ngModel)]="registerPassword"
+            name="registerPassword"
+            class="form-control"
+            placeholder="Entrez votre mot de passe"
+            [disabled]="loading"
+          />
+        </div>
+
+        <div class="form-group">
+          <label for="register-confirm">Confirmer le mot de passe</label>
+          <input
+            type="password"
+            id="register-confirm"
+            [(ngModel)]="registerConfirmPassword"
+            name="registerConfirmPassword"
+            class="form-control"
+            placeholder="Confirmez votre mot de passe"
+            [disabled]="loading"
+          />
+        </div>
+
+        <button type="submit" class="btn btn-login w-100" [disabled]="loading">
+          {{ loading ? 'Création du compte...' : 'Créer un compte' }}
+        </button>
+
+      </form>
+
     </ng-container>
 
     <!-- ========== ADMIN LOGIN MODE ========== -->
     <ng-container *ngIf="isAdminMode">
-      <!-- Error Message for Admin -->
+
       <div *ngIf="errorAdmin" class="alert alert-danger">
         {{ errorAdmin }}
       </div>
 
-      <!-- Admin Login Form -->
       <form (ngSubmit)="adminLogin()" novalidate #adminForm="ngForm">
         <div class="form-group">
           <label for="admin-email">Email Admin</label>
@@ -190,14 +207,13 @@
         </button>
       </form>
 
-      <!-- Admin Help Text -->
       <div class="admin-help">
         <p><strong>Identifiants de test :</strong><br>
         Email: admin@deliverwholesale.com<br>
         Mot de passe: admin123</p>
       </div>
+
     </ng-container>
 
-   
   </div>
 </div>

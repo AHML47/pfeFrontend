@@ -1,7 +1,9 @@
 import { Component, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
-import { OrderService, Order } from '../../../../shared/services/order.service';
+
+import { OrderService } from '../../../../shared/services/order.service';
+import { Order, OrderStatus } from '../../../../shared/models/order.model';
 
 @Component({
   selector: 'app-admin-orders',
@@ -16,102 +18,97 @@ export class AdminOrdersComponent implements OnInit {
   filteredOrders: Order[] = [];
 
   selectedOrder: Order | null = null;
-  showDetailModal: boolean = false;
+  showDetailModal = false;
 
-  filterStatus: string = '';
-  searchQuery: string = '';
+  filterStatus: OrderStatus | '' = '';
+  searchQuery = '';
 
   constructor(private orderService: OrderService) {}
 
-  ngOnInit() {
+  ngOnInit(): void {
     this.loadOrders();
   }
 
+  // ================= LOAD =================
   loadOrders() {
-    this.orders = this.orderService.getAllOrders();
-    this.applyFilters();
+    this.orderService.getAllOrders().subscribe(data => {
+      this.orders = data;
+      this.applyFilters();
+    });
   }
 
+  // ================= FILTER =================
   applyFilters() {
     let filtered = this.orders;
 
+    // filter status
     if (this.filterStatus) {
-      filtered = filtered.filter(o => o.status === this.filterStatus);
+      filtered = filtered.filter(o => o.statut === this.filterStatus);
     }
 
-    if (this.searchQuery) {
+    // search by id
+    if (this.searchQuery.trim()) {
       const q = this.searchQuery.toLowerCase();
       filtered = filtered.filter(o =>
-        o.id.toLowerCase().includes(q) ||
-        o.userName.toLowerCase().includes(q)
+        o.id.toString().includes(q)
       );
     }
 
     this.filteredOrders = filtered;
   }
 
+  onSearch() {
+    this.applyFilters();
+  }
+
+  onStatusChange() {
+    this.applyFilters();
+  }
+
+  // ================= VIEW =================
   viewDetails(order: Order) {
     this.selectedOrder = order;
     this.showDetailModal = true;
   }
 
   closeModal() {
-    this.showDetailModal = false;
     this.selectedOrder = null;
+    this.showDetailModal = false;
   }
 
-  changeStatus(order: Order, newStatus: Order['status']) {
-    if (confirm(`Changer le statut à "${this.getStatusLabel(newStatus)}" ?`)) {
-      this.orderService.updateOrderStatus(order.id, newStatus);
-      this.loadOrders();
-
-      if (this.selectedOrder?.id === order.id) {
-        this.selectedOrder.status = newStatus;
-      }
-    }
-  }
-
+  // ================= CANCEL =================
   cancelOrder(order: Order) {
     if (confirm('Annuler cette commande ?')) {
-      this.orderService.updateOrderStatus(order.id, 'cancelled');
-      this.loadOrders();
-      this.closeModal();
+      this.orderService.cancelOrder(order.id).subscribe(success => {
+        if (success) {
+          this.loadOrders();
+          this.closeModal();
+        }
+      });
     }
   }
 
-  getStatusLabel(status: string): string {
-    const labels: { [key: string]: string } = {
-      'pending': '⏳ En attente',
-      'confirmed': '✅ Confirmée',
-      'preparation': '🔄 Préparation',
-      'shipped': '📦 Expédiée',
-      'delivered': '✓ Livrée',
-      'cancelled': '❌ Annulée'
+  // ================= STATUS LABEL =================
+  getStatusLabel(status: OrderStatus): string {
+    const map: Record<OrderStatus, string> = {
+      EnAttente: '⏳ En attente',
+      Validee: '✅ Validée',
+      Livree: '🚚 Livrée',
+      Annulee: '❌ Annulée'
     };
-    return labels[status] || status;
+
+    return map[status];
   }
 
-  getStatusColor(status: string): string {
-    const colors: { [key: string]: string } = {
-      'pending': 'status-pending',
-      'confirmed': 'status-confirmed',
-      'preparation': 'status-preparation',
-      'shipped': 'status-shipped',
-      'delivered': 'status-delivered',
-      'cancelled': 'status-cancelled'
+  // ================= STATUS COLOR =================
+  getStatusColor(status: OrderStatus): string {
+    const map: Record<OrderStatus, string> = {
+      EnAttente: 'status-pending',
+      Validee: 'status-confirmed',
+      Livree: 'status-delivered',
+      Annulee: 'status-cancelled'
     };
-    return colors[status] || '';
-  }
 
-  getNextStatusOptions(status: string): Order['status'][] {
-    const workflows: { [key: string]: Order['status'][] } = {
-      'pending': ['confirmed', 'cancelled'],
-      'confirmed': ['preparation', 'cancelled'],
-      'preparation': ['shipped', 'cancelled'],
-      'shipped': ['delivered'],
-      'delivered': [],
-      'cancelled': []
-    };
-    return workflows[status] || [];
+    return map[status];
   }
 }

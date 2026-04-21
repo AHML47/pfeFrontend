@@ -2,6 +2,8 @@ import { Injectable, Inject } from '@angular/core';
 import { BehaviorSubject } from 'rxjs';
 import { PLATFORM_ID } from '@angular/core';
 import { isPlatformBrowser } from '@angular/common';
+import { HttpClient } from '@angular/common/http';
+
 import { AIRecommendation, AIRecommendationHistory } from '../models/ai-recommendation.model';
 import { ProductService } from './product.service';
 import { StockService } from './stock.service';
@@ -10,6 +12,9 @@ import { StockService } from './stock.service';
   providedIn: 'root'
 })
 export class AIRecommendationService {
+
+  private apiUrl = 'https://localhost:5001/api/recommendations';
+
   private recommendations$ = new BehaviorSubject<AIRecommendation[]>([]);
   private history$ = new BehaviorSubject<AIRecommendationHistory[]>([]);
   private isBrowser: boolean;
@@ -18,6 +23,7 @@ export class AIRecommendationService {
   public history = this.history$.asObservable();
 
   constructor(
+    private http: HttpClient,
     private productService: ProductService,
     private stockService: StockService,
     @Inject(PLATFORM_ID) platformId: Object
@@ -26,7 +32,21 @@ export class AIRecommendationService {
     this.initializeRecommendations();
   }
 
+  // ================= INIT =================
+
   private initializeRecommendations() {
+    this.http.get<AIRecommendation[]>(this.apiUrl).subscribe({
+      next: (data) => this.recommendations$.next(data),
+      error: () => {
+        console.log('API indisponible → fallback local');
+        this.loadFromLocal();
+      }
+    });
+
+    this.loadHistoryFromLocal();
+  }
+
+  private loadFromLocal() {
     if (!this.isBrowser) return;
 
     const saved = localStorage.getItem('ai_recommendations');
@@ -35,6 +55,10 @@ export class AIRecommendationService {
     } else {
       this.generateInitialRecommendations();
     }
+  }
+
+  private loadHistoryFromLocal() {
+    if (!this.isBrowser) return;
 
     const savedHistory = localStorage.getItem('ai_recommendation_history');
     if (savedHistory) {
@@ -42,66 +66,74 @@ export class AIRecommendationService {
     }
   }
 
+  // ================= FIX IMPORTANT =================
   private generateInitialRecommendations() {
-    const recs: AIRecommendation[] = [];
 
-    const alerts = this.stockService.getActiveAlerts();
-    alerts.forEach(alert => {
-      if (alert.severity === 'critical') {
-        recs.push({
-          id: 'REC-' + Date.now() + '-' + Math.random().toString(36).substring(7),
-          type: 'reorder',
-          productId: alert.productId,
-          productName: alert.productName,
-          title: '⚠️ Stock critique',
-          description: `Le produit ${alert.productName} est en rupture de stock. Vous devez le réapprovisionner immédiatement.`,
-          actionRequired: true,
-          suggestedAction: `Ajouter au minimum 50 unités de ${alert.productName}`,
-          confidence: 95,
-          createdAt: new Date(),
-          actionTaken: false
+    // 🔥 FIX 1 : convertir Observable → array via subscription
+    this.stockService.getActiveAlerts().subscribe(alerts => {
+
+      this.productService.getAllProducts().subscribe(products => {
+
+        const recs: AIRecommendation[] = [];
+
+        // ✅ FIX StockAlert correct
+        alerts.forEach(alert => {
+          if (alert.severity === 'critical') {
+            recs.push({
+              id: 'REC-' + Date.now(),
+              type: 'reorder',
+              productId: alert.productId.toString(),
+              productName: alert.productName ?? 'Produit inconnu',
+              title: '⚠️ Stock critique',
+              description: `Le produit ${alert.productName ?? 'inconnu'} est en rupture de stock.`,
+              actionRequired: true,
+              suggestedAction: `Ajouter 50 unités`,
+              confidence: 95,
+              createdAt: new Date(),
+              actionTaken: false
+            });
+          }
         });
-      } else if (alert.severity === 'warning') {
-        recs.push({
-          id: 'REC-' + Date.now() + '-' + Math.random().toString(36).substring(7),
-          type: 'reorder',
-          productId: alert.productId,
-          productName: alert.productName,
-          title: '⚠️ Stock faible',
-          description: `Le stock de ${alert.productName} approche du minimum. Un réapprovisionnement est recommandé.`,
-          actionRequired: false,
-          suggestedAction: `Considérer l'ajout de 30-50 unités de ${alert.productName}`,
-          confidence: 85,
-          createdAt: new Date(),
-          actionTaken: false
-        });
+
+        // ✅ FIX products[0]
+        if (products && products.length > 0) {
+          recs.push({
+            id: 'REC-TREND',
+            type: 'trending',
+            productId: products[0].id.toString(),
+            productName: products[0].nom,
+            title: '📈 Produit tendance',
+            description: `${products[0].nom} en hausse de ventes`,
+            actionRequired: false,
+            suggestedAction: 'Boost marketing',
+            confidence: 80,
+            createdAt: new Date(),
+            actionTaken: false
+          });
+        }
+
+        this.saveRecommendations(recs);
+      });
+    });
+  }
+
+  // ================= SAVE =================
+
+  private saveRecommendations(recs: AIRecommendation[]) {
+
+    this.http.post(this.apiUrl, recs).subscribe({
+      next: () => console.log('Sauvegardé API'),
+      error: () => {
+        if (this.isBrowser) {
+          localStorage.setItem('ai_recommendations', JSON.stringify(recs));
+        }
       }
     });
 
-    const products = this.productService.getAllProducts();
-    if (products.length > 0) {
-      recs.push({
-        id: 'REC-TRENDING-001',
-        type: 'trending',
-        productId: products[0].id,
-        productName: products[0].name,
-        title: '📈 Produit tendance',
-        description: `${products[0].name} a eu une forte augmentation de ventes cette semaine.`,
-        actionRequired: false,
-        suggestedAction: 'Augmenter la visibilité marketing de ce produit',
-        confidence: 80,
-        createdAt: new Date(),
-        actionTaken: false
-      });
-    }
-
-    this.saveRecommendations(recs);
-  }
-
-  private saveRecommendations(recs: AIRecommendation[]) {
     if (this.isBrowser) {
       localStorage.setItem('ai_recommendations', JSON.stringify(recs));
     }
+
     this.recommendations$.next(recs);
   }
 
@@ -111,6 +143,8 @@ export class AIRecommendationService {
     }
     this.history$.next(history);
   }
+
+  // ================= GET =================
 
   getAllRecommendations(): AIRecommendation[] {
     return this.recommendations$.value;
@@ -124,13 +158,17 @@ export class AIRecommendationService {
     return this.getActiveRecommendations().filter(r => r.actionRequired);
   }
 
-  markAsActioned(recId: string, actionDetails: string = ''): AIRecommendation | undefined {
+  // ================= ACTIONS =================
+
+  markAsActioned(recId: string, actionDetails: string = '') {
     const recs = this.recommendations$.value;
     const rec = recs.find(r => r.id === recId);
+
     if (rec) {
       rec.actionTaken = true;
       rec.actionTakenAt = new Date();
       rec.actionDetails = actionDetails;
+
       this.saveRecommendations(recs);
 
       this.addToHistory({
@@ -142,12 +180,14 @@ export class AIRecommendationService {
 
       return rec;
     }
+
     return undefined;
   }
 
-  dismissRecommendation(recId: string): void {
+  dismissRecommendation(recId: string) {
     const history = this.history$.value;
     const rec = this.recommendations$.value.find(r => r.id === recId);
+
     if (rec) {
       history.push({
         id: 'HIST-' + Date.now(),
@@ -155,42 +195,33 @@ export class AIRecommendationService {
         action: 'dismissed',
         date: new Date()
       });
+
       this.saveHistory(history);
       this.removeRecommendation(recId);
     }
   }
 
-  private removeRecommendation(recId: string): void {
+  private removeRecommendation(recId: string) {
     const recs = this.recommendations$.value.filter(r => r.id !== recId);
     this.saveRecommendations(recs);
   }
 
-  private addToHistory(histEntry: Omit<AIRecommendationHistory, 'id'>): void {
+  private addToHistory(histEntry: Omit<AIRecommendationHistory, 'id'>) {
     const history = this.history$.value;
+
     history.push({
       id: 'HIST-' + Date.now(),
       ...histEntry
     });
+
     this.saveHistory(history);
   }
 
-  generateNewRecommendations(): void {
+  generateNewRecommendations() {
     this.generateInitialRecommendations();
   }
 
-  getRecommendationById(id: string): AIRecommendation | undefined {
-    return this.recommendations$.value.find(r => r.id === id);
-  }
-
-  getRecommendationsByType(type: string): AIRecommendation[] {
-    return this.recommendations$.value.filter(r => r.type === type);
-  }
-
-  getHistory(filter?: 'accepted' | 'rejected' | 'dismissed'): AIRecommendationHistory[] {
-    let history = this.history$.value;
-    if (filter) {
-      history = history.filter(h => h.action === filter);
-    }
-    return history;
+  getHistory(): AIRecommendationHistory[] {
+    return this.history$.value;
   }
 }

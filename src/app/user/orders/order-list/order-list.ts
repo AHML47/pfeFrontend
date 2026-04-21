@@ -32,8 +32,9 @@ export class OrderListComponent implements OnInit {
     }
 
     // Charger les commandes immédiatement
-    this.orders = this.orderService.getUserOrders();
-    this.loading = false;
+    this.orderService.getUserOrders().subscribe(orders => {
+  this.orders = orders;
+});
   }
 
   getStatusIcon(status: string): string {

@@ -69,7 +69,9 @@ export class CartComponent implements OnInit {
     this.loading = true;
 
     // Créer la commande immédiatement
-    const order = this.orderService.createOrder(this.cartItems);
+    const order = this.orderService.createOrder({
+  items: this.cartItems
+})
 
     if (order) {
       this.cartService.clearCart();

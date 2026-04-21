@@ -2,145 +2,155 @@ import { Component, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { ProductService } from '../../../../shared/services/product.service';
-import { StockService } from '../../../../shared/services/stock.service';
-import { Product } from '../../../../shared/models/product.model';
+import { Product, ProductFormData } from '../../../../shared/models/product.model';
 
 @Component({
   selector: 'app-admin-products',
   standalone: true,
   imports: [CommonModule, FormsModule],
   templateUrl: './products.component.html',
-  styleUrls: ['./products.component.css']
+  styleUrl: './products.component.css'
 })
 export class AdminProductsComponent implements OnInit {
+
   products: Product[] = [];
   filteredProducts: Product[] = [];
-  showModal: boolean = false;
-  modalMode: 'add' | 'edit' = 'add';
-  selectedProduct: Product | null = null;
+
   searchQuery: string = '';
-  filterActive: boolean = true;
 
-  // Formulaire
-  form = {
-    name: '',
-    description: '',
-    sku: '',
-    price: 0,
-    category: '',
-    image: '',
-    minimumStock: 10
-  };
+  // ❌ IMPORTANT : DOIT ÊTRE FALSE AU DÉPART
+  showDetailModal = false;
+  showFormModal = false;
 
-  constructor(
-    private productService: ProductService,
-    private stockService: StockService
-  ) {}
+  modalMode: 'add' | 'edit' = 'add';
 
-  ngOnInit() {
+  selectedProduct: Product | null = null;
+
+  form: ProductFormData = this.resetForm();
+
+  constructor(private productService: ProductService) {}
+
+  ngOnInit(): void {
     this.loadProducts();
   }
 
+  // 🔹 LOAD
   loadProducts() {
-    this.products = this.productService.getAllProducts();
-    this.filterProducts();
+    this.productService.getAllProducts().subscribe({
+      next: (res) => {
+        this.products = res || [];
+        this.filterProducts();
+      },
+      error: (err) => console.error(err)
+    });
   }
 
+  // 🔹 FILTER
   filterProducts() {
-    let filtered = this.products;
-
-    // Filtre statut
-    if (this.filterActive) {
-      filtered = filtered.filter(p => p.active);
-    }
-
-    // Recherche
-    if (this.searchQuery.trim()) {
-      const q = this.searchQuery.toLowerCase();
-      filtered = filtered.filter(p =>
-        p.name.toLowerCase().includes(q) ||
-        p.sku.toLowerCase().includes(q)
-      );
-    }
-
-    this.filteredProducts = filtered;
+    this.filteredProducts = this.products.filter(p =>
+      p.nom.toLowerCase().includes(this.searchQuery.toLowerCase())
+    );
   }
 
   onSearch() {
     this.filterProducts();
   }
 
-  toggleFilterActive() {
-    this.filterActive = !this.filterActive;
-    this.filterProducts();
+  // 🔹 VIEW MODAL
+  openViewModal(product: Product) {
+    this.selectedProduct = product;
+    this.showDetailModal = true;
   }
 
-  // Modal
-  openAddModal() {
-    this.resetFormData();
-    this.modalMode = 'add';
+  closeDetailModal() {
     this.selectedProduct = null;
-    this.showModal = true;
+    this.showDetailModal = false;
   }
 
+  // 🔹 ADD MODAL
+  openAddModal() {
+    this.modalMode = 'add';
+    this.form = this.resetForm();
+    this.selectedProduct = null;
+    this.showFormModal = true;
+  }
+
+  // 🔹 EDIT MODAL
   openEditModal(product: Product) {
-    this.form = { ...product };
     this.modalMode = 'edit';
     this.selectedProduct = product;
-    this.showModal = true;
+    this.form = { ...product };
+    this.showFormModal = true;
   }
 
-  closeModal() {
-    this.showModal = false;
-    this.resetFormData();
+  closeFormModal() {
+    this.showFormModal = false;
+    this.form = this.resetForm();
+    this.selectedProduct = null;
   }
 
-  resetFormData() {
-    this.form = {
-      name: '',
-      description: '',
-      sku: '',
-      price: 0,
-      category: '',
-      image: '',
-      minimumStock: 10
-    };
-  }
-
+  // 🔹 SAVE
   saveProduct() {
-    // Validation
-    if (!this.form.name || !this.form.sku || this.form.price <= 0) {
-      alert('Veuillez remplir tous les champs obligatoires');
+
+    if (!this.form.nom || this.form.prixVente <= 0) {
+      alert('Champs obligatoires manquants');
       return;
     }
 
     if (this.modalMode === 'add') {
-      this.productService.addProduct(this.form);
-      alert('Produit ajouté avec succès!');
+      this.productService.addProduct(this.form).subscribe({
+        next: () => {
+          this.loadProducts();
+          this.closeFormModal();
+        },
+        error: (err) => console.error(err)
+      });
+
     } else if (this.selectedProduct) {
-      this.productService.updateProduct(this.selectedProduct.id, this.form);
-      alert('Produit modifié avec succès!');
-    }
-
-    this.closeModal();
-    this.loadProducts();
-  }
-
-  deleteProduct(productId: string) {
-    if (confirm('Êtes-vous sûr de vouloir supprimer ce produit?')) {
-      this.productService.deleteProduct(productId);
-      alert('Produit supprimé avec succès!');
-      this.loadProducts();
+      this.productService.updateProduct(this.selectedProduct.id, this.form)
+        .subscribe({
+          next: () => {
+            this.loadProducts();
+            this.closeFormModal();
+          },
+          error: (err) => console.error(err)
+        });
     }
   }
 
-  toggleStatus(product: Product) {
-    this.productService.toggleProductStatus(product.id, !product.active);
-    this.loadProducts();
+  // 🔹 DELETE
+  deleteProduct(id: number) {
+    if (confirm('Supprimer ce produit ?')) {
+      this.productService.deleteProduct(id).subscribe({
+        next: () => this.loadProducts(),
+        error: (err) => console.error(err)
+      });
+    }
   }
 
-  getStockQuantity(productId: string): number {
-    const stock = this.stockService.getProductStock(productId);
-    return stock?.quantity ?? 0;
+  // 🔹 RESET FORM
+  resetForm(): ProductFormData {
+    return {
+      nom: '',
+      description: '',
+      prixVente: 0,
+      prixAchat: 0,
+      categorieId: 0,
+      isActive: true,
+      stockActuel: 0,
+      minimumStock: 0,
+      type: 'fixe',
+      pourcentage: 0
+    };
+  }
+
+  // ✅ Calculer le prix basé sur le type
+  calculatePrice(product: Product): number {
+    if (product.type === 'fixe') {
+      return product.prixVente;
+    } else if (product.type === 'libre' && product.pourcentage) {
+      return product.prixVente * (1 + product.pourcentage / 100);
+    }
+    return product.prixVente;
   }
 }

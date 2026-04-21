@@ -27,24 +27,21 @@
           <h3>{{ order.id }}</h3>
           <p class="order-date">{{ order.createdAt | date:'dd/MM/yyyy' }}</p>
         </div>
-        <div class="order-status" [class]="'status-' + order.status">
-          <span class="status-icon">{{ getStatusIcon(order.status) }}</span>
-          <span class="status-label">{{ getStatusLabel(order.status) }}</span>
+        <div class="order-statu" [class]="'status-' + order.statut">
+          <span class="status-icon">{{ getStatusIcon(order.statut) }}</span>
+          <span class="status-label">{{ getStatusLabel(order.statut) }}</span>
         </div>
       </div>
 
       <div class="order-items">
         <div class="items-title">Articles commandés:</div>
-        <div class="item" *ngFor="let item of order.items">
-          <div class="item-img">
-            <img [src]="item.image" [alt]="item.name" />
-          </div>
+        <div *ngFor="let item of order.orderDetails" class="item">
           <div class="item-info">
-            <p class="item-name">{{ item.name }}</p>
+            <p class="item-name">{{ item.productName }}</p>
             <p class="item-qty">Quantité: {{ item.quantity }}</p>
           </div>
           <div class="item-price">
-            {{ (item.price * item.quantity) | number:'1.2-2' }} TND
+            {{ (item.price ?? item.prixUnitaire) * item.quantity | number:'1.2-2' }} TND
           </div>
         </div>
       </div>

@@ -13,8 +13,9 @@ import { AIRecommendationService } from '../../../../shared/services/ai-recommen
   styleUrl: './overview.component.css'
 })
 export class AdminOverviewComponent implements OnInit {
+
   @Input() stats!: DashboardStats;
-  
+
   orders: Order[] = [];
   activeAlerts: any[] = [];
   urgentRecommendations: any[] = [];
@@ -26,8 +27,18 @@ export class AdminOverviewComponent implements OnInit {
   ) {}
 
   ngOnInit() {
-    this.orders = this.orderService.getAllOrders();
-    this.activeAlerts = this.stockService.getActiveAlerts();
+
+    // 🔹 ORDERS
+    this.orderService.getAllOrders().subscribe(orders => {
+      this.orders = orders;
+    });
+
+    // 🔹 ALERTS (CORRIGÉ)
+    this.stockService.getActiveAlerts().subscribe(alerts => {
+      this.activeAlerts = alerts;
+    });
+
+    // 🔹 AI (pas Observable donc OK)
     this.urgentRecommendations = this.aiService.getUrgentRecommendations();
   }
 

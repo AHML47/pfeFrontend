@@ -2,7 +2,7 @@ import { Component, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { AIRecommendationService } from '../../../../shared/services/ai-recommendation.service';
 import { AIRecommendation } from '../../../../shared/models/ai-recommendation.model';
-
+import { Subscription } from 'rxjs';
 @Component({
   selector: 'app-admin-ai',
   standalone: true,
@@ -22,11 +22,14 @@ export class AdminAIComponent implements OnInit {
     this.loadRecommendations();
   }
 
-  loadRecommendations() {
-    this.activeRecommendations = this.aiService.getActiveRecommendations();
-    this.urgentRecommendations = this.aiService.getUrgentRecommendations();
-    this.history = this.aiService.getHistory();
-  }
+ loadRecommendations() {
+  this.activeRecommendations = this.aiService.getActiveRecommendations();
+  this.urgentRecommendations = this.aiService.getUrgentRecommendations();
+
+  this.aiService.history.subscribe(data => {
+    this.history = data;
+  });
+}
 
   acceptRecommendation(rec: AIRecommendation) {
     const actionDetails = prompt('Détails de l\'action prise:');

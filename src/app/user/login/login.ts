@@ -12,23 +12,23 @@ import { AuthService } from '../../shared/services/auth.service';
   styleUrl: './login.css',
 })
 export class LoginComponent {
-  // Mode (login ou register)
-  isRegisterMode: boolean = false;
 
-  // Admin mode
+  // Mode
+  isRegisterMode: boolean = false;
   isAdminMode: boolean = false;
 
-  // Login fields
+  // Login
   loginEmail: string = '';
   loginPassword: string = '';
 
-  // Register fields
+  // Register
   registerName: string = '';
   registerEmail: string = '';
   registerPassword: string = '';
   registerConfirmPassword: string = '';
+  registerAddress: string = ''; // ✅ AJOUT ADDRESS
 
-  // Admin fields
+  // Admin
   adminEmail: string = '';
   adminPassword: string = '';
 
@@ -58,56 +58,52 @@ export class LoginComponent {
     this.registerEmail = '';
     this.registerPassword = '';
     this.registerConfirmPassword = '';
+    this.registerAddress = ''; // ✅ RESET ADDRESS
     this.adminEmail = '';
     this.adminPassword = '';
   }
 
+  // ================= LOGIN =================
   login() {
-    console.log('Login called'); // Debug
     this.error = '';
 
-    // Validation
     if (!this.loginEmail || !this.loginPassword) {
       this.error = 'Veuillez remplir tous les champs';
-      console.log('Email ou password vide');
       return;
     }
 
     if (!this.loginEmail.includes('@')) {
       this.error = 'Email invalide';
-      console.log('Email invalide');
       return;
     }
 
     if (this.loginPassword.length < 3) {
       this.error = 'Le mot de passe doit contenir au moins 3 caractères';
-      console.log('Password trop court');
       return;
     }
 
-    console.log('Validations passées, email:', this.loginEmail, 'password:', this.loginPassword);
     this.loading = true;
 
-    // Simulate API call
-    setTimeout(() => {
-      const result = this.authService.login(this.loginEmail, this.loginPassword);
-      console.log('Auth result:', result);
-
-      if (result) {
-        console.log('Login successful, navigating to home');
-        this.router.navigate(['/user/home']);
-      } else {
-        this.error = 'Erreur de connexion';
-        console.log('Login failed');
+    this.authService.login(this.loginEmail, this.loginPassword).subscribe({
+      next: (result) => {
+        if (result) {
+          this.router.navigate(['/user/home']);
+        } else {
+          this.error = 'Erreur de connexion';
+        }
+        this.loading = false;
+      },
+      error: () => {
+        this.error = 'Email ou mot de passe incorrect';
+        this.loading = false;
       }
-      this.loading = false;
-    }, 500);
+    });
   }
 
+  // ================= REGISTER =================
   register() {
     this.error = '';
 
-    // Validation
     if (!this.registerName || !this.registerEmail || !this.registerPassword || !this.registerConfirmPassword) {
       this.error = 'Veuillez remplir tous les champs';
       return;
@@ -135,51 +131,52 @@ export class LoginComponent {
 
     this.loading = true;
 
-    // Simulate API call
-    setTimeout(() => {
-      const success = this.authService.register(this.registerName, this.registerEmail, this.registerPassword);
-
-      if (success) {
-        alert('Compte créé avec succès! Vous êtes connecté.');
-        this.router.navigate(['/user/home']);
-      } else {
-        this.error = 'Erreur lors de la création du compte';
+    // ✅ AJOUT ADDRESS ICI (sans changer logique)
+    this.authService.register(
+      this.registerName,
+      this.registerEmail,
+      this.registerPassword,
+      this.registerAddress
+    ).subscribe({
+      next: (success) => {
+        if (success) {
+          alert('Compte créé avec succès! Vous êtes connecté.');
+          this.router.navigate(['/user/home']);
+        } else {
+          this.error = 'Erreur lors de la création du compte';
+        }
+        this.loading = false;
+      },
+      error: () => {
+        this.error = 'Erreur serveur';
+        this.loading = false;
       }
-      this.loading = false;
-    }, 500);
+    });
   }
 
+  // ================= ADMIN =================
   adminLogin() {
-    console.log('Admin login called');
     this.errorAdmin = '';
 
-    // Validation
     if (!this.adminEmail || !this.adminPassword) {
       this.errorAdmin = 'Veuillez remplir tous les champs';
-      console.log('Admin email ou password vide');
       return;
     }
 
     if (!this.adminEmail.includes('@')) {
       this.errorAdmin = 'Email invalide';
-      console.log('Admin email invalide');
       return;
     }
 
-    console.log('Admin validation passed, email:', this.adminEmail);
     this.loading = true;
 
-    // Simulate API call
     setTimeout(() => {
-      // Check admin credentials
       if (this.adminEmail === 'admin@deliverwholesale.com' && this.adminPassword === 'admin123') {
-        console.log('Admin login successful');
         localStorage.setItem('adminToken', 'token123');
         localStorage.setItem('adminEmail', this.adminEmail);
         this.router.navigate(['/admin/dashboard']);
       } else {
         this.errorAdmin = 'Email ou mot de passe admin incorrect';
-        console.log('Admin login failed');
       }
       this.loading = false;
     }, 500);

@@ -1,222 +1,191 @@
-import { Injectable, Inject } from '@angular/core';
-import { BehaviorSubject } from 'rxjs';
-import { PLATFORM_ID } from '@angular/core';
-import { isPlatformBrowser } from '@angular/common';
-import { Stock, StockBatch, StockAlert, StockMovement } from '../models/stock.model';
-import { ProductService } from './product.service';
+import { Injectable } from '@angular/core';
+import { BehaviorSubject, Observable, of } from 'rxjs';
+import { HttpClient } from '@angular/common/http';
+import { tap, catchError, map } from 'rxjs/operators';
+import { environment } from '../../../environments/environment';
+import { 
+  Stock, 
+  StockLot,      // ✅ était StockBatch
+  StockAlert, 
+  Transaction,   // ✅ était StockMovement
+  AchatLot,
+  TypeMouvement
+} from '../models/stock.model';
 
 @Injectable({
   providedIn: 'root'
 })
 export class StockService {
-  private stocks$ = new BehaviorSubject<Stock[]>([]);
-  private batches$ = new BehaviorSubject<StockBatch[]>([]);
-  private movements$ = new BehaviorSubject<StockMovement[]>([]);
-  private alerts$ = new BehaviorSubject<StockAlert[]>([]);
-  private isBrowser: boolean;
-
-  public stocks = this.stocks$.asObservable();
-  public batches = this.batches$.asObservable();
-  public movements = this.movements$.asObservable();
-  public alerts = this.alerts$.asObservable();
-
-  constructor(
-    private productService: ProductService,
-    @Inject(PLATFORM_ID) platformId: Object
-  ) {
-    this.isBrowser = isPlatformBrowser(platformId);
-    this.initializeStocks();
+  addStockBatch(arg0: { productId: string; quantity: number; unitCost: number; totalCost: number; supplierId: string; batchDate: Date; }) {
+    throw new Error('Method not implemented.');
+  }
+  getProductMovements(productId: string) {
+    throw new Error('Method not implemented.');
   }
 
-  private initializeStocks() {
-    if (!this.isBrowser) return;
+  private readonly API_URL = `${environment.apiEndpoint}/stocks`;
 
-    const saved = localStorage.getItem('stocks');
-    if (saved) {
-      const stocks = JSON.parse(saved);
-      this.stocks$.next(stocks);
-      this.checkAlerts();
-    } else {
-      const products = this.productService.getAllProducts();
-      const initialStocks: Stock[] = products.map(product => ({
-        id: 'STK-' + product.id,
-        productId: product.id,
-        productName: product.name,
-        quantity: 100,
-        lastRestockDate: new Date(),
-        lastRestockQuantity: 100
-      }));
-      this.saveStocks(initialStocks);
-    }
+  // ✅ BehaviorSubjects avec les bons types
+  private stocks$     = new BehaviorSubject<Stock[]>([]);
+  private lots$       = new BehaviorSubject<StockLot[]>([]);        // ✅ était batches$
+  private transactions$ = new BehaviorSubject<Transaction[]>([]);   // ✅ était movements$
+  private alerts$     = new BehaviorSubject<StockAlert[]>([]);
 
-    const savedMovements = localStorage.getItem('stock_movements');
-    if (savedMovements) {
-      this.movements$.next(JSON.parse(savedMovements));
-    }
+  public stocks       = this.stocks$.asObservable();
+  public lots         = this.lots$.asObservable();                  // ✅
+  public transactions = this.transactions$.asObservable();          // ✅
+  public alerts       = this.alerts$.asObservable();
 
-    const savedBatches = localStorage.getItem('stock_batches');
-    if (savedBatches) {
-      this.batches$.next(JSON.parse(savedBatches));
-    }
+  constructor(private http: HttpClient) {
+    this.loadStocks().subscribe();
   }
 
-  private saveStocks(stocks: Stock[]) {
-    if (this.isBrowser) {
-      localStorage.setItem('stocks', JSON.stringify(stocks));
-    }
-    this.stocks$.next(stocks);
-    this.checkAlerts();
+  // ==============================
+  // 🔹 INIT
+  // ==============================
+
+  private loadStocks(): Observable<Stock[]> {
+    return this.http.get<Stock[]>(this.API_URL).pipe(
+      tap(stocks => this.stocks$.next(stocks)),
+      catchError(() => {
+        console.error('API stock indisponible');
+        this.stocks$.next([]);
+        return of([]);
+      })
+    );
   }
 
-  private saveMovements(movements: StockMovement[]) {
-    if (this.isBrowser) {
-      localStorage.setItem('stock_movements', JSON.stringify(movements));
-    }
-    this.movements$.next(movements);
+  loadLots(): Observable<StockLot[]> {                              // ✅ était loadBatches
+    return this.http.get<StockLot[]>(`${this.API_URL}/lots`).pipe(  // ✅ /lots (pas /batches)
+      tap(lots => this.lots$.next(lots)),
+      catchError(() => of([]))
+    );
   }
 
-  private saveBatches(batches: StockBatch[]) {
-    if (this.isBrowser) {
-      localStorage.setItem('stock_batches', JSON.stringify(batches));
-    }
-    this.batches$.next(batches);
+  loadTransactions(): Observable<Transaction[]> {                   // ✅ était loadMovements
+    return this.http.get<Transaction[]>(`${this.API_URL}/transactions`).pipe(
+      tap(t => this.transactions$.next(t)),
+      catchError(() => of([]))
+    );
   }
 
-  getProductStock(productId: string): Stock | undefined {
-    return this.stocks$.value.find(s => s.productId === productId);
+  loadAlerts(): Observable<StockAlert[]> {
+    return this.http.get<StockAlert[]>(`${this.API_URL}/alerts`).pipe(
+      tap(a => this.alerts$.next(a)),
+      catchError(() => of([]))
+    );
   }
 
-  getAllStocks(): Stock[] {
+  // ==============================
+  // 🔹 STOCK
+  // ==============================
+
+  getAllStocks(): Observable<Stock[]> {
+    return this.http.get<Stock[]>(this.API_URL).pipe(
+      tap(stocks => this.stocks$.next(stocks)),
+      catchError(() => of([]))
+    );
+  }
+
+  // ✅ Retourne le stock agrégé d'un produit (stockDisponible = Σ quantiteRestante)
+  getStockByProduit(produitId: string): Observable<Stock | null> {
+    return this.http.get<Stock>(`${this.API_URL}/produit/${produitId}`).pipe(
+      catchError(() => of(null))
+    );
+  }
+
+  // ==============================
+  // 🔹 STOCK LOTS (Achat fournisseur)
+  // ==============================
+
+  // ✅ était addStockBatch — crée un AchatLot + StockLot côté backend
+  addAchatLot(achat: Omit<AchatLot, 'id'>): Observable<AchatLot | null> {
+    return this.http.post<AchatLot>(`${this.API_URL}/achats`, achat).pipe(
+      tap(() => this.loadStocks().subscribe()), // ✅ recalcule le stock après achat
+      catchError(() => of(null))
+    );
+  }
+
+  // ✅ Retourne les lots d'un produit (pour afficher le détail du stock)
+  getLotsByProduit(produitId: string): Observable<StockLot[]> {
+    return this.http.get<StockLot[]>(`${this.API_URL}/lots/produit/${produitId}`).pipe(
+      catchError(() => of([]))
+    );
+  }
+
+  // ==============================
+  // 🔹 TRANSACTIONS (Mouvements)
+  // ==============================
+
+  // ✅ était addStockMovement
+  addTransaction(transaction: Omit<Transaction, 'id'>): Observable<Transaction | null> {
+    return this.http.post<Transaction>(`${this.API_URL}/transactions`, transaction).pipe(
+      tap(newT => {
+        const current = this.transactions$.value;
+        this.transactions$.next([...current, newT]);
+      }),
+      catchError(() => of(null))
+    );
+  }
+
+  getTransactionsByProduit(produitId: string): Observable<Transaction[]> {
+    return this.http.get<Transaction[]>(`${this.API_URL}/transactions/produit/${produitId}`).pipe(
+      catchError(() => of([]))
+    );
+  }
+
+  // ==============================
+  // 🔹 DECREMENT (VENTE / SORTIE)
+  // ==============================
+
+  // ✅ Crée une Transaction de type SORTIE + déduit de StockLot.quantiteRestante
+  decrementStock(produitId: string, quantite: number): Observable<boolean> {
+    return this.http.post<void>(`${this.API_URL}/sortie`, {
+      produitId,
+      quantite,
+      type: TypeMouvement.SORTIE
+    }).pipe(
+      tap(() => this.loadStocks().subscribe()),
+      map(() => true),
+      catchError(() => of(false))
+    );
+  }
+
+  // ==============================
+  // 🔹 ALERTS
+  // ==============================
+
+  getActiveAlerts(): Observable<StockAlert[]> {
+    return this.http.get<StockAlert[]>(`${this.API_URL}/alerts/active`).pipe(
+      tap(alerts => this.alerts$.next(alerts)),
+      catchError(() => of([]))
+    );
+  }
+
+  // ==============================
+  // 🔹 STATISTIQUES
+  // ==============================
+
+  getStockStats(): Observable<any> {
+    return this.http.get(`${this.API_URL}/stats`).pipe(
+      catchError(() => of({
+        totalProduits: 0,
+        totalQuantite: 0,
+        produitsStockBas: 0,
+        produitsRupture: 0
+      }))
+    );
+  }
+
+  // ==============================
+  // 🔹 CACHE LOCAL
+  // ==============================
+
+  getStocks(): Stock[] {
     return this.stocks$.value;
   }
 
-  addStockBatch(batch: Omit<StockBatch, 'id' | 'totalCost'>): StockBatch {
-    const batches = this.batches$.value;
-    const newBatch: StockBatch = {
-      id: 'BATCH-' + Date.now(),
-      ...batch,
-      totalCost: batch.quantity * batch.purchasePrice,
-      batchDate: batch.batchDate || new Date()
-    };
-
-    const stocks = this.stocks$.value;
-    const stock = stocks.find(s => s.productId === batch.productId);
-    if (stock) {
-      stock.quantity += batch.quantity;
-      stock.lastRestockDate = new Date();
-      stock.lastRestockQuantity = batch.quantity;
-      this.saveStocks(stocks);
-    }
-
-    this.addStockMovement({
-      type: 'in',
-      productId: batch.productId,
-      productName: batch.productName,
-      quantity: batch.quantity,
-      reason: `Achat du fournisseur ${batch.supplier}`,
-      date: new Date()
-    });
-
-    batches.push(newBatch);
-    this.saveBatches(batches);
-    return newBatch;
-  }
-
-  addStockMovement(movement: Omit<StockMovement, 'id'>): StockMovement {
-    const movements = this.movements$.value;
-    const newMovement: StockMovement = {
-      id: 'MOV-' + Date.now(),
-      ...movement,
-      date: movement.date || new Date()
-    };
-    movements.push(newMovement);
-    this.saveMovements(movements);
-    return newMovement;
-  }
-
-  decrementStock(productId: string, quantity: number, reason: string = 'Vente'): boolean {
-    const stocks = this.stocks$.value;
-    const stock = stocks.find(s => s.productId === productId);
-
-    if (stock && stock.quantity >= quantity) {
-      stock.quantity -= quantity;
-      this.saveStocks(stocks);
-
-      const product = this.productService.getProductById(productId);
-      this.addStockMovement({
-        type: 'out',
-        productId,
-        productName: product?.name || 'Produit inconnu',
-        quantity,
-        reason,
-        date: new Date()
-      });
-
-      this.checkAlerts();
-      return true;
-    }
-    return false;
-  }
-
-  private checkAlerts() {
-    const products = this.productService.getAllProducts();
-    const stocks = this.stocks$.value;
-    const alerts: StockAlert[] = [];
-
-    stocks.forEach(stock => {
-      const product = products.find(p => p.id === stock.productId);
-      if (product) {
-        if (stock.quantity === 0) {
-          alerts.push({
-            id: 'ALERT-' + stock.id,
-            productId: stock.productId,
-            productName: stock.productName,
-            currentStock: stock.quantity,
-            minimumStock: product.minimumStock,
-            severity: 'critical',
-            createdAt: new Date(),
-            resolved: false
-          });
-        } else if (stock.quantity <= product.minimumStock) {
-          alerts.push({
-            id: 'ALERT-' + stock.id,
-            productId: stock.productId,
-            productName: stock.productName,
-            currentStock: stock.quantity,
-            minimumStock: product.minimumStock,
-            severity: 'warning',
-            createdAt: new Date(),
-            resolved: false
-          });
-        }
-      }
-    });
-
-    this.alerts$.next(alerts);
-  }
-
-  getActiveAlerts(): StockAlert[] {
-    return this.alerts$.value.filter(a => !a.resolved);
-  }
-
-  getStockStats() {
-    const stocks = this.stocks$.value;
-    return {
-      totalProducts: stocks.length,
-      totalQuantity: stocks.reduce((sum, s) => sum + s.quantity, 0),
-      productsLowStock: stocks.filter(s => {
-        const product = this.productService.getProductById(s.productId);
-        return product && s.quantity <= product.minimumStock;
-      }).length,
-      productsOutOfStock: stocks.filter(s => s.quantity === 0).length
-    };
-  }
-
-  getProductMovements(productId: string): StockMovement[] {
-    return this.movements$.value.filter(m => m.productId === productId);
-  }
-
-  getProductBatches(productId: string): StockBatch[] {
-    return this.batches$.value.filter(b => b.productId === productId);
+  getLots(): StockLot[] {
+    return this.lots$.value;
   }
 }

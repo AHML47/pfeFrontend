@@ -1,134 +1,105 @@
-<div class="products-container">
-  <div class="products-header">
-    <h2>📦 Gestion des Produits</h2>
-    <button class="btn btn-primary" (click)="openAddModal()">
-      ➕ Ajouter un produit
-    </button>
-  </div>
+<div>
 
-  <!-- Filters -->
-  <div class="filters">
-    <div class="search-box">
-      <input 
-        type="text" 
-        placeholder="Rechercher par nom ou SKU..."
-        [(ngModel)]="searchQuery"
-        (keyup)="onSearch()"
-        class="search-input"
-      />
+  <h2>📦 Liste des Produits</h2>
+  
+
+  <!-- 🔍 SEARCH -->
+  <input 
+    type="text"
+    placeholder="Rechercher..."
+    [(ngModel)]="searchQuery"
+    (keyup)="onSearch()" />
+
+  <!-- ➕ ADD -->
+  <button (click)="openAddModal()">➕ Ajouter</button>
+
+ <table class="products-table">
+  <thead>
+    <tr>
+      <th>📦 Nom</th>
+      <th>💰 Prix Vente</th>
+      <th>📊 Stock</th>
+      <th>⚙️ Actions</th>
+    </tr>
+  </thead>
+
+  <tbody>
+    <tr *ngFor="let p of filteredProducts">
+      <td class="name">{{ p.nom }}</td>
+
+      <td class="price">
+        {{ p.prixVente | number:'1.2-2' }} TND
+      </td>
+
+      <td>
+        <span 
+          class="stock-badge"
+          [ngClass]="{
+            'low': p.stockActuel < 5,
+            'medium': p.stockActuel >= 5 && p.stockActuel < 20,
+            'high': p.stockActuel >= 20
+          }">
+          {{ p.stockActuel }}
+        </span>
+      </td>
+
+      <td class="actions">
+        <button class="btn view" (click)="openViewModal(p)">👁️</button>
+        <button class="btn edit" (click)="openEditModal(p)">✏️</button>
+        <button class="btn delete" (click)="deleteProduct(p.id)">🗑️</button>
+      </td>
+    </tr>
+  </tbody>
+</table>
+
+  <!-- 🪟 MODAL DÉTAIL -->
+  <div *ngIf="showDetailModal && selectedProduct" class="modal-overlay" (click)="closeDetailModal()">
+    <div class="modal" (click)="$event.stopPropagation()">
+      <h3>📦 {{ selectedProduct.nom }}</h3>
+      <p><strong>Description:</strong> {{ selectedProduct.description }}</p>
+      <p><strong>Prix Vente:</strong> {{ selectedProduct.prixVente }} TND</p>
+      <p><strong>Prix Achat:</strong> {{ selectedProduct.prixAchat }} TND</p>
+      <p><strong>Stock:</strong> {{ selectedProduct.stockActuel }}</p>
+      <p><strong>Type:</strong> {{ selectedProduct.type === 'fixe' ? 'Fixe' : 'Libre' }}</p>
+      <p *ngIf="selectedProduct.type === 'libre'"><strong>Pourcentage:</strong> {{ selectedProduct.pourcentage }}%</p>
+      <button (click)="closeDetailModal()">Fermer</button>
     </div>
-    <button 
-      class="btn btn-secondary"
-      [class.active]="filterActive"
-      (click)="toggleFilterActive()"
-    >
-      {{ filterActive ? '✓ Produits actifs' : 'Voir tous' }}
-    </button>
   </div>
 
-  <!-- Products Table -->
-  <div class="table-container">
-    <div *ngIf="filteredProducts.length === 0" class="empty-state">
-      <p>Aucun produit trouvé</p>
-    </div>
+  <!-- 🪟 MODAL FORM -->
+  <div *ngIf="showFormModal" class="modal-overlay" (click)="closeFormModal()">
 
-    <table *ngIf="filteredProducts.length > 0" class="products-table">
-      <thead>
-        <tr>
-          <th>Nom</th>
-          <th>SKU</th>
-          <th>Catégorie</th>
-          <th>Prix</th>
-          <th>Stock</th>
-          <th>Statut</th>
-          <th>Actions</th>
-        </tr>
-      </thead>
-      <tbody>
-        <tr *ngFor="let product of filteredProducts">
-          <td><strong>{{ product.name }}</strong></td>
-          <td><code>{{ product.sku }}</code></td>
-          <td>{{ product.category }}</td>
-          <td>{{ product.price | number:'1.2-2' }} TND</td>
-          <td>
-            <span class="stock-badge">{{ getStockQuantity(product.id) }} unités</span>
-          </td>
-          <td>
-            <span class="status-badge" [class]="product.active ? 'status-active' : 'status-inactive'">
-              {{ product.active ? '✓ Actif' : '✗ Inactif' }}
-            </span>
-          </td>
-          <td class="actions">
-            <button class="btn btn-sm btn-edit" (click)="openEditModal(product)">
-              ✏️ Éditer
-            </button>
-            <button class="btn btn-sm btn-delete" (click)="deleteProduct(product.id)">
-              🗑️ Supprimer
-            </button>
-            <button 
-              class="btn btn-sm" 
-              [class]="product.active ? 'btn-disable' : 'btn-enable'"
-              (click)="toggleStatus(product)"
-            >
-              {{ product.active ? '❌ Désactiver' : '✓ Activer' }}
-            </button>
-          </td>
-        </tr>
-      </tbody>
-    </table>
-  </div>
-</div>
+    <div class="modal" (click)="$event.stopPropagation()">
 
-<!-- Modal Ajout/Édition -->
-<div *ngIf="showModal" class="modal-overlay" (click)="closeModal()">
-  <div class="modal" (click)="$event.stopPropagation()">
-    <div class="modal-header">
       <h3>{{ modalMode === 'add' ? '➕ Ajouter un produit' : '✏️ Modifier le produit' }}</h3>
-      <button class="btn-close" (click)="closeModal()">✕</button>
+
+      <input [(ngModel)]="form.nom" placeholder="Nom" />
+      <input [(ngModel)]="form.description" placeholder="Description" />
+      <input [(ngModel)]="form.prixVente" type="number" placeholder="Prix Vente" />
+      <input [(ngModel)]="form.prixAchat" type="number" placeholder="Prix Achat" />
+      <input [(ngModel)]="form.stockActuel" type="number" placeholder="Stock" />
+      <input [(ngModel)]="form.minimumStock" type="number" placeholder="Stock Minimum" />
+
+      <!-- Type de produit -->
+      <select [(ngModel)]="form.type" placeholder="Type de produit">
+        <option value="fixe">Fixe</option>
+        <option value="libre">Libre</option>
+      </select>
+
+      <!-- Pourcentage (visible si type = 'libre') -->
+      <div *ngIf="form.type === 'libre'">
+        <label>Pourcentage (%)</label>
+        <input 
+          [(ngModel)]="form.pourcentage" 
+          type="number" 
+          placeholder="Ex: 10 pour +10%" />
+      </div>
+
+      <button (click)="saveProduct()">💾 Enregistrer</button>
+      <button (click)="closeFormModal()">❌ Annuler</button>
+
     </div>
 
-    <form (ngSubmit)="saveProduct()" class="modal-body">
-      <div class="form-group">
-        <label>Nom du produit *</label>
-        <input type="text" [(ngModel)]="form.name" name="name" class="form-control" placeholder="Ex: Huile d'olive premium" required />
-      </div>
-
-      <div class="form-group">
-        <label>Description</label>
-        <textarea [(ngModel)]="form.description" name="description" class="form-control" placeholder="Description du produit..." rows="3"></textarea>
-      </div>
-
-      <div class="form-row">
-        <div class="form-group">
-          <label>SKU (Code) *</label>
-          <input type="text" [(ngModel)]="form.sku" name="sku" class="form-control" placeholder="HUILE-001" required />
-        </div>
-        <div class="form-group">
-          <label>Prix (TND) *</label>
-          <input type="number" [(ngModel)]="form.price" name="price" class="form-control" placeholder="45" required step="0.01" />
-        </div>
-      </div>
-
-      <div class="form-row">
-        <div class="form-group">
-          <label>Catégorie</label>
-          <input type="text" [(ngModel)]="form.category" name="category" class="form-control" placeholder="Huiles, Condiments..." />
-        </div>
-        <div class="form-group">
-          <label>Stock Minimum</label>
-          <input type="number" [(ngModel)]="form.minimumStock" name="minimumStock" class="form-control" placeholder="20" />
-        </div>
-      </div>
-
-      <div class="form-group">
-        <label>Image URL</label>
-        <input type="text" [(ngModel)]="form.image" name="image" class="form-control" placeholder="/assets/products/huile.jpg" />
-      </div>
-
-      <div class="modal-footer">
-        <button type="button" class="btn btn-secondary" (click)="closeModal()">Annuler</button>
-        <button type="submit" class="btn btn-primary">{{ modalMode === 'add' ? 'Ajouter' : 'Modifier' }}</button>
-      </div>
-    </form>
   </div>
+
 </div>

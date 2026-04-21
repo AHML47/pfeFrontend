@@ -3,7 +3,7 @@ import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { Router } from '@angular/router';
 
-@Component({
+@Component({ 
   selector: 'app-admin-login',
   standalone: true,
   imports: [CommonModule, FormsModule],
