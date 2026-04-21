@@ -1,0 +1,26 @@
+<div class="profile-container">
+  <h2>👤 Mon Profil</h2>
+
+  <form *ngIf="editMode; else viewMode" (ngSubmit)="saveProfile()">
+    <label>Nom :</label>
+    <input [(ngModel)]="profile.nom" name="nom" required />
+
+    <label>Email :</label>
+    <input [(ngModel)]="profile.email" name="email" required type="email" />
+
+    <label>Téléphone :</label>
+    <input [(ngModel)]="profile.telephone" name="telephone" required />
+
+    <button type="submit">💾 Sauvegarder</button>
+    <button type="button" (click)="editMode = false">Annuler</button>
+    <button type="button" (click)="deleteProfile()" class="danger">Supprimer</button>
+  </form>
+
+  <ng-template #viewMode>
+    <p><strong>Nom :</strong> {{ profile.nom }}</p>
+    <p><strong>Email :</strong> {{ profile.email }}</p>
+    <p><strong>Téléphone :</strong> {{ profile.telephone }}</p>
+    <button (click)="enableEdit()">✏️ Modifier</button>
+    <button (click)="deleteProfile()" class="danger">Supprimer</button>
+  </ng-template>
+</div>

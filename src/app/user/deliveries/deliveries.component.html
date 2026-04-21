@@ -1,0 +1,24 @@
+<div class="deliveries-container">
+  <h2>📦 Mes Livraisons</h2>
+
+  <div *ngIf="myDeliveries.length === 0" class="alert alert-info">
+    Aucune livraison disponible.
+  </div>
+
+  <div *ngFor="let d of myDeliveries" class="delivery-card">
+    <div class="delivery-header">
+      <h3>Livraison #{{ d.id }}</h3>
+      <span class="badge" [style.background-color]="getStatusColor(d.statut)">
+        {{ getStatusBadge(d.statut) }}
+      </span>
+    </div>
+
+    <div class="delivery-body">
+      <p><strong>📍 Adresse :</strong> {{ d.adresseLivraison }}</p>
+      <p><strong>📅 Date Prévue :</strong> {{ d.dateLivraisonPrevue | date:'fullDate' }}</p>
+      <p *ngIf="d.dateLivraisonReel">
+        <strong>✓ Date de Livraison :</strong> {{ d.dateLivraisonReel | date:'fullDate' }}
+      </p>
+    </div>
+  </div>
+</div>

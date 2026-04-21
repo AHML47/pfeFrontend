@@ -16,7 +16,13 @@ const routes: Routes = [
   {
     path: 'dashboard',
     component: AdminDashboardComponent
+  },
+  {
+    path: 'deliveries',
+    loadComponent: () =>
+      import('./dashboard/sections/deliveries/deliveries.component').then(m => m.AdminDeliveriesComponent)
   }
+  
 ];
 
 @NgModule({
