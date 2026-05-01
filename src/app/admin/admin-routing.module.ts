@@ -18,7 +18,7 @@ const routes: Routes = [
     component: AdminDashboardComponent
   },
   {
-    path: 'deliveries',
+    path: 'deliveries', 
     loadComponent: () =>
       import('./dashboard/sections/deliveries/deliveries.component').then(m => m.AdminDeliveriesComponent)
   }

@@ -1,0 +1,63 @@
+<div class="container">
+
+  <div class="header">
+    <h2>Catégories</h2>
+    <button class="btn btn-primary" (click)="openCreate()">+ Ajouter</button>
+  </div>
+
+  <p class="error" *ngIf="error">{{ error }}</p>
+
+  <p *ngIf="loading">Chargement...</p>
+
+  <table *ngIf="!loading && categories.length > 0">
+    <thead>
+      <tr>
+        <th>#</th>
+        <th>Nom</th>
+        <th>Actions</th>
+      </tr>
+    </thead>
+
+    <tbody>
+      <tr *ngFor="let c of categories">
+        <td>{{ c.id }}</td>
+        <td>{{ c.nom }}</td>
+        <td>
+          <button class="btn btn-edit" (click)="openEdit(c)">Modifier</button>
+          <button class="btn btn-delete" (click)="delete(c.id)">Supprimer</button>
+        </td>
+      </tr>
+    </tbody>
+  </table>
+
+  <p *ngIf="!loading && categories.length === 0">
+    Aucune catégorie
+  </p>
+
+  <!-- ✅ FORMULAIRE INLINE -->
+  <div class="form-box" *ngIf="showForm">
+
+    <h3>
+      {{ editingCategory ? 'Modifier catégorie' : 'Ajouter catégorie' }}
+    </h3>
+
+    <input
+      type="text"
+      placeholder="Nom"
+      [(ngModel)]="formNom"
+    />
+
+    <input
+      type="text"
+      placeholder="Description"
+      [(ngModel)]="formDescription"
+    />
+
+    <div class="actions">
+      <button class="btn" (click)="resetForm()">Annuler</button>
+      <button class="btn btn-primary" (click)="submitForm()">Enregistrer</button>
+    </div>
+
+  </div>
+
+</div>

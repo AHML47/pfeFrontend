@@ -24,8 +24,8 @@
     <div class="order-card" *ngFor="let order of orders">
       <div class="order-header">
         <div class="order-info">
-          <h3>{{ order.id }}</h3>
-          <p class="order-date">{{ order.createdAt | date:'dd/MM/yyyy' }}</p>
+          <h3>Commande #{{ order.id }}</h3>
+          <p class="order-date">{{ order.dateCommande | date:'dd/MM/yyyy' }}</p>
         </div>
         <div class="order-statu" [class]="'status-' + order.statut">
           <span class="status-icon">{{ getStatusIcon(order.statut) }}</span>
@@ -37,21 +37,32 @@
         <div class="items-title">Articles commandés:</div>
         <div *ngFor="let item of order.orderDetails" class="item">
           <div class="item-info">
-            <p class="item-name">{{ item.productName }}</p>
-            <p class="item-qty">Quantité: {{ item.quantity }}</p>
+            <p class="item-name">{{ item.produit?.nom ?? 'Produit #' + item.produitId }}</p>
+            <p class="item-qty">Quantité: {{ item.quantite }}</p>
           </div>
           <div class="item-price">
-            {{ (item.price ?? item.prixUnitaire) * item.quantity | number:'1.2-2' }} TND
+            {{ item.prixUnitaire * item.quantite | number:'1.2-2' }} TND
           </div>
         </div>
       </div>
 
       <div class="order-footer">
         <div class="order-total">
+          <span>Sous-total:</span>
+          <span class="total-price">{{ order.totalProduits | number:'1.2-2' }} TND</span>
+        </div>
+        <div class="order-total">
+          <span>Frais de livraison:</span>
+          <span>{{ order.fraisLivraison | number:'1.2-2' }} TND</span>
+        </div>
+        <div class="order-total">
           <span>Total:</span>
-          <span class="total-price">{{ order.totalPrice | number:'1.2-2' }} TND</span>
+          <span class="total-price">
+            {{ order.totalProduits + order.fraisLivraison | number:'1.2-2' }} TND
+          </span>
         </div>
       </div>
+
     </div>
   </div>
 </div>

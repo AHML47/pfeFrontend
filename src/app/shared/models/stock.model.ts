@@ -1,4 +1,3 @@
-// stock.model.ts
 
 // ============================================================
 // ENUMS
@@ -11,11 +10,12 @@ export enum TypeMouvement {
 }
 
 // ============================================================
-// ACHAT LOT  →  classe "AchatLot" du diagramme
+// ACHAT LOT
 // ============================================================
 
 export interface AchatLot {
-  id: string;
+  id?: string; // ✅ IMPORTANT : optionnel (backend le génère)
+
   dateAchat: Date;
   quantiteAchetee: number;
   prixAchatUnitaire: number;
@@ -25,7 +25,7 @@ export interface AchatLot {
 }
 
 // ============================================================
-// STOCK LOT  →  classe "Stock Lots" du diagramme
+// STOCK LOT
 // ============================================================
 
 export interface StockLot {
@@ -38,7 +38,7 @@ export interface StockLot {
 }
 
 // ============================================================
-// STOCK  →  vue agrégée par produit
+// STOCK (agrégé)
 // ============================================================
 
 export interface Stock {
@@ -46,8 +46,12 @@ export interface Stock {
   productId: string;
   quantity: number;
   lastUpdated: Date;
-   produitId: number;
+  produitId: number;
 }
+
+// ============================================================
+// STOCK BATCH (optionnel)
+// ============================================================
 
 export interface StockBatch {
   id: string;
@@ -60,6 +64,10 @@ export interface StockBatch {
   supplierId: string;
 }
 
+// ============================================================
+// STOCK MOVEMENT
+// ============================================================
+
 export interface StockMovement {
   id: string;
   productId: string;
@@ -69,18 +77,8 @@ export interface StockMovement {
   timestamp: Date;
 }
 
-export interface StockAlert {
-  id: string;
-  productId: string;
-  productName: string;
-  currentStock: number;
-  minimumStock: number;
-  severity: 'low' | 'critical';
-  createdAt: Date;
-}
-
 // ============================================================
-// STOCK ALERT  →  logique produit.seuilAlerte + alerteStock
+// STOCK ALERT (UNIQUE VERSION)
 // ============================================================
 
 export interface StockAlert {
@@ -94,7 +92,7 @@ export interface StockAlert {
 }
 
 // ============================================================
-// TRANSACTION  →  classe "transactions" du diagramme
+// TRANSACTION
 // ============================================================
 
 export interface Transaction {

@@ -1,7 +1,9 @@
 import { Component, Input, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
+
 import { DashboardStats } from '../../dashboard.component';
-import { OrderService, Order } from '../../../../shared/services/order.service';
+import { OrderService } from '../../../../shared/services/order.service';
+import { Order } from '../../../../shared/models/order.model';          // ← import depuis le modèle
 import { StockService } from '../../../../shared/services/stock.service';
 import { AIRecommendationService } from '../../../../shared/services/ai-recommendation.service';
 
@@ -14,11 +16,18 @@ import { AIRecommendationService } from '../../../../shared/services/ai-recommen
 })
 export class AdminOverviewComponent implements OnInit {
 
-  @Input() stats!: DashboardStats;
+  @Input() stats: DashboardStats = {
+    totalOrders: 0,
+    pendingOrders: 0,
+    confirmedOrders: 0,
+    totalRevenue: 0,
+    totalProducts: 0,
+    totalStock: 0,
+    lowStockProducts: 0,
+    urgentRecommendations: 0
+  };
 
   orders: Order[] = [];
-  activeAlerts: any[] = [];
-  urgentRecommendations: any[] = [];
 
   constructor(
     private orderService: OrderService,
@@ -26,30 +35,14 @@ export class AdminOverviewComponent implements OnInit {
     private aiService: AIRecommendationService
   ) {}
 
-  ngOnInit() {
-
-    // 🔹 ORDERS
-    this.orderService.getAllOrders().subscribe(orders => {
-      this.orders = orders;
-    });
-
-    // 🔹 ALERTS (CORRIGÉ)
-    this.stockService.getActiveAlerts().subscribe(alerts => {
-      this.activeAlerts = alerts;
-    });
-
-    // 🔹 AI (pas Observable donc OK)
-    this.urgentRecommendations = this.aiService.getUrgentRecommendations();
-  }
+  ngOnInit(): void {}
 
   getStatusLabel(status: string): string {
     const labels: { [key: string]: string } = {
-      'pending': '⏳ En attente',
-      'confirmed': '✅ Confirmée',
-      'preparation': '🔄 Préparation',
-      'shipped': '📦 Expédiée',
-      'delivered': '✓ Livrée',
-      'cancelled': '❌ Annulée'
+      EnAttente:  '⏳ En attente',
+      Confirmee:  '✅ Confirmée',
+      Livree:     '📦 Livrée',
+      Annulee:    '❌ Annulée'
     };
     return labels[status] || status;
   }

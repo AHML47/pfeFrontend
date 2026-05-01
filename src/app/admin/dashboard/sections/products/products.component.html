@@ -1,103 +1,75 @@
-<div>
+<div class="products-container">
 
-  <h2>📦 Liste des Produits</h2>
-  
-
-  <!-- 🔍 SEARCH -->
-  <input 
-    type="text"
-    placeholder="Rechercher..."
-    [(ngModel)]="searchQuery"
-    (keyup)="onSearch()" />
-
-  <!-- ➕ ADD -->
-  <button (click)="openAddModal()">➕ Ajouter</button>
-
- <table class="products-table">
-  <thead>
-    <tr>
-      <th>📦 Nom</th>
-      <th>💰 Prix Vente</th>
-      <th>📊 Stock</th>
-      <th>⚙️ Actions</th>
-    </tr>
-  </thead>
-
-  <tbody>
-    <tr *ngFor="let p of filteredProducts">
-      <td class="name">{{ p.nom }}</td>
-
-      <td class="price">
-        {{ p.prixVente | number:'1.2-2' }} TND
-      </td>
-
-      <td>
-        <span 
-          class="stock-badge"
-          [ngClass]="{
-            'low': p.stockActuel < 5,
-            'medium': p.stockActuel >= 5 && p.stockActuel < 20,
-            'high': p.stockActuel >= 20
-          }">
-          {{ p.stockActuel }}
-        </span>
-      </td>
-
-      <td class="actions">
-        <button class="btn view" (click)="openViewModal(p)">👁️</button>
-        <button class="btn edit" (click)="openEditModal(p)">✏️</button>
-        <button class="btn delete" (click)="deleteProduct(p.id)">🗑️</button>
-      </td>
-    </tr>
-  </tbody>
-</table>
-
-  <!-- 🪟 MODAL DÉTAIL -->
-  <div *ngIf="showDetailModal && selectedProduct" class="modal-overlay" (click)="closeDetailModal()">
-    <div class="modal" (click)="$event.stopPropagation()">
-      <h3>📦 {{ selectedProduct.nom }}</h3>
-      <p><strong>Description:</strong> {{ selectedProduct.description }}</p>
-      <p><strong>Prix Vente:</strong> {{ selectedProduct.prixVente }} TND</p>
-      <p><strong>Prix Achat:</strong> {{ selectedProduct.prixAchat }} TND</p>
-      <p><strong>Stock:</strong> {{ selectedProduct.stockActuel }}</p>
-      <p><strong>Type:</strong> {{ selectedProduct.type === 'fixe' ? 'Fixe' : 'Libre' }}</p>
-      <p *ngIf="selectedProduct.type === 'libre'"><strong>Pourcentage:</strong> {{ selectedProduct.pourcentage }}%</p>
-      <button (click)="closeDetailModal()">Fermer</button>
-    </div>
+  <div class="header">
+    <h2>📦 Produits</h2>
+    <button class="btn-primary" (click)="openAddForm()">➕ Ajouter</button>
   </div>
 
-  <!-- 🪟 MODAL FORM -->
-  <div *ngIf="showFormModal" class="modal-overlay" (click)="closeFormModal()">
+  <p class="error" *ngIf="error">{{ error }}</p>
 
-    <div class="modal" (click)="$event.stopPropagation()">
+  <input
+    type="text"
+    [(ngModel)]="searchQuery"
+    (keyup)="onSearch()"
+    placeholder="🔍 Rechercher..."
+    class="search-input"
+  />
 
-      <h3>{{ modalMode === 'add' ? '➕ Ajouter un produit' : '✏️ Modifier le produit' }}</h3>
+  <!-- TABLE -->
+  <table *ngIf="filteredProducts.length > 0">
+    <thead>
+      <tr>
+        <th>#</th>
+        <th>Nom</th>
+        <th>Prix</th>
+        <th>Catégorie</th>
+        <th>Actions</th>
+      </tr>
+    </thead>
 
-      <input [(ngModel)]="form.nom" placeholder="Nom" />
-      <input [(ngModel)]="form.description" placeholder="Description" />
-      <input [(ngModel)]="form.prixVente" type="number" placeholder="Prix Vente" />
-      <input [(ngModel)]="form.prixAchat" type="number" placeholder="Prix Achat" />
-      <input [(ngModel)]="form.stockActuel" type="number" placeholder="Stock" />
-      <input [(ngModel)]="form.minimumStock" type="number" placeholder="Stock Minimum" />
+    <tbody>
+      <tr *ngFor="let p of filteredProducts">
+        <td>{{ p.id }}</td>
+        <td>{{ p.nom }}</td>
+        <td>{{ p.prixAchat }} TND</td>
+        <td>{{ getCategoryName(p.categorieId) }}</td>
+        <td>
+          <button (click)="openEditForm(p)">✏️</button>
+          <button (click)="delete(p.id)">🗑️</button>
+        </td>
+      </tr>
+    </tbody>
+  </table>
 
-      <!-- Type de produit -->
-      <select [(ngModel)]="form.type" placeholder="Type de produit">
-        <option value="fixe">Fixe</option>
-        <option value="libre">Libre</option>
-      </select>
+  <p *ngIf="filteredProducts.length === 0">
+    Aucun produit
+  </p>
 
-      <!-- Pourcentage (visible si type = 'libre') -->
-      <div *ngIf="form.type === 'libre'">
-        <label>Pourcentage (%)</label>
-        <input 
-          [(ngModel)]="form.pourcentage" 
-          type="number" 
-          placeholder="Ex: 10 pour +10%" />
-      </div>
+  <!-- ================= FORMULAIRE SIMPLE ================= -->
+  <div class="form-container" *ngIf="showForm">
 
-      <button (click)="saveProduct()">💾 Enregistrer</button>
-      <button (click)="closeFormModal()">❌ Annuler</button>
+    <h3>
+      {{ editMode ? '✏️ Modifier produit' : '➕ Ajouter produit' }}
+    </h3>
 
+    <p class="error" *ngIf="error">{{ error }}</p>
+
+    <input type="text" [(ngModel)]="form.nom" placeholder="Nom" />
+
+    <input type="text" [(ngModel)]="form.description" placeholder="Description" />
+
+    <input type="number" [(ngModel)]="form.prix" placeholder="Prix" />
+
+    <select [(ngModel)]="form.categorieId">
+      <option [ngValue]="0">-- Catégorie --</option>
+      <option *ngFor="let c of categories" [ngValue]="c.id">
+        {{ c.nom }}
+      </option>
+    </select>
+
+    <div class="actions">
+      <button class="btn-primary" (click)="save()">💾 Enregistrer</button>
+      <button class="btn-secondary" (click)="closeForm()">❌ Annuler</button>
     </div>
 
   </div>

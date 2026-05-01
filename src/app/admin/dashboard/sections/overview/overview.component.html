@@ -4,137 +4,116 @@
     <!-- Commandes -->
     <div class="kpi-card">
       <div class="kpi-header">📋 Commandes</div>
-      <div class="kpi-value">{{ stats.totalOrders }}</div>
+      <div class="kpi-value">{{ stats.totalOrders || 0 }}</div>
       <div class="kpi-details">
-        <span class="badge badge-pending">⏳ {{ stats.pendingOrders }} en attente</span>
-        <span class="badge badge-confirmed">✅ {{ stats.confirmedOrders }} confirmées</span>
+        <span class="badge badge-pending">⏳ {{ stats.pendingOrders || 0 }} en attente</span>
+        <span class="badge badge-confirmed">✅ {{ stats.confirmedOrders || 0 }} confirmées</span>
       </div>
     </div>
 
     <!-- Revenu -->
     <div class="kpi-card">
       <div class="kpi-header">💰 Revenu total</div>
-      <div class="kpi-value">{{ stats.totalRevenue | number:'1.2-2' }}</div>
+      <div class="kpi-value">{{ stats.totalRevenue || 0 | number : '1.2-2' }}</div>
       <div class="kpi-unit">TND</div>
     </div>
 
     <!-- Produits -->
     <div class="kpi-card">
       <div class="kpi-header">📦 Produits</div>
-      <div class="kpi-value">{{ stats.totalProducts }}</div>
+      <div class="kpi-value">{{ stats.totalProducts || 0 }}</div>
       <div class="kpi-details">
-        <span class="badge">Stock total: {{ stats.totalStock }} unités</span>
+        <span class="badge">Stock total: {{ stats.totalStock || 0 }} unités</span>
       </div>
     </div>
 
-    <!-- Alertes Stock -->
-    <div class="kpi-card" [class.alert-card]="stats.activeAlerts > 0">
+    <!-- Alertes -->
+    <!-- <div class="kpi-card">
       <div class="kpi-header">⚠️ Alertes stock</div>
-      <div class="kpi-value" [class.alert-value]="stats.activeAlerts > 0">{{ stats.activeAlerts }}</div>
+      <div class="kpi-value">{{ stats.activeAlerts || 0 }}</div>
       <div class="kpi-details">
-        <span class="badge">{{ stats.lowStockProducts }} produits à faible stock</span>
+        <span class="badge">
+          {{ stats.lowStockProducts || 0 }} produits à faible stock
+        </span>
       </div>
-    </div>
+    </div> -->
 
-    <!-- Recommandations IA -->
-    <div class="kpi-card" [class.alert-card]="stats.urgentRecommendations > 0">
+    <!-- IA -->
+    <!-- <div class="kpi-card">
       <div class="kpi-header">🤖 Actions recommandées</div>
-      <div class="kpi-value" [class.alert-value]="stats.urgentRecommendations > 0">{{ stats.urgentRecommendations }}</div>
+      <div class="kpi-value">{{ stats.urgentRecommendations || 0 }}</div>
       <div class="kpi-details">
-        <span class="badge">Actions requises urgentes</span>
+        <span class="badge">Actions urgentes</span>
       </div>
-    </div>
+    </div> -->
   </div>
 
-  <!-- Conteneur deux colonnes -->
-  <div class="two-column-container">
-    <!-- Colonne gauche: Alertes stock -->
-    <div class="card">
-      <div class="card-header">
-        <h3>⚠️ Alertes Stock</h3>
-        <span class="count-badge">{{ activeAlerts.length }}</span>
-      </div>
-      
-      <div *ngIf="activeAlerts.length === 0" class="empty-state">
-        <p>✅ Aucune alerte - Tous les stocks sont bons!</p>
-      </div>
-
-      <div *ngIf="activeAlerts.length > 0" class="alerts-list">
-        <div *ngFor="let alert of activeAlerts" class="alert-item" [class]="'severity-' + alert.severity">
-          <div class="alert-icon">
-            {{ alert.severity === 'critical' ? '🔴' : '🟡' }}
-          </div>
-          <div class="alert-content">
-            <div class="alert-product">{{ alert.productName }}</div>
-            <div class="alert-details">
-              Stock: {{ alert.currentStock }} / Min: {{ alert.minimumStock }}
-            </div>
-          </div>
-          <div class="alert-severity">
-            {{ getSeverityLabel(alert.severity) }}
-          </div>
-        </div>
-      </div>
+  <!-- ALERTES STOCK -->
+  <!-- <div class="card">
+    <div class="card-header">
+      <h3>⚠️ Alertes Stock</h3>
+      <span class="count-badge">{{ activeAlerts.length || 0 }}</span>
     </div>
 
-    <!-- Colonne droite: Recommandations urgentes -->
-    <div class="card">
-      <div class="card-header">
-        <h3>🤖 Recommandations Urgentes</h3>
-        <span class="count-badge">{{ urgentRecommendations.length }}</span>
-      </div>
+    <div *ngIf="activeAlerts.length === 0" class="empty-state">
+      <p>✅ Aucune alerte de stock</p>
+    </div> -->
 
-      <div *ngIf="urgentRecommendations.length === 0" class="empty-state">
-        <p>✅ Aucune action urgente requise</p>
-      </div>
+  <!-- <div *ngIf="activeAlerts.length > 0">
 
-      <div *ngIf="urgentRecommendations.length > 0" class="recommendations-list">
-        <div *ngFor="let rec of urgentRecommendations" class="rec-item">
-          <div class="rec-title">{{ rec.title }}</div>
-          <div class="rec-product">{{ rec.productName }}</div>
-          <div class="rec-action">{{ rec.suggestedAction }}</div>
-          <div class="rec-confidence">
-            Confiance: {{ rec.confidence }}%
-          </div>
+      <div *ngFor="let alert of activeAlerts" class="alert-item">
+
+        <div><strong>{{ alert.productName }}</strong></div>
+
+        <div>
+          Stock: {{ alert.currentStock }} / Min: {{ alert.minimumStock }}
         </div>
+
+        <div>
+          <span [class]="alert.severity === 'critical' ? 'danger' : 'warning'">
+            {{ alert.severity }}
+          </span>
+        </div>
+
+      </div>
+
+    </div> -->
+  <!-- </div> -->
+
+  <!-- RECOMMANDATIONS -->
+  <!-- <div class="card">
+    <div class="card-header">
+      <h3>🤖 Recommandations IA</h3>
+      <span class="count-badge">{{ urgentRecommendations.length || 0 }}</span>
+    </div>
+
+    <div *ngIf="urgentRecommendations.length === 0" class="empty-state">
+      <p>✅ Aucune action urgente</p>
+    </div>
+
+    <div *ngIf="urgentRecommendations.length > 0">
+      <div *ngFor="let rec of urgentRecommendations">
+        <strong>{{ rec.title }}</strong
+        ><br />
+        {{ rec.productName }} - {{ rec.suggestedAction }}<br />
+        Confiance: {{ rec.confidence }}%
       </div>
     </div>
-  </div>
+  </div> -->
 
-  <!-- Dernières commandes -->
+  <!-- COMMANDES -->
   <div class="card">
     <div class="card-header">
-      <h3>📋 Dernières Commandes</h3>
-      <span class="count-badge">{{ orders.length }}</span>
+      <h3>📋 Dernières commandes</h3>
+      <span class="count-badge">{{ orders.length || 0 }}</span>
     </div>
 
-    <div *ngIf="orders.length === 0" class="empty-state">
-      <p>Aucune commande encore</p>
-    </div>
-
-    <table *ngIf="orders.length > 0" class="orders-table">
-      <thead>
-        <tr>
-          <th>Commande</th>
-          <th>Client</th>
-          <th>Date</th>
-          <th>Total</th>
-          <th>Statut</th>
-        </tr>
-      </thead>
-      <tbody>
-        <tr *ngFor="let order of orders.slice(0, 5)">
-          <td><strong>{{ order.id }}</strong></td>
-          <td>{{ order.userName }}</td>
-          <td>{{ order.createdAt | date:'dd/MM/yyyy HH:mm' }}</td>
-          <td>{{ order.totalPrice | number:'1.2-2' }} TND</td>
-          <td>
-            <span class="status-badge" [class]="'status-' + order.statut">
-  {{ getStatusLabel(order.statut) }}
-</span>
-          </td>
-        </tr>
-      </tbody>
+    <table *ngIf="orders.length > 0">
+      <tr *ngFor="let order of orders.slice(0, 5)">
+        <td>{{ order.id }}</td>
+        <td>{{ order.userId }}</td>
+        <td>{{ order.totalProduits + order.fraisLivraison | number:'1.2-2' }} TND</td>
+      </tr>
     </table>
   </div>
 </div>

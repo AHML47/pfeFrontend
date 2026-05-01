@@ -37,11 +37,7 @@ const routes: Routes = [
     loadComponent: () =>
       import('../products/product-details/product-details').then(m => m.ProductDetails )
   },
-  {
-  path: 'profile',
-  loadComponent: () =>
-    import('../profile/profile.component').then(m => m.ProfileComponent)
-}
+ 
 ];
 
 @NgModule({

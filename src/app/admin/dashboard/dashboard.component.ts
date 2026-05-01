@@ -1,17 +1,19 @@
-import { Component, OnInit, Inject } from '@angular/core';
-import { CommonModule, isPlatformBrowser } from '@angular/common';
+import { Component, OnInit } from '@angular/core';
+import { CommonModule } from '@angular/common';
 import { Router } from '@angular/router';
-import { PLATFORM_ID } from '@angular/core';
-import { OrderService, Order } from '../../shared/services/order.service';
+
+import { OrderService } from '../../shared/services/order.service';
+import { Order } from '../../shared/models/order.model';
 import { ProductService } from '../../shared/services/product.service';
 import { StockService } from '../../shared/services/stock.service';
 import { AIRecommendationService } from '../../shared/services/ai-recommendation.service';
 
 import { AdminOverviewComponent } from './sections/overview/overview.component';
 import { AdminProductsComponent } from './sections/products/products.component';
-import { AdminStocksComponent } from './sections/stocks/stocks.component';
+import { AdminStockComponent } from './sections/stocks/stocks.component';
 import { AdminOrdersComponent } from './sections/orders/orders.component';
 import { AdminAIComponent } from './sections/ai/ai.component';
+import { CategoryComponent } from './sections/category/category.component'; // ← ajouté
 
 interface Tab {
   id: string;
@@ -27,7 +29,6 @@ export interface DashboardStats {
   totalProducts: number;
   totalStock: number;
   lowStockProducts: number;
-  activeAlerts: number;
   urgentRecommendations: number;
 }
 
@@ -38,9 +39,10 @@ export interface DashboardStats {
     CommonModule,
     AdminOverviewComponent,
     AdminProductsComponent,
-    AdminStocksComponent,
+    AdminStockComponent,
     AdminOrdersComponent,
-    AdminAIComponent
+    AdminAIComponent,
+    CategoryComponent  // ← ajouté
   ],
   templateUrl: './dashboard.component.html',
   styleUrl: './dashboard.component.css'
@@ -48,17 +50,21 @@ export interface DashboardStats {
 export class AdminDashboardComponent implements OnInit {
 
   tabs: Tab[] = [
-    { id: 'overview', label: 'Tableau de bord', icon: '📊' },
-    { id: 'products', label: 'Produits', icon: '📦' },
-    { id: 'stocks', label: 'Stocks', icon: '🏭' },
-    { id: 'orders', label: 'Commandes', icon: '📋' },
-    { id: 'ai', label: 'Recommandations IA', icon: '🤖' }
+    { id: 'overview',    label: 'Tableau de bord',     icon: '📊' },
+    { id: 'categories',  label: 'Catégories',           icon: '🗂️' }, // ← ajouté
+    { id: 'products',    label: 'Produits',             icon: '📦' },
+    { id: 'stocks',      label: 'Stocks',               icon: '🏭' },
+    { id: 'orders',      label: 'Commandes',            icon: '📋' },
+    { id: 'ai',          label: 'Recommandations IA',   icon: '🤖' }
   ];
 
   activeTab: string = 'overview';
+
   orders: Order[] = [];
+  products: any[] = [];
+  stocks: any[] = [];
+
   loading: boolean = true;
-  private isBrowser: boolean;
 
   dashboardStats: DashboardStats = {
     totalOrders: 0,
@@ -68,7 +74,6 @@ export class AdminDashboardComponent implements OnInit {
     totalProducts: 0,
     totalStock: 0,
     lowStockProducts: 0,
-    activeAlerts: 0,
     urgentRecommendations: 0
   };
 
@@ -77,11 +82,8 @@ export class AdminDashboardComponent implements OnInit {
     private orderService: OrderService,
     private productService: ProductService,
     private stockService: StockService,
-    private aiService: AIRecommendationService,
-    @Inject(PLATFORM_ID) platformId: Object
-  ) {
-    this.isBrowser = isPlatformBrowser(platformId);
-  }
+    private aiService: AIRecommendationService
+  ) {}
 
   ngOnInit() {
     this.checkAuth();
@@ -89,10 +91,7 @@ export class AdminDashboardComponent implements OnInit {
   }
 
   checkAuth() {
-    if (!this.isBrowser) return;
-
-    const token = localStorage.getItem('adminToken');
-
+    const token = localStorage.getItem('access_token');
     if (!token) {
       this.router.navigate(['/admin/login']);
     }
@@ -100,39 +99,45 @@ export class AdminDashboardComponent implements OnInit {
 
   loadDashboard() {
 
-    // 🔹 ORDERS
-    this.orderService.getAllOrders().subscribe(orders => {
+    this.orderService.getAllOrders().subscribe((orders: Order[]) => {
       this.orders = orders;
 
       this.dashboardStats.totalOrders = orders.length;
 
       this.dashboardStats.totalRevenue =
-        orders.reduce((sum, order) => sum + (order.totalPrice ?? 0), 0);
+        orders.reduce((sum: number, order: Order) => {
+          const orderTotal = order.orderDetails.reduce(
+            (s, d) => s + d.prixUnitaire * d.quantite, 0
+          );
+          return sum + orderTotal + (order.fraisLivraison ?? 0);
+        }, 0);
 
-      // ✅ FIX : Changez 'pending' → 'EnAttente'
       this.dashboardStats.pendingOrders =
         orders.filter(o => o.statut === 'EnAttente').length;
 
-      // ✅ FIX : Changez 'confirmed' → 'Validee'
       this.dashboardStats.confirmedOrders =
-        orders.filter(o => o.statut === 'Validee').length;
+        orders.filter(o => o.statut === 'Confirmee').length;
     });
 
-    // 🔹 STOCK STATS
-    this.stockService.getStockStats().subscribe(stocks => {
-      this.dashboardStats.totalProducts = stocks.totalProducts;
-      this.dashboardStats.totalStock = stocks.totalQuantity;
-      this.dashboardStats.lowStockProducts = stocks.productsLowStock;
+    this.productService.getAllProducts().subscribe((products: any[]) => {
+      this.products = products;
+      this.dashboardStats.totalProducts = products.length;
     });
 
-    // 🔹 ALERTS
-    this.stockService.getActiveAlerts().subscribe(alerts => {
-      this.dashboardStats.activeAlerts = alerts.length;
+    this.stockService.getAllStocks().subscribe((stocks: any[]) => {
+      this.stocks = stocks;
+
+      this.dashboardStats.totalStock = stocks.reduce(
+        (sum: number, s: any) => sum + (s.quantity || 0),
+        0
+      );
+
+      this.dashboardStats.lowStockProducts =
+        stocks.filter((s: any) => (s.quantity || 0) <= 5).length;
     });
 
-    // 🔹 AI
-    this.dashboardStats.urgentRecommendations =
-      this.aiService.getUrgentRecommendations().length;
+    const data = this.aiService.getUrgentRecommendations();
+    this.dashboardStats.urgentRecommendations = data.length;
 
     this.loading = false;
   }
@@ -142,23 +147,17 @@ export class AdminDashboardComponent implements OnInit {
   }
 
   logout() {
-    if (this.isBrowser) {
-      localStorage.removeItem('adminToken');
-      localStorage.removeItem('adminEmail');
-    }
+    localStorage.clear();
     this.router.navigate(['/admin/login']);
   }
 
   getStatusLabel(status: string): string {
-    const labels: { [key: string]: string } = {
-      'pending': 'En attente',
-      'confirmed': 'Confirmée',
-      'preparation': 'Préparation',
-      'shipped': 'Expédiée',
-      'delivered': 'Livrée',
-      'cancelled': 'Annulée'
+    const labels: any = {
+      EnAttente: 'En attente',
+      Confirmee: 'Confirmée',
+      Livree:    'Livrée',
+      Annulee:   'Annulée'
     };
-
     return labels[status] || status;
   }
 

@@ -1,156 +1,163 @@
 import { Component, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
+
 import { ProductService } from '../../../../shared/services/product.service';
+import { CategoryService } from '../../../../shared/services/category.service';
 import { Product, ProductFormData } from '../../../../shared/models/product.model';
+import { Category } from '../../../../shared/models/category.model';
 
 @Component({
   selector: 'app-admin-products',
   standalone: true,
   imports: [CommonModule, FormsModule],
   templateUrl: './products.component.html',
-  styleUrl: './products.component.css'
+  styleUrls: ['./products.component.css']
 })
 export class AdminProductsComponent implements OnInit {
 
   products: Product[] = [];
   filteredProducts: Product[] = [];
+  categories: Category[] = [];
 
-  searchQuery: string = '';
+  searchQuery = '';
+  loading = false;
+  error = '';
 
-  // ❌ IMPORTANT : DOIT ÊTRE FALSE AU DÉPART
-  showDetailModal = false;
-  showFormModal = false;
+  // FORM SIMPLE (SANS MODAL)
+  showForm = false;
+  editMode = false;
+  selectedId: number | null = null;
 
-  modalMode: 'add' | 'edit' = 'add';
+  form: ProductFormData = {
+    nom: '',
+    description: '',
+    prix: 0,
+    categorieId: 0
+  };
 
-  selectedProduct: Product | null = null;
-
-  form: ProductFormData = this.resetForm();
-
-  constructor(private productService: ProductService) {}
+  constructor(
+    private productService: ProductService,
+    private categoryService: CategoryService
+  ) {}
 
   ngOnInit(): void {
     this.loadProducts();
+    this.loadCategories();
   }
 
-  // 🔹 LOAD
-  loadProducts() {
+  // ================= LOAD =================
+  loadProducts(): void {
+    this.loading = true;
     this.productService.getAllProducts().subscribe({
-      next: (res) => {
-        this.products = res || [];
-        this.filterProducts();
+      next: (data) => {
+        this.products = data;
+        this.filteredProducts = data;
+        this.loading = false;
       },
-      error: (err) => console.error(err)
+      error: () => {
+        this.error = 'Erreur chargement produits';
+        this.loading = false;
+      }
     });
   }
 
-  // 🔹 FILTER
-  filterProducts() {
+  loadCategories(): void {
+    this.categoryService.getAll().subscribe({
+      next: (data) => this.categories = data
+    });
+  }
+
+  // ================= SEARCH =================
+  onSearch(): void {
+    const q = this.searchQuery.toLowerCase();
     this.filteredProducts = this.products.filter(p =>
-      p.nom.toLowerCase().includes(this.searchQuery.toLowerCase())
+      p.nom.toLowerCase().includes(q)
     );
   }
 
-  onSearch() {
-    this.filterProducts();
-  }
+  // ================= FORM OPEN =================
+  openAddForm(): void {
+    this.showForm = true;
+    this.editMode = false;
+    this.selectedId = null;
 
-  // 🔹 VIEW MODAL
-  openViewModal(product: Product) {
-    this.selectedProduct = product;
-    this.showDetailModal = true;
-  }
-
-  closeDetailModal() {
-    this.selectedProduct = null;
-    this.showDetailModal = false;
-  }
-
-  // 🔹 ADD MODAL
-  openAddModal() {
-    this.modalMode = 'add';
-    this.form = this.resetForm();
-    this.selectedProduct = null;
-    this.showFormModal = true;
-  }
-
-  // 🔹 EDIT MODAL
-  openEditModal(product: Product) {
-    this.modalMode = 'edit';
-    this.selectedProduct = product;
-    this.form = { ...product };
-    this.showFormModal = true;
-  }
-
-  closeFormModal() {
-    this.showFormModal = false;
-    this.form = this.resetForm();
-    this.selectedProduct = null;
-  }
-
-  // 🔹 SAVE
-  saveProduct() {
-
-    if (!this.form.nom || this.form.prixVente <= 0) {
-      alert('Champs obligatoires manquants');
-      return;
-    }
-
-    if (this.modalMode === 'add') {
-      this.productService.addProduct(this.form).subscribe({
-        next: () => {
-          this.loadProducts();
-          this.closeFormModal();
-        },
-        error: (err) => console.error(err)
-      });
-
-    } else if (this.selectedProduct) {
-      this.productService.updateProduct(this.selectedProduct.id, this.form)
-        .subscribe({
-          next: () => {
-            this.loadProducts();
-            this.closeFormModal();
-          },
-          error: (err) => console.error(err)
-        });
-    }
-  }
-
-  // 🔹 DELETE
-  deleteProduct(id: number) {
-    if (confirm('Supprimer ce produit ?')) {
-      this.productService.deleteProduct(id).subscribe({
-        next: () => this.loadProducts(),
-        error: (err) => console.error(err)
-      });
-    }
-  }
-
-  // 🔹 RESET FORM
-  resetForm(): ProductFormData {
-    return {
+    this.form = {
       nom: '',
       description: '',
-      prixVente: 0,
-      prixAchat: 0,
-      categorieId: 0,
-      isActive: true,
-      stockActuel: 0,
-      minimumStock: 0,
-      type: 'fixe',
-      pourcentage: 0
+      prix: 0,
+      categorieId: 0
     };
   }
 
-  // ✅ Calculer le prix basé sur le type
-  calculatePrice(product: Product): number {
-    if (product.type === 'fixe') {
-      return product.prixVente;
-    } else if (product.type === 'libre' && product.pourcentage) {
-      return product.prixVente * (1 + product.pourcentage / 100);
+  openEditForm(p: Product): void {
+    this.showForm = true;
+    this.editMode = true;
+    this.selectedId = p.id;
+
+    this.form = {
+      nom: p.nom,
+      description: p.description,
+      prix: p.prixAchat,
+      categorieId: p.categorieId
+    };
+  }
+
+  closeForm(): void {
+    this.showForm = false;
+    this.error = '';
+  }
+
+  // ================= SAVE =================
+  save(): void {
+
+    if (!this.form.nom.trim()) {
+      this.error = 'Nom obligatoire';
+      return;
     }
-    return product.prixVente;
+
+    if (this.form.categorieId === 0) {
+      this.error = 'Choisir catégorie';
+      return;
+    }
+
+    if (this.form.prix <= 0) {
+      this.error = 'Prix invalide';
+      return;
+    }
+
+    this.error = '';
+
+    if (this.editMode && this.selectedId) {
+
+      this.productService.updateProduct(this.selectedId, this.form).subscribe({
+        next: () => {
+          this.loadProducts();
+          this.closeForm();
+        }
+      });
+
+    } else {
+
+      this.productService.addProduct(this.form).subscribe({
+        next: () => {
+          this.loadProducts();
+          this.closeForm();
+        }
+      });
+    }
+  }
+
+  // ================= DELETE =================
+  delete(id: number): void {
+    if (!confirm('Supprimer ce produit ?')) return;
+
+    this.productService.deleteProduct(id).subscribe({
+      next: () => this.loadProducts()
+    });
+  }
+
+  getCategoryName(id: number): string {
+    return this.categories.find(c => c.id === id)?.nom || 'N/A';
   }
 }

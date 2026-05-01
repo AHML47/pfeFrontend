@@ -1,118 +1,58 @@
-<div class="stocks-container">
+<div class="container">
 
-  <!-- STATS -->
-  <div class="stock-stats">
-    <div class="stat-item">
-      <div class="stat-label">📦 Produits</div>
-      <div class="stat-value">{{ stats?.totalProducts }}</div>
-    </div>
+  <h2>📦 Achat Produit</h2>
 
-    <div class="stat-item">
-      <div class="stat-label">🏭 Stock total</div>
-      <div class="stat-value">{{ stats?.totalQuantity }}</div>
-    </div>
+  <form (ngSubmit)="onSubmit()" #form="ngForm">
 
-    <div class="stat-item">
-      <div class="stat-label">⚠️ Faible stock</div>
-      <div class="stat-value">{{ stats?.productsLowStock }}</div>
-    </div>
-
-    <div class="stat-item">
-      <div class="stat-label">🔴 Rupture</div>
-      <div class="stat-value">{{ stats?.productsOutOfStock }}</div>
-    </div>
-  </div>
-
-  <!-- BUTTON -->
-  <button class="btn btn-primary" (click)="openAddModal()">
-    ➕ Ajouter Stock
-  </button>
-
-  <!-- TABLE -->
-  <table class="stocks-table">
-    <thead>
-      <tr>
-        <th>Produit</th>
-        <th>Stock</th>
-        <th>Minimum</th>
-        <th>Status</th>
-        <th>Actions</th>
-      </tr>
-    </thead>
-
-    <tbody>
-      <tr *ngFor="let stock of stocks">
-
-        <td><strong>{{ getProduct(stock.productId)?.nom }}</strong></td>
-
-        <td>{{ stock.quantity }}</td>
-
-        <td>{{ getProduct(stock.productId)?.minimumStock || 0 }}</td>
-
-        <td>
-          <span *ngIf="stock.quantity > (getProduct(stock.productId)?.minimumStock || 0)">
-            OK
-          </span>
-
-          <span *ngIf="stock.quantity <= (getProduct(stock.productId)?.minimumStock || 0) && stock.quantity > 0">
-            Faible
-          </span>
-
-          <span *ngIf="stock.quantity === 0">
-            Rupture
-          </span>
-        </td>
-
-        <td>
-          <button (click)="openHistoryModal(stock.productId)">📊</button>
-          <button (click)="openEditModal(stock)">✏️</button>
-          <button (click)="deleteStock(stock.id)">🗑️</button>
-        </td>
-
-      </tr>
-    </tbody>
-  </table>
-</div>
-
-<!-- MODAL -->
-<div *ngIf="showBatchModal" class="modal-overlay">
-
-  <div class="modal">
-
-    <h3>{{ modalMode === 'add' ? 'Ajouter Stock' : 'Modifier Stock' }}</h3>
-
-    <select [(ngModel)]="batchForm.productId" (change)="onProductChange()">
-      <option *ngFor="let p of products" [value]="p.id">
+    <!-- PRODUIT -->
+    <label>Produit</label>
+    <select [(ngModel)]="stock.produitId" name="produitId" required>
+      <option [ngValue]="null">-- Choisir produit --</option>
+      <option *ngFor="let p of produits" [ngValue]="p.id">
         {{ p.nom }}
       </option>
     </select>
 
-    <input type="number" [(ngModel)]="batchForm.quantity" placeholder="Quantité">
+    <!-- QUANTITE -->
+    <label>Quantité</label>
+    <input type="number" [(ngModel)]="stock.quantiteAchetee" name="qte" required>
 
-    <input type="number" [(ngModel)]="batchForm.purchasePrice" placeholder="Prix">
+    <!-- PRIX -->
+    <label>Prix Unitaire</label>
+    <input type="number" [(ngModel)]="stock.prixUnitaire" name="prix" required>
 
-    <input type="text" [(ngModel)]="batchForm.supplier" placeholder="Fournisseur">
+    <!-- FOURNISSEUR -->
+    <label>Fournisseur</label>
+    <input type="text" [(ngModel)]="stock.fournisseur" name="fournisseur">
 
-    <input type="text" [(ngModel)]="batchForm.notes" placeholder="Notes">
+    <!-- LOT -->
+    <label>Numéro Lot</label>
+    <input type="text" [(ngModel)]="stock.numeroLot" name="lot">
 
-    <button (click)="saveBatch()">Save</button>
-    <button (click)="closeBatchModal()">Cancel</button>
+    <button type="submit" [disabled]="form.invalid">
+      Ajouter Achat
+    </button>
 
-  </div>
-</div>
+  </form>
 
-<!-- HISTORY -->
-<div *ngIf="showHistoryModal" class="modal-overlay">
+  <p class="message">{{ message }}</p>
 
-  <div class="modal">
+  <hr>
 
-    <h3>Historique - {{ selectedProductName }}</h3>
+  <h3>📊 Stock actuel</h3>
 
-    <div *ngFor="let h of selectedHistory">
-      {{ h.dateMouvement | date }} - {{ getTypeMouvement(h.type) }} - {{ h.quantite }}
-    </div>
+  <table>
+    <tr>
+      <th>Produit</th>
+      <th>Lot</th>
+      <th>Quantité</th>
+    </tr>
 
-    <button (click)="closeHistoryModal()">Close</button>
+    <tr *ngFor="let s of stocks">
+      <td>{{ s.achatLot?.produit?.nom }}</td>
+      <td>{{ s.numeroLot }}</td>
+      <td>{{ s.quantiteRestante }}</td>
+    </tr>
+  </table>
 
-  </div>
 </div>

@@ -2,7 +2,7 @@
 export const environment = {
   production: false,
   
-  apiEndpoint: 'http://localhost:5000/api/v1',
+  apiEndpoint: 'http://localhost:7278/api',
   appName: 'DeliverWholesale',
   version: '1.0.0',
   logging: true,

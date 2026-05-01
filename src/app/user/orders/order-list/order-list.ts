@@ -1,7 +1,8 @@
 import { Component, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { Router } from '@angular/router';
-import { OrderService, Order } from '../../../shared/services/order.service';
+import { OrderService } from '../../../shared/services/order.service';
+import { Order } from '../../../shared/models/order.model';
 import { AuthService } from '../../../shared/services/auth.service';
 
 @Component({
@@ -31,32 +32,30 @@ export class OrderListComponent implements OnInit {
       return;
     }
 
-    // Charger les commandes immédiatement
-    this.orderService.getUserOrders().subscribe(orders => {
-  this.orders = orders;
-});
+    const currentUser = this.authService.getCurrentUser();
+
+    this.orderService.getAllOrders().subscribe((orders: Order[]) => {
+      this.orders = orders.filter(o => o.userId === Number(currentUser?.id)); // ← string → number
+      this.loading = false;
+    });
   }
 
   getStatusIcon(status: string): string {
     switch(status) {
-      case 'pending': return '⏳';
-      case 'confirmed': return '✅';
-      case 'preparation': return '🔧';
-      case 'shipped': return '🚚';
-      case 'delivered': return '📦';
-      case 'cancelled': return '❌';
+      case 'EnAttente': return '⏳';
+      case 'Confirmee': return '✅';
+      case 'Livree': return '📦';
+      case 'Annulee': return '❌';
       default: return '❓';
     }
   }
 
   getStatusLabel(status: string): string {
     switch(status) {
-      case 'pending': return 'En attente de confirmation';
-      case 'confirmed': return 'Confirmée';
-      case 'preparation': return 'En préparation';
-      case 'shipped': return 'Expédiée';
-      case 'delivered': return 'Livrée';
-      case 'cancelled': return 'Annulée';
+      case 'EnAttente': return 'En attente de confirmation';
+      case 'Confirmee': return 'Confirmée';
+      case 'Livree': return 'Livrée';
+      case 'Annulee': return 'Annulée';
       default: return 'Inconnue';
     }
   }

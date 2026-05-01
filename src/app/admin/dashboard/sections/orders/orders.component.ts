@@ -17,11 +17,11 @@ export class AdminOrdersComponent implements OnInit {
   orders: Order[] = [];
   filteredOrders: Order[] = [];
 
-  selectedOrder: Order | null = null;
+  selectedOrder!: Order;
   showDetailModal = false;
 
-  filterStatus: OrderStatus | '' = '';
   searchQuery = '';
+  filterStatus: OrderStatus | '' = '';
 
   constructor(private orderService: OrderService) {}
 
@@ -29,7 +29,7 @@ export class AdminOrdersComponent implements OnInit {
     this.loadOrders();
   }
 
-  // ================= LOAD =================
+  // LOAD
   loadOrders() {
     this.orderService.getAllOrders().subscribe(data => {
       this.orders = data;
@@ -37,62 +37,48 @@ export class AdminOrdersComponent implements OnInit {
     });
   }
 
-  // ================= FILTER =================
+  // FILTER
   applyFilters() {
-    let filtered = this.orders;
+    let result = this.orders;
 
-    // filter status
     if (this.filterStatus) {
-      filtered = filtered.filter(o => o.statut === this.filterStatus);
+      result = result.filter(o => o.statut === this.filterStatus);
     }
 
-    // search by id
     if (this.searchQuery.trim()) {
-      const q = this.searchQuery.toLowerCase();
-      filtered = filtered.filter(o =>
-        o.id.toString().includes(q)
+      result = result.filter(o =>
+        o.id.toString().includes(this.searchQuery)
       );
     }
 
-    this.filteredOrders = filtered;
+    this.filteredOrders = result;
   }
 
-  onSearch() {
-    this.applyFilters();
-  }
-
-  onStatusChange() {
-    this.applyFilters();
-  }
-
-  // ================= VIEW =================
+  // VIEW DETAILS
   viewDetails(order: Order) {
     this.selectedOrder = order;
     this.showDetailModal = true;
   }
 
   closeModal() {
-    this.selectedOrder = null;
     this.showDetailModal = false;
   }
 
-  // ================= CANCEL =================
+  // CANCEL ORDER
   cancelOrder(order: Order) {
     if (confirm('Annuler cette commande ?')) {
-      this.orderService.cancelOrder(order.id).subscribe(success => {
-        if (success) {
-          this.loadOrders();
-          this.closeModal();
-        }
+      this.orderService.cancelOrder(order.id).subscribe(() => {
+        this.loadOrders();
+        this.closeModal();
       });
     }
   }
 
-  // ================= STATUS LABEL =================
+  // STATUS LABEL
   getStatusLabel(status: OrderStatus): string {
     const map: Record<OrderStatus, string> = {
       EnAttente: '⏳ En attente',
-      Validee: '✅ Validée',
+      Confirmee: '✅ Confirmée',
       Livree: '🚚 Livrée',
       Annulee: '❌ Annulée'
     };
@@ -100,11 +86,11 @@ export class AdminOrdersComponent implements OnInit {
     return map[status];
   }
 
-  // ================= STATUS COLOR =================
+  // STATUS COLOR
   getStatusColor(status: OrderStatus): string {
     const map: Record<OrderStatus, string> = {
       EnAttente: 'status-pending',
-      Validee: 'status-confirmed',
+      Confirmee: 'status-confirmed',
       Livree: 'status-delivered',
       Annulee: 'status-cancelled'
     };

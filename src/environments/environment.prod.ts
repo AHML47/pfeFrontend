@@ -2,7 +2,7 @@
 export const environment = {
   production: true,
  
-  apiEndpoint: 'https://api.deliverwholesale.com/api/v1',
+  apiEndpoint: 'http://api.deliverwholesale.com/api',
   appName: 'DeliverWholesale',
   version: '1.0.0'
 };

@@ -1,34 +1,30 @@
-export type OrderStatus = 'EnAttente' | 'Validee' | 'Livree' | 'Annulee';
+export type OrderStatus =
+  'EnAttente' |
+  'Confirmee' |
+  'Livree' |
+  'Annulee';
 
 export interface Order {
   id: number;
 
+  userId: number;
+
+  dateCommande: string;
+
+  totalProduits: number;
+  fraisLivraison: number;
+
   statut: OrderStatus;
-
-  createdAt: Date;
-  dateCommande?: Date;
-
-  userId?: number;
-  userName?: string;
-
-  totalPrice?: number;
-  totalProduits?: number;
-  fraisLivraison?: number;
-  totalFinal?: number;
 
   orderDetails: OrderDetail[];
 }
 
 export interface OrderDetail {
-  productId: number;
-  productName?: string;
-
-  quantity: number;
+  produitId: number;
+  quantite: number;
   prixUnitaire: number;
-  price?: number;
 
   produit?: {
     nom: string;
-    image?: string;
   };
 }

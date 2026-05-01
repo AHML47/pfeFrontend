@@ -15,16 +15,19 @@ export interface User {
 
 export interface AuthResponse {
   access_token: string;
-  refresh_token?: string; 
+  refresh_token?: string;
+  role: string;        // ← ajouté
+  email: string;       // ← ajouté
+  fullName: string;    // ← ajouté
   user: User;
 }
 
 export interface JwtPayload {
-  sub: string;       
+  sub: string;
   email: string;
   name: string;
-  iat: number;       
-  exp: number;       
+  iat: number;
+  exp: number;
 }
 
 @Injectable({
@@ -33,6 +36,7 @@ export interface JwtPayload {
 export class AuthService {
   private readonly ACCESS_TOKEN_KEY = 'access_token';
   private readonly REFRESH_TOKEN_KEY = 'refresh_token';
+  private readonly ROLE_KEY = 'role';                  // ← ajouté
   private readonly API_URL = environment.apiEndpoint;
 
   private currentUser$ = new BehaviorSubject<User | null>(null);
@@ -44,9 +48,7 @@ export class AuthService {
     private http: HttpClient
   ) {
     this.isBrowser = isPlatformBrowser(platformId);
-
     if (this.isBrowser) {
-      // Restaurer l'utilisateur depuis le token stocké au démarrage
       const token = this.getAccessToken();
       if (token && !this.isTokenExpired(token)) {
         const user = this.decodeUserFromToken(token);
@@ -57,33 +59,27 @@ export class AuthService {
     }
   }
 
-  // ─── AUTH METHODS ──────────────────────────────────────────────
-
   login(email: string, password: string): Observable<boolean> {
-    return this.http.post<AuthResponse>(`${this.API_URL}/login`, { email, password }).pipe(
+    return this.http.post<AuthResponse>(`${this.API_URL}/auth/login`, { email, password }).pipe(
       tap(response => this.handleAuthResponse(response)),
       map(() => true)
     );
   }
 
- register(name: string, email: string, password: string, address: string): Observable<boolean> {
-  return this.http.post<AuthResponse>(`${this.API_URL}/register`, {
-    name,
-    email,
-    password,
-    address
-  }).pipe(
-    tap(response => this.handleAuthResponse(response)),
-    map(() => true)
-  );
-}
+  register(name: string, email: string, password: string, address: string): Observable<boolean> {
+    return this.http.post<AuthResponse>(`${this.API_URL}/register`, {
+      name, email, password, address
+    }).pipe(
+      tap(response => this.handleAuthResponse(response)),
+      map(() => true)
+    );
+  }
+
   logout(): void {
-    // Optionnel : notifier le backend pour invalider le refresh token
     const refreshToken = this.getRefreshToken();
     if (refreshToken) {
       this.http.post(`${this.API_URL}/logout`, { refresh_token: refreshToken }).subscribe();
     }
-
     this.clearTokens();
     this.currentUser$.next(null);
   }
@@ -99,14 +95,16 @@ export class AuthService {
     );
   }
 
-  // ─── TOKEN MANAGEMENT ──────────────────────────────────────────
-
   getAccessToken(): string | null {
     return this.isBrowser ? localStorage.getItem(this.ACCESS_TOKEN_KEY) : null;
   }
 
   getRefreshToken(): string | null {
     return this.isBrowser ? localStorage.getItem(this.REFRESH_TOKEN_KEY) : null;
+  }
+
+  getRole(): string | null {                           // ← ajouté
+    return this.isBrowser ? localStorage.getItem(this.ROLE_KEY) : null;
   }
 
   private storeAccessToken(token: string): void {
@@ -119,18 +117,20 @@ export class AuthService {
     if (this.isBrowser) {
       localStorage.removeItem(this.ACCESS_TOKEN_KEY);
       localStorage.removeItem(this.REFRESH_TOKEN_KEY);
+      localStorage.removeItem(this.ROLE_KEY);          // ← ajouté
     }
   }
 
   private handleAuthResponse(response: AuthResponse): void {
     this.storeAccessToken(response.access_token);
+    if (this.isBrowser) {
+      localStorage.setItem(this.ROLE_KEY, response.role);  // ← ajouté
+    }
     if (response.refresh_token && this.isBrowser) {
       localStorage.setItem(this.REFRESH_TOKEN_KEY, response.refresh_token);
     }
     this.currentUser$.next(response.user);
   }
-
-  // ─── JWT UTILS ─────────────────────────────────────────────────
 
   decodeToken(token: string): JwtPayload | null {
     try {
@@ -151,14 +151,8 @@ export class AuthService {
   private decodeUserFromToken(token: string): User | null {
     const payload = this.decodeToken(token);
     if (!payload) return null;
-    return {
-      id: payload.sub,
-      email: payload.email,
-      name: payload.name
-    };
+    return { id: payload.sub, email: payload.email, name: payload.name };
   }
-
-  // ─── HELPERS ───────────────────────────────────────────────────
 
   isLoggedIn(): boolean {
     const token = this.getAccessToken();
@@ -168,6 +162,4 @@ export class AuthService {
   getCurrentUser(): User | null {
     return this.currentUser$.value;
   }
-  
-  
 }

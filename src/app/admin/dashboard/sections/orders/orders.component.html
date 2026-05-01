@@ -1,49 +1,46 @@
 <div class="orders-container">
 
-  <!-- Filters -->
+  <!-- FILTERS -->
   <div class="filters-section">
 
-    <input 
-      type="text" 
-      placeholder="Rechercher par ID commande..."
+    <input
+      type="text"
+      placeholder="Rechercher par ID..."
       [(ngModel)]="searchQuery"
       (input)="applyFilters()"
       class="search-input"
     />
 
-    <select 
+    <select
       [(ngModel)]="filterStatus"
       (change)="applyFilters()"
       class="filter-select"
     >
       <option value="">Tous les statuts</option>
       <option value="EnAttente">⏳ En attente</option>
-      <option value="Validee">✅ Validée</option>
+      <option value="Confirmee">✅ Confirmée</option>
       <option value="Livree">🚚 Livrée</option>
       <option value="Annulee">❌ Annulée</option>
     </select>
 
   </div>
 
-  <!-- Orders Table -->
+  <!-- TABLE -->
   <div class="card">
 
     <div class="card-header">
-      <h3>📋 Commandes ({{ filteredOrders.length }})</h3>
-    </div>
-
-    <div *ngIf="filteredOrders.length === 0" class="empty-state">
-      <p>Aucune commande trouvée</p>
+      <h3>📦 Commandes ({{ filteredOrders.length }})</h3>
     </div>
 
     <table *ngIf="filteredOrders.length > 0" class="orders-table">
+
       <thead>
         <tr>
           <th>ID</th>
-          <th>User ID</th>
+          <th>User</th>
           <th>Date</th>
           <th>Total Produits</th>
-          <th>Frais Livraison</th>
+          <th>Frais</th>
           <th>Total Final</th>
           <th>Statut</th>
           <th>Actions</th>
@@ -51,23 +48,32 @@
       </thead>
 
       <tbody>
+
         <tr *ngFor="let order of filteredOrders">
 
-          <td><strong>{{ order.userName }}</strong></td>
+          <td>{{ order.id }}</td>
 
           <td>{{ order.userId }}</td>
 
           <td>
-            {{order.createdAt | date:'dd/MM/yyyy HH:mm' }}
+            {{ order.dateCommande | date:'dd/MM/yyyy HH:mm' }}
           </td>
 
           <td>
-            {{ order.totalPrice | number:'1.2-2' }} TND
+            {{ order.totalProduits | number:'1.2-2' }} TND
           </td>
 
-          
           <td>
-            <strong>{{ order.totalPrice | number:'1.2-2' }} TND</strong>
+            {{ order.fraisLivraison | number:'1.2-2' }} TND
+          </td>
+
+          <td>
+            <strong>
+              {{
+                (order.totalProduits + order.fraisLivraison)
+                | number:'1.2-2'
+              }} TND
+            </strong>
           </td>
 
           <td>
@@ -83,116 +89,71 @@
           </td>
 
         </tr>
+
       </tbody>
 
     </table>
+
+    <p *ngIf="filteredOrders.length === 0">
+      Aucune commande trouvée
+    </p>
+
   </div>
 </div>
 
 <!-- ================= MODAL ================= -->
-<div *ngIf="showDetailModal && selectedOrder" class="modal-overlay" (click)="closeModal()">
+<div *ngIf="showDetailModal && selectedOrder" class="modal-overlay">
 
-  <div class="modal" (click)="$event.stopPropagation()">
+  <div class="modal">
 
     <div class="modal-header">
-      <h3>📋 Commande #{{ selectedOrder.id }}</h3>
-      <button class="btn-close" (click)="closeModal()">✕</button>
+      <h3>Commande #{{ selectedOrder.id }}</h3>
+      <button (click)="closeModal()">✖</button>
     </div>
 
     <div class="modal-body">
 
-      <!-- INFO -->
-      <div class="info-section">
-        <h4>📦 Informations commande</h4>
+      <p><strong>User ID:</strong> {{ selectedOrder.userId }}</p>
 
-        <p><strong>ID User :</strong> {{ selectedOrder.userId }}</p>
+      <p><strong>Date:</strong>
+        {{ selectedOrder.dateCommande | date:'dd/MM/yyyy HH:mm' }}
+      </p>
 
-        <p><strong>Date :</strong> 
-          {{ selectedOrder.dateCommande | date:'dd/MM/yyyy HH:mm' }}
-        </p>
+      <p><strong>Statut:</strong>
+        {{ getStatusLabel(selectedOrder.statut) }}
+      </p>
 
-        <p><strong>Statut :</strong>
-          <span class="status-badge" [class]="getStatusColor(selectedOrder.statut)">
-            {{ getStatusLabel(selectedOrder.statut) }}
-          </span>
-        </p>
+      <h4>Produits</h4>
 
-      </div>
+      <table>
+        <tr *ngFor="let item of selectedOrder.orderDetails">
 
-      <!-- DETAILS -->
-      <div class="info-section">
+          <td>{{ item.produit?.nom }}</td>
 
-        <h4>🛒 Produits commandés</h4>
+          <td>{{ item.quantite }}</td>
 
-        <table class="items-table">
-          <thead>
-            <tr>
-              <th>Produit</th>
-              <th>Quantité</th>
-              <th>Prix unitaire</th>
-              <th>Total</th>
-            </tr>
-          </thead>
+          <td>{{ item.prixUnitaire | number:'1.2-2' }} TND</td>
 
-          <tbody>
-            <tr *ngFor="let item of selectedOrder.orderDetails">
+          <td>
+            {{ item.quantite * item.prixUnitaire | number:'1.2-2' }} TND
+          </td>
 
-              <td>{{ item.produit?.nom }}</td>
+        </tr>
+      </table>
 
-              <td>{{ item.quantity }}</td> 
+      <div class="actions">
 
-              <td>{{ (item.price ?? item.prixUnitaire) | number:'1.2-2' }} TND</td>
-
-              <td>
-                <strong>
-                  {{ item.quantity * (item.price ?? item.prixUnitaire) | number:'1.2-2' }} TND
-                </strong>
-              </td>
-
-            </tr>
-          </tbody>
-        </table>
+        <button
+          *ngIf="selectedOrder.statut !== 'Livree'
+               && selectedOrder.statut !== 'Annulee'"
+          (click)="cancelOrder(selectedOrder)"
+          class="btn btn-danger"
+        >
+          ❌ Annuler
+        </button>
 
       </div>
 
-      <!-- TOTAL -->
-      <div class="total-section">
-        <span>Total Produits:</span>
-        <strong>{{ selectedOrder.totalProduits | number:'1.2-2' }} TND</strong>
-      </div>
-
-      <div class="total-section">
-        <span>Frais Livraison:</span>
-        <strong>{{ selectedOrder.fraisLivraison | number:'1.2-2' }} TND</strong>
-      </div>
-
-      <div class="total-section final">
-        <span>Total Final:</span>
-        <strong>{{ selectedOrder.totalFinal | number:'1.2-2' }} TND</strong>
-      </div>
-
-      <!-- ACTIONS STATUS -->
-      <div class="info-section">
-
-        <h4>⚙️ Gestion statut</h4>
-
-        <div *ngIf="selectedOrder.statut !== 'Livree' && selectedOrder.statut !== 'Annulee'">
-
-          <button 
-            class="btn btn-danger"
-            (click)="cancelOrder(selectedOrder)"
-          >
-            ❌ Annuler commande
-          </button>
-
-        </div>
-
-      </div>
-
-    </div>
-
-    <div class="modal-footer">
-      <button class="btn btn-secondary" (click)="closeModal()">Fermer</button>
     </div>
 
   </div>
