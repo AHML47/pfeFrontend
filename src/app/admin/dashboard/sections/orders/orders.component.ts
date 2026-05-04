@@ -1,7 +1,6 @@
-import { Component, OnInit } from '@angular/core';
+import { ChangeDetectorRef, Component, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
-
 import { OrderService } from '../../../../shared/services/order.service';
 import { Order, OrderStatus } from '../../../../shared/models/order.model';
 
@@ -17,19 +16,20 @@ export class AdminOrdersComponent implements OnInit {
   orders: Order[] = [];
   filteredOrders: Order[] = [];
 
-  selectedOrder!: Order;
-  showDetailModal = false;
-
   searchQuery = '';
   filterStatus: OrderStatus | '' = '';
 
-  constructor(private orderService: OrderService) {}
+  selectedOrder!: Order;
+  showDetailModal = false;
+
+  constructor(private orderService: OrderService,
+    private cdr : ChangeDetectorRef
+  ) {}
 
   ngOnInit(): void {
     this.loadOrders();
   }
 
-  // LOAD
   loadOrders() {
     this.orderService.getAllOrders().subscribe(data => {
       this.orders = data;
@@ -37,7 +37,6 @@ export class AdminOrdersComponent implements OnInit {
     });
   }
 
-  // FILTER
   applyFilters() {
     let result = this.orders;
 
@@ -54,17 +53,16 @@ export class AdminOrdersComponent implements OnInit {
     this.filteredOrders = result;
   }
 
-  // VIEW DETAILS
   viewDetails(order: Order) {
     this.selectedOrder = order;
     this.showDetailModal = true;
+    this.cdr.detectChanges(); // Force update to ensure modal shows updated data
   }
 
   closeModal() {
     this.showDetailModal = false;
   }
 
-  // CANCEL ORDER
   cancelOrder(order: Order) {
     if (confirm('Annuler cette commande ?')) {
       this.orderService.cancelOrder(order.id).subscribe(() => {
@@ -74,27 +72,23 @@ export class AdminOrdersComponent implements OnInit {
     }
   }
 
-  // STATUS LABEL
-  getStatusLabel(status: OrderStatus): string {
-    const map: Record<OrderStatus, string> = {
+  getStatusLabel(status: OrderStatus) {
+    const map = {
       EnAttente: '⏳ En attente',
       Confirmee: '✅ Confirmée',
       Livree: '🚚 Livrée',
       Annulee: '❌ Annulée'
     };
-
     return map[status];
   }
 
-  // STATUS COLOR
-  getStatusColor(status: OrderStatus): string {
-    const map: Record<OrderStatus, string> = {
+  getStatusColor(status: OrderStatus) {
+    const map = {
       EnAttente: 'status-pending',
       Confirmee: 'status-confirmed',
       Livree: 'status-delivered',
       Annulee: 'status-cancelled'
     };
-
     return map[status];
   }
 }

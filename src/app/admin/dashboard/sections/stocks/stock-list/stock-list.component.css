@@ -1,0 +1,220 @@
+.page-wrapper {
+  max-width: 1000px;
+  margin: 32px auto;
+  padding: 0 16px;
+}
+
+/* Stats */
+.stats-grid {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 12px;
+  margin-bottom: 20px;
+}
+
+.stat-card {
+  background: #fafaf8;
+  border: 1px solid #e8e8e4;
+  border-radius: 10px;
+  padding: 14px 16px;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.stat-label { font-size: 12px; color: #888780; }
+.stat-value { font-size: 24px; font-weight: 500; color: #1a1a18; }
+.stat-warning .stat-value { color: #854f0b; }
+.stat-muted   .stat-value { color: #5f5e5a; }
+
+/* Filtres */
+.filters-bar {
+  display: flex;
+  gap: 10px;
+  margin-bottom: 12px;
+  flex-wrap: wrap;
+  align-items: center;
+}
+
+.search-input {
+  flex: 1;
+  min-width: 200px;
+  padding: 8px 12px;
+  font-size: 14px;
+  font-family: inherit;
+  border: 1px solid #d3d1c7;
+  border-radius: 8px;
+  outline: none;
+  background: #fff;
+  color: #1a1a18;
+  transition: border-color 0.15s;
+}
+
+.search-input:focus {
+  border-color: #1d9e75;
+  box-shadow: 0 0 0 3px rgba(29,158,117,0.1);
+}
+
+.filters-bar select {
+  padding: 8px 12px;
+  font-size: 14px;
+  font-family: inherit;
+  border: 1px solid #d3d1c7;
+  border-radius: 8px;
+  outline: none;
+  background: #fff;
+  color: #1a1a18;
+  -webkit-appearance: none;
+  appearance: none;
+  cursor: pointer;
+}
+
+.filters-bar select:focus { border-color: #1d9e75; }
+
+.btn-reset {
+  padding: 8px 14px;
+  font-size: 13px;
+  font-family: inherit;
+  background: #fff;
+  border: 1px solid #d3d1c7;
+  border-radius: 8px;
+  color: #5f5e5a;
+  cursor: pointer;
+}
+
+.btn-reset:hover { background: #f7f6f2; }
+
+.btn-refresh {
+  padding: 8px 14px;
+  font-size: 13px;
+  font-family: inherit;
+  background: #e8f5ef;
+  border: 1px solid #9fe1cb;
+  border-radius: 8px;
+  color: #0f6e56;
+  font-weight: 500;
+  cursor: pointer;
+}
+
+.btn-refresh:hover { background: #9fe1cb; }
+
+.result-count {
+  font-size: 13px;
+  color: #888780;
+  margin: 0 0 10px;
+}
+
+/* Loading */
+.loading-state {
+  text-align: center;
+  padding: 48px;
+  color: #888780;
+  font-size: 14px;
+}
+
+/* Tableau */
+.table-wrapper {
+  background: #fff;
+  border: 1px solid #e8e8e4;
+  border-radius: 12px;
+  overflow: hidden;
+}
+
+table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 14px;
+}
+
+thead {
+  background: #fafaf8;
+  border-bottom: 1px solid #e8e8e4;
+}
+
+th {
+  padding: 11px 14px;
+  text-align: left;
+  font-size: 12px;
+  font-weight: 500;
+  color: #888780;
+  white-space: nowrap;
+}
+
+th.sortable { cursor: pointer; user-select: none; }
+th.sortable:hover { color: #1a1a18; }
+
+.sort-icon        { margin-left: 4px; font-size: 10px; color: #d3d1c7; }
+.sort-icon.active { color: #1d9e75; }
+
+td {
+  padding: 11px 14px;
+  border-bottom: 0.5px solid #f0efeb;
+  vertical-align: middle;
+}
+
+tr:last-child td  { border-bottom: none; }
+tr:hover td       { background: #fafaf8; }
+tr.row-vide td    { opacity: 0.5; }
+
+.td-produit   { font-weight: 500; color: #1a1a18; }
+.td-mono      { font-family: monospace; font-size: 13px; color: #5f5e5a; }
+.td-secondary { color: #888780; }
+
+.empty-row {
+  text-align: center;
+  color: #aaa89e;
+  padding: 40px;
+  font-size: 14px;
+}
+
+/* Quantité */
+.qty-cell {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.qty-value       { font-weight: 500; color: #1a1a18; font-size: 13px; }
+.qty-value.qty-zero { color: #aaa89e; }
+.qty-total       { font-weight: 400; color: #aaa89e; font-size: 12px; }
+
+.progress-bar {
+  height: 4px;
+  background: #f0efeb;
+  border-radius: 2px;
+  overflow: hidden;
+  width: 80px;
+}
+
+.progress-fill  { height: 100%; border-radius: 2px; transition: width 0.3s; }
+.fill-ok        { background: #1d9e75; }
+.fill-faible    { background: #ef9f27; }
+.fill-vide      { background: #d3d1c7; }
+
+/* Statut */
+.statut-badge {
+  display: inline-block;
+  font-size: 11px;
+  font-weight: 500;
+  padding: 3px 9px;
+  border-radius: 20px;
+  white-space: nowrap;
+}
+
+.statut-ok     { background: #e1f5ee; color: #085041; }
+.statut-faible { background: #faeeda; color: #633806; }
+.statut-vide   { background: #f1efe8; color: #5f5e5a; }
+
+/* Responsive */
+@media (max-width: 768px) {
+  .stats-grid    { grid-template-columns: repeat(2, 1fr); }
+  .table-wrapper { overflow-x: auto; }
+  table          { min-width: 650px; }
+}
+
+@media (max-width: 480px) {
+  .stats-grid  { grid-template-columns: repeat(2, 1fr); }
+  .filters-bar { flex-direction: column; }
+  .search-input,
+  .filters-bar select { width: 100%; }
+}

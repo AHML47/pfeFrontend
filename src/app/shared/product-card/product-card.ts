@@ -21,15 +21,17 @@ export class ProductCard {
   ) {}
 
   addToCart() {
-    // Vérifier si l'utilisateur est connecté
     if (!this.authService.isLoggedIn()) {
       alert('Veuillez vous connecter pour ajouter un produit au panier');
       this.router.navigate(['/user/login']);
       return;
     }
 
-    // Ajouter au panier
     this.cartService.addToCart(this.product);
     alert(`${this.product.name} a été ajouté au panier!`);
+  }
+
+  goToDetails() {
+    this.router.navigate(['/user/products/details', this.product.id]);
   }
 }

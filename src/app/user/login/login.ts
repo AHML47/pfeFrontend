@@ -15,7 +15,6 @@ export class LoginComponent {
 
   // Mode
   isRegisterMode: boolean = false;
-  isAdminMode: boolean = false;
 
   // Login
   loginEmail: string = '';
@@ -26,41 +25,32 @@ export class LoginComponent {
   registerEmail: string = '';
   registerPassword: string = '';
   registerConfirmPassword: string = '';
-  registerAddress: string = ''; // ✅ AJOUT ADDRESS
-
-  // Admin
-  adminEmail: string = '';
-  adminPassword: string = '';
+  registerAddress: string = '';
 
   // State
   error: string = '';
-  errorAdmin: string = '';
   loading: boolean = false;
 
   constructor(private authService: AuthService, private router: Router) {}
 
+  // ================= TOGGLE =================
   toggleMode() {
     this.isRegisterMode = !this.isRegisterMode;
     this.resetForm();
   }
 
-  toggleAdminMode() {
-    this.isAdminMode = !this.isAdminMode;
-    this.resetForm();
-  }
-
+  // ================= RESET =================
   resetForm() {
     this.error = '';
-    this.errorAdmin = '';
+
     this.loginEmail = '';
     this.loginPassword = '';
+
     this.registerName = '';
     this.registerEmail = '';
     this.registerPassword = '';
     this.registerConfirmPassword = '';
-    this.registerAddress = ''; // ✅ RESET ADDRESS
-    this.adminEmail = '';
-    this.adminPassword = '';
+    this.registerAddress = '';
   }
 
   // ================= LOGIN =================
@@ -69,16 +59,6 @@ export class LoginComponent {
 
     if (!this.loginEmail || !this.loginPassword) {
       this.error = 'Veuillez remplir tous les champs';
-      return;
-    }
-
-    if (!this.loginEmail.includes('@')) {
-      this.error = 'Email invalide';
-      return;
-    }
-
-    if (this.loginPassword.length < 3) {
-      this.error = 'Le mot de passe doit contenir au moins 3 caractères';
       return;
     }
 
@@ -109,21 +89,6 @@ export class LoginComponent {
       return;
     }
 
-    if (this.registerName.trim().length < 2) {
-      this.error = 'Le nom doit contenir au moins 2 caractères';
-      return;
-    }
-
-    if (!this.registerEmail.includes('@')) {
-      this.error = 'Email invalide';
-      return;
-    }
-
-    if (this.registerPassword.length < 3) {
-      this.error = 'Le mot de passe doit contenir au moins 3 caractères';
-      return;
-    }
-
     if (this.registerPassword !== this.registerConfirmPassword) {
       this.error = 'Les mots de passe ne correspondent pas';
       return;
@@ -131,7 +96,6 @@ export class LoginComponent {
 
     this.loading = true;
 
-    // ✅ AJOUT ADDRESS ICI (sans changer logique)
     this.authService.register(
       this.registerName,
       this.registerEmail,
@@ -140,8 +104,8 @@ export class LoginComponent {
     ).subscribe({
       next: (success) => {
         if (success) {
-          alert('Compte créé avec succès! Vous êtes connecté.');
-          this.router.navigate(['/user/home']);
+          alert('📩 Email de confirmation envoyé');
+this.router.navigate(['/login']);
         } else {
           this.error = 'Erreur lors de la création du compte';
         }
@@ -152,33 +116,5 @@ export class LoginComponent {
         this.loading = false;
       }
     });
-  }
-
-  // ================= ADMIN =================
-  adminLogin() {
-    this.errorAdmin = '';
-
-    if (!this.adminEmail || !this.adminPassword) {
-      this.errorAdmin = 'Veuillez remplir tous les champs';
-      return;
-    }
-
-    if (!this.adminEmail.includes('@')) {
-      this.errorAdmin = 'Email invalide';
-      return;
-    }
-
-    this.loading = true;
-
-    setTimeout(() => {
-      if (this.adminEmail === 'admin@deliverwholesale.com' && this.adminPassword === 'admin123') {
-        localStorage.setItem('adminToken', 'token123');
-        localStorage.setItem('adminEmail', this.adminEmail);
-        this.router.navigate(['/admin/dashboard']);
-      } else {
-        this.errorAdmin = 'Email ou mot de passe admin incorrect';
-      }
-      this.loading = false;
-    }, 500);
   }
 }

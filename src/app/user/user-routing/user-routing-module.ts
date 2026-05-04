@@ -1,6 +1,8 @@
 import { NgModule } from '@angular/core';
 import { RouterModule, Routes } from '@angular/router';
-
+import { MesReclamationsComponent } from '../reclamations/mes-reclamations/mes-reclamations.component';
+import { CreateReclamationComponent } from '../reclamations/create-reclamation/create-reclamation.component';
+import { CategoryUserComponent } from '../category/category-user.component';
 const routes: Routes = [
   {
     path: '',
@@ -37,7 +39,24 @@ const routes: Routes = [
     loadComponent: () =>
       import('../products/product-details/product-details').then(m => m.ProductDetails )
   },
- 
+ {
+  path: 'reclamations',
+  loadComponent: () =>
+    import('../reclamations/mes-reclamations/mes-reclamations.component')
+      .then(m => m.MesReclamationsComponent)
+},
+{
+  path: 'reclamations/new',
+  loadComponent: () =>
+    import('../reclamations/create-reclamation/create-reclamation.component')
+      .then(m => m.CreateReclamationComponent)
+},
+{
+  path: 'categories',
+  loadComponent: () =>
+    import('../category/category-user.component')
+      .then(m => m.CategoryUserComponent)
+},
 ];
 
 @NgModule({

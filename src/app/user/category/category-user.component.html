@@ -1,0 +1,26 @@
+<div class="container mt-4">
+
+  <h2>📂 Catégories</h2>
+
+  <p *ngIf="loading">Chargement...</p>
+  <p class="error" *ngIf="error">{{ error }}</p>
+
+  <div class="category-grid">
+
+    <div
+      class="category-card"
+      *ngFor="let c of categories"
+      (click)="goToCategory(c.nom)"
+    >
+      <div class="icon">📦</div>
+
+      <h4>{{ c.nom }}</h4>
+
+      <p *ngIf="c.description">
+        {{ c.description }}
+      </p>
+    </div>
+
+  </div>
+
+</div>

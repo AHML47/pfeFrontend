@@ -3,19 +3,36 @@
 
   <div class="collapse navbar-collapse">
     <ul class="navbar-nav ms-auto gap-2">
+
       <li class="nav-item">
         <a routerLink="/user/home" routerLinkActive="active" class="nav-link nav-link-custom">
           <span class="icon">🏠</span> Home
         </a>
       </li>
+
       <li class="nav-item">
         <a routerLink="/user/products" routerLinkActive="active" class="nav-link nav-link-custom">
           <span class="icon">📦</span> Produits
         </a>
       </li>
+
       <li class="nav-item">
         <a routerLink="/user/orders" routerLinkActive="active" class="nav-link nav-link-custom">
           <span class="icon">🛒</span> Commandes
+        </a>
+      </li>
+
+      <!-- ✅ Mes réclamations -->
+      <li class="nav-item">
+        <a routerLink="/user/reclamations" routerLinkActive="active" class="nav-link nav-link-custom">
+          <span class="icon">📋</span> Mes réclamations
+        </a>
+      </li>
+
+      <!-- ✅ Nouvelle réclamation -->
+      <li class="nav-item">
+        <a routerLink="/user/reclamation/create" routerLinkActive="active" class="nav-link nav-link-custom">
+          <span class="icon">🛡️</span> Réclamation
         </a>
       </li>
 
@@ -43,6 +60,7 @@
         >
           <span class="icon">🚪</span> Déconnexion
         </button>
+
         <a
           *ngIf="!authService.isLoggedIn()"
           routerLink="/user/login"
@@ -51,6 +69,7 @@
           <span class="icon">🔐</span> Connexion
         </a>
       </li>
+
     </ul>
   </div>
 </nav>

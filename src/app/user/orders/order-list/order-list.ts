@@ -13,8 +13,9 @@ import { AuthService } from '../../../shared/services/auth.service';
   styleUrl: './order-list.css'
 })
 export class OrderListComponent implements OnInit {
+
   orders: Order[] = [];
-  loading: boolean = true;
+  loading = true;
 
   constructor(
     private orderService: OrderService,
@@ -32,16 +33,37 @@ export class OrderListComponent implements OnInit {
       return;
     }
 
-    const currentUser = this.authService.getCurrentUser();
+    const token = this.authService.getAccessToken();
+    const payload = this.authService.decodeToken(token!);
 
-    this.orderService.getAllOrders().subscribe((orders: Order[]) => {
-      this.orders = orders.filter(o => o.userId === Number(currentUser?.id)); // ← string → number
+    const userId = Number(
+      payload?.['http://schemas.xmlsoap.org/ws/2005/05/identity/claims/nameidentifier']
+    );
+
+    if (isNaN(userId)) {
+      console.error('userId invalide');
       this.loading = false;
+      return;
+    }
+
+    // 👈 récupérer toutes les commandes et filtrer par userId
+    this.orderService.getAllOrders().subscribe({
+      next: (data) => {
+        this.orders = data.filter(o => o.userId === userId);
+        this.loading = false;
+      },
+      error: () => {
+        this.loading = false;
+      }
     });
   }
 
-  getStatusIcon(status: string): string {
-    switch(status) {
+  continueShopping() {
+    this.router.navigate(['/user/products']);
+  }
+
+  getStatusIcon(status: string) {
+    switch (status) {
       case 'EnAttente': return '⏳';
       case 'Confirmee': return '✅';
       case 'Livree': return '📦';
@@ -50,17 +72,13 @@ export class OrderListComponent implements OnInit {
     }
   }
 
-  getStatusLabel(status: string): string {
-    switch(status) {
-      case 'EnAttente': return 'En attente de confirmation';
+  getStatusLabel(status: string) {
+    switch (status) {
+      case 'EnAttente': return 'En attente';
       case 'Confirmee': return 'Confirmée';
       case 'Livree': return 'Livrée';
       case 'Annulee': return 'Annulée';
       default: return 'Inconnue';
     }
-  }
-
-  continueShopping() {
-    this.router.navigate(['/user/products']);
   }
 }

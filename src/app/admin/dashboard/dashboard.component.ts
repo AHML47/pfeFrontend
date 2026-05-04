@@ -8,12 +8,15 @@ import { ProductService } from '../../shared/services/product.service';
 import { StockService } from '../../shared/services/stock.service';
 import { AIRecommendationService } from '../../shared/services/ai-recommendation.service';
 
+import { SignalRService } from '../../shared/services/signalr.service';
+
 import { AdminOverviewComponent } from './sections/overview/overview.component';
 import { AdminProductsComponent } from './sections/products/products.component';
 import { AdminStockComponent } from './sections/stocks/stocks.component';
 import { AdminOrdersComponent } from './sections/orders/orders.component';
 import { AdminAIComponent } from './sections/ai/ai.component';
-import { CategoryComponent } from './sections/category/category.component'; // ← ajouté
+import { CategoryComponent } from './sections/category/category.component';
+import { AdminReclamationsComponent } from './sections/reclamations/admin-reclamations.component';
 
 interface Tab {
   id: string;
@@ -42,20 +45,26 @@ export interface DashboardStats {
     AdminStockComponent,
     AdminOrdersComponent,
     AdminAIComponent,
-    CategoryComponent  // ← ajouté
+    CategoryComponent,
+    AdminReclamationsComponent
   ],
   templateUrl: './dashboard.component.html',
   styleUrl: './dashboard.component.css'
 })
 export class AdminDashboardComponent implements OnInit {
 
+  // ✅ notifications corrigé
+  notifications: string[] = [];
+
   tabs: Tab[] = [
-    { id: 'overview',    label: 'Tableau de bord',     icon: '📊' },
-    { id: 'categories',  label: 'Catégories',           icon: '🗂️' }, // ← ajouté
-    { id: 'products',    label: 'Produits',             icon: '📦' },
-    { id: 'stocks',      label: 'Stocks',               icon: '🏭' },
-    { id: 'orders',      label: 'Commandes',            icon: '📋' },
-    { id: 'ai',          label: 'Recommandations IA',   icon: '🤖' }
+    { id: 'overview', label: 'Tableau de bord', icon: '📊' },
+    { id: 'categories', label: 'Catégories', icon: '🗂️' },
+    { id: 'products', label: 'Produits', icon: '📦' },
+    { id: 'stocks', label: 'Stocks', icon: '🏭' },
+    { id: 'orders', label: 'Commandes', icon: '📋' },
+    { id: 'ai', label: 'Recommandations IA', icon: '🤖' },
+    { id: 'reclamations', label: 'Réclamations', icon: '💬' },
+    { id: 'notifications', label: 'Notifications', icon: '🔔' }
   ];
 
   activeTab: string = 'overview';
@@ -82,12 +91,22 @@ export class AdminDashboardComponent implements OnInit {
     private orderService: OrderService,
     private productService: ProductService,
     private stockService: StockService,
-    private aiService: AIRecommendationService
+    private aiService: AIRecommendationService,
+    private signalR: SignalRService
   ) {}
 
   ngOnInit() {
     this.checkAuth();
     this.loadDashboard();
+
+    // ✅ SignalR safe init
+    this.signalR.startConnection();
+    // this.signalR.joinAdminGroup();
+
+    this.signalR.onNotification((msg: any) => {
+      this.notifications.push(msg);
+      console.log('📢 Notification:', msg);
+    });
   }
 
   checkAuth() {
@@ -124,7 +143,7 @@ export class AdminDashboardComponent implements OnInit {
       this.dashboardStats.totalProducts = products.length;
     });
 
-    this.stockService.getAllStocks().subscribe((stocks: any[]) => {
+    this.stockService.getAllStockLots().subscribe((stocks: any[]) => {
       this.stocks = stocks;
 
       this.dashboardStats.totalStock = stocks.reduce(
@@ -136,8 +155,8 @@ export class AdminDashboardComponent implements OnInit {
         stocks.filter((s: any) => (s.quantity || 0) <= 5).length;
     });
 
-    const data = this.aiService.getUrgentRecommendations();
-    this.dashboardStats.urgentRecommendations = data.length;
+    this.dashboardStats.urgentRecommendations =
+      this.aiService.getUrgentRecommendations().length;
 
     this.loading = false;
   }
@@ -155,13 +174,13 @@ export class AdminDashboardComponent implements OnInit {
     const labels: any = {
       EnAttente: 'En attente',
       Confirmee: 'Confirmée',
-      Livree:    'Livrée',
-      Annulee:   'Annulée'
+      Livree: 'Livrée',
+      Annulee: 'Annulée'
     };
     return labels[status] || status;
   }
 
   getOrderCountByStatus(status: string): number {
-    return this.orders.filter(order => order.statut === status).length;
+    return this.orders.filter(o => o.statut === status).length;
   }
 }

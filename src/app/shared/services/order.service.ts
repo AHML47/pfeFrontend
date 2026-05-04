@@ -13,32 +13,26 @@ export class OrderService {
 
   constructor(private http: HttpClient) {}
 
-  // GET ALL ORDERS
+  // ================= ADMIN =================
   getAllOrders(): Observable<Order[]> {
     return this.http.get<Order[]>(this.API_URL);
   }
 
-  // GET BY ID
+  // ================= USER =================
+  getOrdersByUser(userId: number): Observable<Order[]> {
+    return this.http.get<Order[]>(`${this.API_URL}/user/${userId}`);
+  }
+
+  // ================= COMMON =================
   getOrderById(id: number): Observable<Order> {
     return this.http.get<Order>(`${this.API_URL}/${id}`);
   }
 
-  // CREATE ORDER
-  createOrder(dto: any): Observable<any> {
-    return this.http.post(this.API_URL, dto);
-  }
-
-  // DELETE ORDER
-  deleteOrder(id: number): Observable<any> {
-    return this.http.delete(`${this.API_URL}/${id}`);
-  }
-
-  // CANCEL ORDER
   cancelOrder(id: number): Observable<any> {
     return this.http.post(`${this.API_URL}/${id}/cancel`, {});
   }
+
+  createOrder(dto: any): Observable<any> {
+    return this.http.post(this.API_URL, dto);
+  }
 }
-
-
-
-

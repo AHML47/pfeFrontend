@@ -1,0 +1,92 @@
+<div class="reclamation-page">
+  <div class="page-header">
+    <div class="header-icon">🛡️</div>
+    <h1>Signaler un problème</h1>
+    <p>Notre équipe traitera votre réclamation dans les plus brefs délais.</p>
+  </div>
+
+  <!-- Success -->
+  <div class="success-card" *ngIf="success">
+    <div class="success-icon">✅</div>
+    <h2>Réclamation envoyée !</h2>
+    <p>Nous avons bien reçu votre réclamation.</p>
+    <button class="btn-primary" (click)="success = false">
+      Faire une autre réclamation
+    </button>
+  </div>
+
+  <form [formGroup]="form" (ngSubmit)="submit()" *ngIf="!success">
+
+    <!-- Numéro de commande -->
+    <div class="form-section">
+      <label class="form-label">
+        <span class="label-icon">🧾</span> Numéro de commande
+      </label>
+      <input
+        type="number"
+        formControlName="orderId"
+        class="form-input"
+        [class.invalid]="f['orderId'].invalid && f['orderId'].touched"
+        placeholder="ex: 1042"
+      />
+      <div class="error-msg"
+           *ngIf="f['orderId'].invalid && f['orderId'].touched">
+        Veuillez entrer un numéro de commande valide.
+      </div>
+    </div>
+
+    <!-- Type de problème -->
+    <div class="form-section">
+      <label class="form-label">
+        <span class="label-icon">⚠️</span> Type de problème
+      </label>
+      <div class="type-grid">
+        <button
+          type="button"
+          *ngFor="let type of types"
+          class="type-card"
+          [class.selected]="f['sujet'].value === type"
+          (click)="selectType(type)"
+        >
+          <span class="type-icon">{{ typeIcons[type] }}</span>
+          <span class="type-label">{{ type }}</span>
+        </button>
+      </div>
+      <div class="error-msg"
+           *ngIf="f['sujet'].invalid && f['sujet'].touched">
+        Veuillez sélectionner un type de problème.
+      </div>
+    </div>
+
+    <!-- Description -->
+    <div class="form-section">
+      <label class="form-label">
+        <span class="label-icon">📝</span> Description du problème
+      </label>
+      <textarea
+        formControlName="description"
+        class="form-textarea"
+        [class.invalid]="f['description'].invalid && f['description'].touched"
+        placeholder="Décrivez votre problème en détail (minimum 20 caractères)..."
+        rows="5"
+      ></textarea>
+      <div class="char-count">
+        {{ f['description'].value?.length || 0 }} caractères
+      </div>
+      <div class="error-msg"
+           *ngIf="f['description'].invalid && f['description'].touched">
+        La description doit contenir au moins 20 caractères.
+      </div>
+    </div>
+
+    <div class="alert-error" *ngIf="error">
+      <span>⛔</span> {{ error }}
+    </div>
+
+    <button type="submit" class="btn-submit" [disabled]="loading">
+      <span *ngIf="!loading">Envoyer la réclamation →</span>
+      <span *ngIf="loading">Envoi en cours...</span>
+    </button>
+
+  </form>
+</div>

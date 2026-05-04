@@ -15,18 +15,16 @@ import { CreateAchatLotDto } from '../../../../shared/models/create-achat-lot.dt
 })
 export class AdminStockComponent implements OnInit {
 
-  stock: CreateAchatLotDto = {
-    produitId: null as any,
-    quantiteAchetee: 0,
-    prixUnitaire: 0,
-    fournisseur: '',
-    numeroLot: ''
-  };
+  stock: CreateAchatLotDto = this.emptyForm();
 
   produits: any[] = [];
-  stocks: any[] = [];
-
+  loading = false;
   message = '';
+  messageType: 'success' | 'error' | '' = '';
+
+  get totalAchat(): number {
+    return +(this.stock.quantiteAchetee * this.stock.prixUnitaire).toFixed(2);
+  }
 
   constructor(
     private stockService: StockService,
@@ -35,42 +33,68 @@ export class AdminStockComponent implements OnInit {
 
   ngOnInit(): void {
     this.loadProduits();
-    this.loadStocks();
   }
 
-  loadProduits() {
+  loadProduits(): void {
     this.productService.getAllProducts().subscribe({
-      next: res => this.produits = res
+      next: (data) => (this.produits = data),
+      error: (err) => console.error('Erreur chargement produits', err)
     });
   }
 
-  loadStocks() {
-    this.stockService.getAllStocks().subscribe({
-      next: res => this.stocks = res
-    });
-  }
+  onSubmit(): void {
+    if (!this.stock.produitId) {
+      this.setMessage('Veuillez sélectionner un produit.', 'error');
+      return;
+    }
+    if (this.stock.quantiteAchetee < 1) {
+      this.setMessage('Le nombre de packs doit être au moins 1.', 'error');
+      return;
+    }
+    if (this.stock.prixUnitaire <= 0) {
+      this.setMessage('Le prix unitaire doit être supérieur à 0.', 'error');
+      return;
+    }
 
-  onSubmit() {
+    this.loading = true;
+    this.message = '';
+
     this.stockService.addAchatLot(this.stock).subscribe({
       next: () => {
-        this.message = '✔ Achat créé avec succès';
-        this.resetForm();
-        this.loadStocks();
+        this.setMessage(
+          `${this.stock.quantiteAchetee} pack(s) créés avec succès.`,
+          'success'
+        );
+        this.stock = this.emptyForm();
+        this.loading = false;
       },
-      error: err => {
+      error: (err) => {
         console.error(err);
-        this.message = '❌ Erreur';
+        const detail = err?.error?.message || 'Erreur lors de la création.';
+        this.setMessage(detail, 'error');
+        this.loading = false;
       }
     });
   }
 
-  resetForm() {
-    this.stock = {
+  resetForm(): void {
+    this.stock = this.emptyForm();
+    this.message = '';
+    this.messageType = '';
+  }
+
+  private emptyForm(): CreateAchatLotDto {
+    return {
       produitId: null as any,
-      quantiteAchetee: 0,
+      quantiteAchetee: 1,
       prixUnitaire: 0,
       fournisseur: '',
       numeroLot: ''
     };
+  }
+
+  private setMessage(msg: string, type: 'success' | 'error'): void {
+    this.message = msg;
+    this.messageType = type;
   }
 }

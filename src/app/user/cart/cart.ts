@@ -1,4 +1,4 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, OnInit, ChangeDetectorRef } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { Router } from '@angular/router';
@@ -16,6 +16,7 @@ import { AuthService } from '../../shared/services/auth.service';
 export class CartComponent implements OnInit {
   cartItems: any[] = [];
   totalPrice: number = 0;
+  savedTotal: number = 0;
   loading: boolean = false;
   showModal: boolean = false;
   orderCreated: any = null;
@@ -24,7 +25,8 @@ export class CartComponent implements OnInit {
     private cartService: CartService,
     private orderService: OrderService,
     private authService: AuthService,
-    private router: Router
+    private router: Router,
+    private cdr: ChangeDetectorRef // 👈 ajouter
   ) {}
 
   ngOnInit() {
@@ -67,21 +69,31 @@ export class CartComponent implements OnInit {
     }
 
     this.loading = true;
+    this.savedTotal = this.totalPrice;
 
-    // Créer la commande immédiatement
-    const order = this.orderService.createOrder({
-  items: this.cartItems
-})
+    const orderDto = {
+      items: this.cartItems.map(item => ({
+        produitId: item.id,
+        quantite: item.quantity
+      }))
+    };
 
-    if (order) {
-      this.cartService.clearCart();
-      this.orderCreated = order;
-      this.showModal = true;
-      this.loading = false;
-    } else {
-      this.loading = false;
-      alert('Erreur lors de la création de la commande');
-    }
+    this.orderService.createOrder(orderDto).subscribe({
+      next: (order) => {
+        this.orderCreated = order;
+        this.totalPrice = this.savedTotal;
+        this.cartService.clearCart();
+        this.loadCart();
+        this.showModal = true;
+        this.cdr.detectChanges(); // 👈 forcer la mise à jour
+        this.loading = false;
+      },
+      error: (err) => {
+        console.error('Erreur commande:', err);
+        this.loading = false;
+        alert('Erreur lors de la création de la commande');
+      }
+    });
   }
 
   closeModal() {

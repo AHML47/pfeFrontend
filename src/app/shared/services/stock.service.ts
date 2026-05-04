@@ -10,30 +10,28 @@ import { CreateAchatLotDto } from '../models/create-achat-lot.dto';
 })
 export class StockService {
 
-  private apiAchat = environment.apiEndpoint + '/AchatLot';
-  private apiStock = environment.apiEndpoint + '/Stock';
+  private apiAchatLot = `${environment.apiEndpoint}/AchatLot`;
+  private apiStockLot = `${environment.apiEndpoint}/StockLot`;
 
   constructor(private http: HttpClient) {}
 
-  // =========================
-  // ACHAT
-  // =========================
+  // ─────────────────────────────
+  // AchatLot (POST + GET)
+  // ─────────────────────────────
+
   addAchatLot(dto: CreateAchatLotDto): Observable<any> {
-    return this.http.post<any>(this.apiAchat, dto);
+    return this.http.post<any>(this.apiAchatLot, dto);
   }
 
   getAllAchatLots(): Observable<any[]> {
-    return this.http.get<any[]>(this.apiAchat);
+    return this.http.get<any[]>(this.apiAchatLot);
   }
 
-  // =========================
-  // STOCK
-  // =========================
-  getAllStocks(): Observable<any[]> {
-    return this.http.get<any[]>(this.apiStock);
-  }
+  // ─────────────────────────────
+  // StockLot (GET)
+  // ─────────────────────────────
 
-  getStockByProduct(produitId: number): Observable<any> {
-    return this.http.get<any>(`${this.apiStock}/${produitId}`);
+  getAllStockLots(): Observable<any[]> {
+    return this.http.get<any[]>(this.apiStockLot);
   }
 }

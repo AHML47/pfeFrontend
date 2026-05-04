@@ -6,9 +6,7 @@ export type OrderStatus =
 
 export interface Order {
   id: number;
-
   userId: number;
-
   dateCommande: string;
 
   totalProduits: number;
@@ -26,5 +24,6 @@ export interface OrderDetail {
 
   produit?: {
     nom: string;
+    image?: string;
   };
 }

@@ -1,53 +1,78 @@
 <div class="admin-dashboard">
 
+  <!-- HEADER -->
   <div class="dashboard-header">
-    <div class="header-left">
+    <div>
       <h1>📊 Tableau de Bord Admin</h1>
-      <p class="subtitle">Gestion complète de votre plateforme wholesale</p>
+      <p>Gestion complète de la plateforme</p>
     </div>
-    <button class="btn btn-logout" (click)="logout()">Déconnexion</button>
+
+    <button (click)="logout()" class="btn btn-danger">
+      Déconnexion
+    </button>
   </div>
 
-  <div class="dashboard-tabs">
+  <!-- TABS -->
+  <div class="tabs">
     <button
       *ngFor="let tab of tabs"
-      class="tab-btn"
-      [class.active]="activeTab === tab.id"
       (click)="switchTab(tab.id)"
-    >
+      [class.active]="activeTab === tab.id">
       {{ tab.icon }} {{ tab.label }}
     </button>
   </div>
 
-  <div *ngIf="loading" class="loading">
-    <p>⏳ Chargement du tableau de bord...</p>
+  <!-- LOADING -->
+  <div *ngIf="loading">
+    ⏳ Chargement...
   </div>
 
-  <div *ngIf="!loading" class="dashboard-content">
+  <!-- CONTENT -->
+  <div *ngIf="!loading">
 
-    <div *ngIf="activeTab === 'overview'" class="tab-content">
+    <div *ngIf="activeTab === 'overview'">
       <app-admin-overview [stats]="dashboardStats"></app-admin-overview>
     </div>
 
-    <!-- ← AJOUTÉ -->
-    <div *ngIf="activeTab === 'categories'" class="tab-content">
+    <div *ngIf="activeTab === 'categories'">
       <app-category></app-category>
     </div>
 
-    <div *ngIf="activeTab === 'products'" class="tab-content">
+    <div *ngIf="activeTab === 'products'">
       <app-admin-products></app-admin-products>
     </div>
 
-    <div *ngIf="activeTab === 'stocks'" class="tab-content">
+    <div *ngIf="activeTab === 'stocks'">
       <app-admin-stocks></app-admin-stocks>
     </div>
 
-    <div *ngIf="activeTab === 'orders'" class="tab-content">
+    <div *ngIf="activeTab === 'orders'">
       <app-admin-orders></app-admin-orders>
     </div>
 
-    <div *ngIf="activeTab === 'ai'" class="tab-content">
+    <div *ngIf="activeTab === 'reclamations'">
+      <app-admin-reclamations></app-admin-reclamations>
+    </div>
+
+    <div *ngIf="activeTab === 'ai'">
       <app-admin-ai></app-admin-ai>
+    </div>
+
+    <!-- NOTIFICATIONS -->
+    <div *ngIf="activeTab === 'notifications'">
+
+      <h3>🔔 Notifications</h3>
+
+      <div *ngIf="notifications.length === 0">
+        Aucune notification
+      </div>
+
+      <ul>
+        <li *ngFor="let n of notifications">
+          {{ n.message }}
+        </li>
+      </ul>
+
     </div>
 
   </div>

@@ -16,9 +16,9 @@ export interface User {
 export interface AuthResponse {
   access_token: string;
   refresh_token?: string;
-  role: string;        // ← ajouté
-  email: string;       // ← ajouté
-  fullName: string;    // ← ajouté
+  role: string;
+  email: string;
+  fullName: string;
   user: User;
 }
 
@@ -28,6 +28,7 @@ export interface JwtPayload {
   name: string;
   iat: number;
   exp: number;
+  [key: string]: any;
 }
 
 @Injectable({
@@ -36,7 +37,7 @@ export interface JwtPayload {
 export class AuthService {
   private readonly ACCESS_TOKEN_KEY = 'access_token';
   private readonly REFRESH_TOKEN_KEY = 'refresh_token';
-  private readonly ROLE_KEY = 'role';                  // ← ajouté
+  private readonly ROLE_KEY = 'role';
   private readonly API_URL = environment.apiEndpoint;
 
   private currentUser$ = new BehaviorSubject<User | null>(null);
@@ -67,8 +68,8 @@ export class AuthService {
   }
 
   register(name: string, email: string, password: string, address: string): Observable<boolean> {
-    return this.http.post<AuthResponse>(`${this.API_URL}/register`, {
-      name, email, password, address
+    return this.http.post<AuthResponse>(`${this.API_URL}/auth/register`, {
+      fullName: name, email, password, address
     }).pipe(
       tap(response => this.handleAuthResponse(response)),
       map(() => true)
@@ -103,7 +104,7 @@ export class AuthService {
     return this.isBrowser ? localStorage.getItem(this.REFRESH_TOKEN_KEY) : null;
   }
 
-  getRole(): string | null {                           // ← ajouté
+  getRole(): string | null {
     return this.isBrowser ? localStorage.getItem(this.ROLE_KEY) : null;
   }
 
@@ -117,14 +118,14 @@ export class AuthService {
     if (this.isBrowser) {
       localStorage.removeItem(this.ACCESS_TOKEN_KEY);
       localStorage.removeItem(this.REFRESH_TOKEN_KEY);
-      localStorage.removeItem(this.ROLE_KEY);          // ← ajouté
+      localStorage.removeItem(this.ROLE_KEY);
     }
   }
 
   private handleAuthResponse(response: AuthResponse): void {
     this.storeAccessToken(response.access_token);
     if (this.isBrowser) {
-      localStorage.setItem(this.ROLE_KEY, response.role);  // ← ajouté
+      localStorage.setItem(this.ROLE_KEY, response.role);
     }
     if (response.refresh_token && this.isBrowser) {
       localStorage.setItem(this.REFRESH_TOKEN_KEY, response.refresh_token);
@@ -151,7 +152,16 @@ export class AuthService {
   private decodeUserFromToken(token: string): User | null {
     const payload = this.decodeToken(token);
     if (!payload) return null;
-    return { id: payload.sub, email: payload.email, name: payload.name };
+
+    // 👈 C# JWT utilise ces claims longs
+    const id = payload['http://schemas.xmlsoap.org/ws/2005/05/identity/claims/nameidentifier']
+             || payload.sub
+             || payload['nameid'];
+
+    const email = payload['http://schemas.xmlsoap.org/ws/2005/05/identity/claims/emailaddress']
+                || payload.email;
+
+    return { id, email, name: payload.name || '' };
   }
 
   isLoggedIn(): boolean {
@@ -159,7 +169,22 @@ export class AuthService {
     return !!token && !this.isTokenExpired(token);
   }
 
+  isUser(): boolean {
+    return this.getRole()?.toLowerCase() === 'client';
+  }
+
+  isAdmin(): boolean {
+    return this.getRole()?.toLowerCase() === 'admin';
+  }
+
   getCurrentUser(): User | null {
     return this.currentUser$.value;
+  }
+
+  confirmEmail(email: string, token: string) {
+    return this.http.get(
+      'http://localhost:5045/api/auth/confirm-email',
+      { params: { email, token } }
+    );
   }
 }

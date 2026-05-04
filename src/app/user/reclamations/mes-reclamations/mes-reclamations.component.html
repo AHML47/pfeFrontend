@@ -1,0 +1,79 @@
+<div class="mes-reclamations-page">
+  <div class="page-header">
+    <h1>📋 Mes réclamations</h1>
+    <p>Suivez l'état de vos réclamations en temps réel.</p>
+  </div>
+
+  <div class="loading-state" *ngIf="loading">
+    <div class="spinner-ring"></div><p>Chargement...</p>
+  </div>
+
+  <div class="alert-error" *ngIf="error && !loading">⛔ {{ error }}</div>
+
+  <div class="empty-state" *ngIf="!loading && !error && reclamations.length === 0">
+    <div class="empty-icon">📭</div>
+    <h3>Aucune réclamation</h3>
+    <p>Vous n'avez pas encore fait de réclamation.</p>
+  </div>
+
+  <div class="reclamation-list" *ngIf="!loading && reclamations.length > 0">
+    <div
+      class="reclamation-card"
+      *ngFor="let r of reclamations"
+      (click)="openDetail(r)"
+    >
+      <div class="card-left">
+        <div class="order-badge">#{{ r.orderId }}</div>
+        <div class="card-info">
+          <div class="sujet">{{ r.sujet }}</div>
+          <div class="date">{{ r.dateCreation | date:'dd/MM/yyyy à HH:mm' }}</div>
+        </div>
+      </div>
+      <div class="card-right">
+        <span class="status-badge" [ngClass]="statusColors[r.status]">
+          {{ statusIcons[r.status] }} {{ r.status }}
+        </span>
+        <button
+          class="btn-delete"
+          (click)="$event.stopPropagation(); delete(r.id)"
+          title="Supprimer"
+        >🗑️</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Modal détail -->
+  <div class="modal-overlay" *ngIf="selectedReclamation" (click)="closeDetail()">
+    <div class="modal-card" (click)="$event.stopPropagation()">
+      <button class="modal-close" (click)="closeDetail()">✕</button>
+
+      <div class="modal-header">
+        <span class="status-badge large"
+              [ngClass]="statusColors[selectedReclamation.status]">
+          {{ statusIcons[selectedReclamation.status] }} {{ selectedReclamation.status }}
+        </span>
+        <h2>Commande #{{ selectedReclamation.orderId }}</h2>
+        <p class="modal-type">{{ selectedReclamation.sujet }}</p>
+      </div>
+
+      <div class="modal-body">
+        <div class="detail-row">
+          <label>Description</label>
+          <p>{{ selectedReclamation.description }}</p>
+        </div>
+        <div class="detail-row">
+          <label>Date de réclamation</label>
+          <p>{{ selectedReclamation.dateCreation | date:'dd MMMM yyyy, HH:mm' }}</p>
+        </div>
+        <div class="detail-row" *ngIf="selectedReclamation.dateResolution">
+          <label>Date de résolution</label>
+          <p>{{ selectedReclamation.dateResolution | date:'dd MMMM yyyy, HH:mm' }}</p>
+        </div>
+        <div class="detail-row reponse" *ngIf="selectedReclamation.reponseAdmin">
+          <label>💬 Réponse de l'administrateur</label>
+          <p>{{ selectedReclamation.reponseAdmin }}</p>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>

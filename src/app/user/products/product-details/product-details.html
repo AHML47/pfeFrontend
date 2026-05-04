@@ -25,9 +25,8 @@
       <!-- Stock Status -->
       <div class="stock-info">
         <span [class.in-stock]="product.stock > 0"
-              [class.low-stock]="product.stock <= 10 && product.stock > 0"
-              [class.out-of-stock]="product.stock === 0">
-          {{ product.stock > 0 ? 'En stock: ' + product.stock + ' articles' : 'Rupture de stock' }}
+              [class.low-stock]="product.stock <= 10 && product.stock > 0">
+          {{ product.stock > 0 ? 'En stock: ' + product.stock + ' articles' : 'Stock limité' }}
         </span>
       </div>
 
@@ -43,9 +42,7 @@
 
       <!-- Add to Cart Button -->
       <div class="mt-5">
-        <button class="btn btn-success btn-lg w-100"
-                (click)="addToCart()"
-                [disabled]="product.stock === 0">
+        <button class="btn btn-success btn-lg w-100" (click)="addToCart()">
           🛒 Ajouter au panier
         </button>
       </div>

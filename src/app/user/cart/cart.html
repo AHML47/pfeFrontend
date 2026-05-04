@@ -2,7 +2,7 @@
   <h1>🛒 Mon Panier</h1>
 
   <!-- Cart Empty -->
-  <div *ngIf="cartItems.length === 0" class="alert alert-info mt-5">
+  <div *ngIf="cartItems.length === 0 && !showModal" class="alert alert-info mt-5">
     <p>Votre panier est vide</p>
     <button class="btn btn-primary mt-3" (click)="continueShopping()">
       Continuer vos achats
@@ -85,22 +85,18 @@
   <!-- Modal de Confirmation -->
   <div *ngIf="showModal" class="modal-overlay" (click)="closeModal()">
     <div class="modal-content" (click)="$event.stopPropagation()">
-      <!-- Icône de succès -->
+
       <div class="success-icon">✅</div>
 
-      <!-- Message de succès -->
       <h2>Commande passée avec succès !</h2>
-      <p class="success-message">Merci pour votre achat. Vous recevrez une confirmation par email dans quelques instants.</p>
+      <p class="success-message">
+        Merci pour votre achat. Vous recevrez une confirmation par email dans quelques instants.
+      </p>
 
-      <!-- Récapitulatif de la commande -->
       <div class="order-summary" *ngIf="orderCreated">
         <div class="summary-item">
           <span class="label">Numéro de commande:</span>
-          <span class="value">{{ orderCreated.id }}</span>
-        </div>
-        <div class="summary-item">
-          <span class="label">Date:</span>
-          <span class="value">{{ orderCreated.createdAt | date:'dd/MM/yyyy HH:mm' }}</span>
+          <span class="value">#{{ orderCreated.orderId }}</span>
         </div>
         <div class="summary-item">
           <span class="label">Statut:</span>
@@ -108,11 +104,10 @@
         </div>
         <div class="summary-item total">
           <span class="label">Total payé:</span>
-          <span class="value">{{ orderCreated.totalPrice | number:'1.2-2' }} TND</span>
+          <span class="value highlight">{{ savedTotal | number:'1.2-2' }} TND</span>
         </div>
       </div>
 
-      <!-- Boutons d'action -->
       <div class="modal-actions">
         <button class="btn btn-primary" (click)="followOrder()">
           Suivre ma commande

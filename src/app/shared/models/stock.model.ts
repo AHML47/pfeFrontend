@@ -1,107 +1,38 @@
-
-// ============================================================
-// ENUMS
-// ============================================================
-
-export enum TypeMouvement {
-  ENTREE = 'ENTREE',
-  SORTIE = 'SORTIE',
-  AJUSTEMENT = 'AJUSTEMENT'
-}
-
-// ============================================================
-// ACHAT LOT
-// ============================================================
-
-export interface AchatLot {
-  id?: string; // ✅ IMPORTANT : optionnel (backend le génère)
-
-  dateAchat: Date;
-  quantiteAchetee: number;
-  prixAchatUnitaire: number;
-  fournisseur: string;
-  numeroLot: string;
-  produitId: string;
-}
-
-// ============================================================
-// STOCK LOT
-// ============================================================
-
+// Correspond exactement à StockLot.cs + AchatLot.cs + Produit
 export interface StockLot {
-  id: string;
-  produitId: string;
-  produitNom: string;
+  id: number;
+  achatLotId: number;
   quantiteRestante: number;
-  dateReception: Date;
-  achatLot?: AchatLot;
+  dateReception: string;
+  achatLot: {
+    id: number;
+    produitId: number;
+    quantiteAchetee: number;
+    prixUnitaire: number;
+    fournisseur: string;
+    numeroLot: string;
+    dateAchat: string;
+    produit: {
+      id: number;
+      nom: string;
+    };
+  };
 }
 
-// ============================================================
-// STOCK (agrégé)
-// ============================================================
+// Statut calculé côté Angular
+export type StatutLot = 'ok' | 'faible' | 'vide';
 
-export interface Stock {
-  id: string;
-  productId: string;
-  quantity: number;
-  lastUpdated: Date;
-  produitId: number;
+export function getStatutLot(lot: StockLot): StatutLot {
+  const restante  = lot.quantiteRestante;
+  const initiale  = lot.achatLot?.quantiteAchetee ?? 0;
+
+  if (restante === 0)                    return 'vide';
+  if (restante <= initiale * 0.2)        return 'faible';
+  return 'ok';
 }
 
-// ============================================================
-// STOCK BATCH (optionnel)
-// ============================================================
-
-export interface StockBatch {
-  id: string;
-  productId: string;
-  quantity: number;
-  unitCost: number;
-  totalCost: number;
-  batchDate: Date;
-  expirationDate?: Date;
-  supplierId: string;
-}
-
-// ============================================================
-// STOCK MOVEMENT
-// ============================================================
-
-export interface StockMovement {
-  id: string;
-  productId: string;
-  type: 'in' | 'out';
-  quantity: number;
-  reason: string;
-  timestamp: Date;
-}
-
-// ============================================================
-// STOCK ALERT (UNIQUE VERSION)
-// ============================================================
-
-export interface StockAlert {
-  id: string;
-  productId: string;
-  productName: string;
-  currentStock: number;
-  minimumStock: number;
-  severity: 'low' | 'critical';
-  createdAt: Date;
-}
-
-// ============================================================
-// TRANSACTION
-// ============================================================
-
-export interface Transaction {
-  id: string;
-  produitId: string;
-  produitNom: string;
-  type: TypeMouvement;
-  quantite: number;
-  dateMouvement: Date;
-  achatLotId?: string;
-  lotCommandeId?: string;
+export function pourcentage(lot: StockLot): number {
+  const initiale = lot.achatLot?.quantiteAchetee ?? 0;
+  if (!initiale) return 0;
+  return Math.round((lot.quantiteRestante / initiale) * 100);
 }
