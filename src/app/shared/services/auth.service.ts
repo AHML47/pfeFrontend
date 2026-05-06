@@ -14,7 +14,7 @@ export interface User {
 }
 
 export interface AuthResponse {
-  access_token: string;
+  token: string;        // ✅ correspond au backend
   refresh_token?: string;
   role: string;
   email: string;
@@ -87,12 +87,12 @@ export class AuthService {
 
   refreshToken(): Observable<string> {
     const refreshToken = this.getRefreshToken();
-    return this.http.post<{ access_token: string }>(
+    return this.http.post<{ token: string }>(
       `${this.API_URL}/refresh`,
       { refresh_token: refreshToken }
     ).pipe(
-      tap(res => this.storeAccessToken(res.access_token)),
-      map(res => res.access_token)
+      tap(res => this.storeAccessToken(res.token)),  // ✅ res.token
+      map(res => res.token)                           // ✅ res.token
     );
   }
 
@@ -123,7 +123,7 @@ export class AuthService {
   }
 
   private handleAuthResponse(response: AuthResponse): void {
-    this.storeAccessToken(response.access_token);
+    this.storeAccessToken(response.token);  // ✅ était response.access_token
     if (this.isBrowser) {
       localStorage.setItem(this.ROLE_KEY, response.role);
     }
@@ -153,7 +153,6 @@ export class AuthService {
     const payload = this.decodeToken(token);
     if (!payload) return null;
 
-    // 👈 C# JWT utilise ces claims longs
     const id = payload['http://schemas.xmlsoap.org/ws/2005/05/identity/claims/nameidentifier']
              || payload.sub
              || payload['nameid'];

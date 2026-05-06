@@ -1,6 +1,8 @@
 import { Component, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
+import { Observable, of } from 'rxjs';
+import { catchError } from 'rxjs/operators';
 
 import { Category, CategoryFormData } from '../../../../shared/models/category.model';
 import { CategoryService } from '../../../../shared/services/category.service';
@@ -10,15 +12,13 @@ import { CategoryService } from '../../../../shared/services/category.service';
   standalone: true,
   imports: [CommonModule, FormsModule],
   templateUrl: './category.component.html',
-  styleUrls: ['./category.component.css']
+  styleUrls: ['./category.component.css'],
 })
 export class CategoryComponent implements OnInit {
 
-  categories: Category[] = [];
-  loading = false;
-  error = '';
+  categories$!: Observable<Category[]>;
+  error: string | null = null;
 
-  // FORM SIMPLE
   showForm = false;
   editingCategory: Category | null = null;
 
@@ -32,28 +32,20 @@ export class CategoryComponent implements OnInit {
     this.load();
   }
 
-  // LOAD
   load(): void {
-    this.loading = true;
-    this.categoryService.getAll().subscribe({
-      next: (data) => {
-        this.categories = data;
-        this.loading = false;
-      },
-      error: () => {
-        this.loading = false;
+    this.categories$ = this.categoryService.getAll().pipe(
+      catchError(() => {
         this.error = 'Erreur de chargement';
-      }
-    });
+        return of([]);
+      })
+    );
   }
 
-  // OPEN CREATE
   openCreate(): void {
     this.resetForm();
     this.showForm = true;
   }
 
-  // OPEN EDIT
   openEdit(category: Category): void {
     this.editingCategory = category;
 
@@ -64,9 +56,7 @@ export class CategoryComponent implements OnInit {
     this.showForm = true;
   }
 
-  // SUBMIT
   submitForm(): void {
-
     if (!this.formNom.trim()) {
       this.error = 'Nom obligatoire';
       return;
@@ -78,27 +68,18 @@ export class CategoryComponent implements OnInit {
       parentId: this.formParentId
     };
 
-    if (this.editingCategory) {
+    const request$ = this.editingCategory
+      ? this.categoryService.update(this.editingCategory.id, payload)
+      : this.categoryService.create(payload);
 
-      this.categoryService.update(this.editingCategory.id, payload).subscribe({
-        next: () => {
-          this.resetForm();
-          this.load();
-        }
-      });
-
-    } else {
-
-      this.categoryService.create(payload).subscribe({
-        next: () => {
-          this.resetForm();
-          this.load();
-        }
-      });
-    }
+    request$.subscribe({
+      next: () => {
+        this.resetForm();
+        this.load();
+      }
+    });
   }
 
-  // DELETE
   delete(id: number): void {
     if (!confirm('Supprimer cette catégorie ?')) return;
 
@@ -107,14 +88,12 @@ export class CategoryComponent implements OnInit {
     });
   }
 
-  // RESET FORM
   resetForm(): void {
     this.showForm = false;
     this.editingCategory = null;
-
     this.formNom = '';
     this.formDescription = '';
     this.formParentId = null;
-    this.error = '';
+    this.error = null;
   }
 }

@@ -1,52 +1,133 @@
+/* ================= GLOBAL CONTAINER ================= */
 .container {
   padding: 2rem;
-  max-width: 700px;
+  max-width: 900px;
   margin: auto;
+  font-family: Arial, sans-serif;
 }
 
+/* ================= HEADER ================= */
 .header {
   display: flex;
   justify-content: space-between;
   margin-bottom: 1rem;
+  align-items: center;
 }
 
+/* ================= TABLE ================= */
 table {
   width: 100%;
   border-collapse: collapse;
+  background: white;
+  border-radius: 14px;
+  overflow: hidden;
+  box-shadow: 0 10px 25px rgba(0,0,0,0.08);
+  border: 1px solid #eee;
 }
 
-th, td {
-  padding: 0.7rem;
-  border-bottom: 1px solid #eee;
+/* HEADER TABLE */
+th {
+  background: #4f46e5;
+  color: white;
+  padding: 14px;
+  text-align: left;
+  font-size: 14px;
 }
 
+/* CELLS */
+td {
+  padding: 14px;
+  border-bottom: 1px solid #f1f1f1;
+  font-size: 14px;
+  color: #333;
+}
+
+/* HOVER */
+tr:hover {
+  background: #eef2ff;
+}
+
+/* ================= BUTTONS (BLEU UNIQUE) ================= */
 .btn {
-  padding: 0.4rem 0.8rem;
+  padding: 0.45rem 0.9rem;
   cursor: pointer;
   border: none;
-  border-radius: 5px;
+  border-radius: 8px;
+  font-weight: 600;
+  font-size: 13px;
+  transition: 0.2s ease;
 }
 
-.btn-primary { background: blue; color: white; }
-.btn-edit { background: orange; color: white; }
-.btn-delete { background: red; color: white; }
+/* PRIMARY BUTTON (TOUS LES BOUTONS) */
+.btn-primary,
+.btn-edit,
+.btn-delete,
+.btn-cancel {
+  background: #4f46e5;
+  color: white;
+}
 
-.form-box {
-  margin-top: 1.5rem;
-  padding: 1rem;
-  border: 1px solid #ddd;
-  background: #fafafa;
+/* HOVER UNIQUE */
+.btn:hover {
+  background: #3730a3;
+}
+
+/* ================= ESPACE ENTRE BOUTONS ================= */
+.actions {
+  display: flex;
+  gap: 10px; /* 👈 petit espace entre boutons */
+  justify-content: space-between;
+}
+
+/* ================= ERROR ================= */
+.error {
+  color: #4f46e5;
+  margin-bottom: 10px;
+  font-weight: 500;
+}
+
+/* ================= MODAL ================= */
+.modal-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(17, 24, 39, 0.6);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 1000;
+}
+
+.modal-content {
+  background: white;
+  padding: 25px;
+  border-radius: 14px;
+  width: 420px;
+  max-width: 95%;
+  box-shadow: 0 15px 40px rgba(0,0,0,0.25);
+}
+
+.modal-content h3 {
+  margin-bottom: 15px;
+  color: #4f46e5;
+}
+
+/* INPUTS */
+.modal-content input {
+  width: 100%;
+  padding: 10px;
+  margin-bottom: 10px;
+  border: 1px solid #e5e7eb;
   border-radius: 8px;
 }
 
-.form-box input {
-  display: block;
-  width: 100%;
-  margin-bottom: 0.7rem;
-  padding: 0.5rem;
+.modal-content input:focus {
+  outline: none;
+  border-color: #4f46e5;
+  box-shadow: 0 0 0 3px rgba(79,70,229,0.15);
 }
 
-.actions {
-  display: flex;
-  gap: 0.5rem;
+/* ANIMATION */
+@keyframes pop {
+  from { transform: scale(0.9); opacity: 0; }
+  to { transform: scale(1); opacity: 1; }
 }

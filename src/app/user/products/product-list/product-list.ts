@@ -6,6 +6,7 @@ import { CartService } from '../../../shared/services/cart.service';
 import { AuthService } from '../../../shared/services/auth.service';
 import { ProductService } from '../../../shared/services/product.service';
 import { CategoryService } from '../../../shared/services/category.service';
+import { BehaviorSubject } from 'rxjs';
 
 interface Product {
   id: number;
@@ -27,10 +28,16 @@ interface Product {
 export class ProductListComponent implements OnInit {
 
   products: Product[] = [];
-  categories: { [id: number]: string } = {}; // 👈 map id → nom
+  categories: { [id: number]: string } = {};
 
   searchQuery: string = '';
   selectedCategory: string = '';
+
+  // ✅ async like Orders
+  products$ = new BehaviorSubject<Product[]>([]);
+
+  // ✅ anti double click
+  isLoadingAction = false;
 
   constructor(
     private router: Router,
@@ -38,25 +45,23 @@ export class ProductListComponent implements OnInit {
     private cartService: CartService,
     private authService: AuthService,
     private productService: ProductService,
-    private categoryService: CategoryService // 👈 injecter
+    private categoryService: CategoryService
   ) {}
 
   ngOnInit() {
-    // 1️⃣ Charger les catégories d'abord
+
     this.categoryService.getAll().subscribe({
       next: (cats) => {
-        // Construire le map id → nom
         cats.forEach(c => this.categories[c.id] = c.nom);
 
-        // 2️⃣ Ensuite charger les produits
         this.productService.getAllProducts().subscribe({
           next: (data: any[]) => {
-            this.products = data.map(p => this.mapProduct(p));
-          },
-          error: (err) => console.log(err)
+            const mapped = data.map(p => this.mapProduct(p));
+            this.products = mapped;
+            this.products$.next(mapped);
+          }
         });
-      },
-      error: (err) => console.log(err)
+      }
     });
 
     this.route.queryParams.subscribe(params => {
@@ -73,7 +78,7 @@ export class ProductListComponent implements OnInit {
       price: p.prixAchat,
       description: p.description,
       stock: p.stockDisponible ?? 0,
-      category: this.categories[p.categorieId] ?? 'Sans catégorie', // 👈 utiliser le map
+      category: this.categories[p.categorieId] ?? 'Sans catégorie',
       image: p.image ?? '/assets/default.png'
     };
   }
@@ -101,18 +106,35 @@ export class ProductListComponent implements OnInit {
     this.selectedCategory = '';
   }
 
+  // ✅ FIX addToCart
   addToCart(product: Product) {
+    if (this.isLoadingAction) return;
+    this.isLoadingAction = true;
+
     if (!this.authService.isLoggedIn()) {
       alert('Veuillez vous connecter');
       this.router.navigate(['/user/login']);
+      this.isLoadingAction = false;
       return;
     }
 
     this.cartService.addToCart(product);
     alert(`${product.name} ajouté au panier`);
+
+    setTimeout(() => {
+      this.isLoadingAction = false;
+    }, 300);
   }
 
+  // ✅ FIX navigation
   goToDetails(id: number) {
+    if (this.isLoadingAction) return;
+    this.isLoadingAction = true;
+
     this.router.navigate(['/user/products/details', id]);
+
+    setTimeout(() => {
+      this.isLoadingAction = false;
+    }, 300);
   }
 }

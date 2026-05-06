@@ -7,7 +7,7 @@
       <p>Gestion complète de la plateforme</p>
     </div>
 
-    <button (click)="logout()" class="btn btn-danger">
+    <button (click)="logout()" class="btn btn-danger" type="button">
       Déconnexion
     </button>
   </div>
@@ -15,9 +15,9 @@
   <!-- TABS -->
   <div class="tabs">
     <button
+      type="button"
       *ngFor="let tab of tabs"
-      (click)="switchTab(tab.id)"
-      [class.active]="activeTab === tab.id">
+      (click)="switchTab(tab.id)">
       {{ tab.icon }} {{ tab.label }}
     </button>
   </div>
@@ -28,38 +28,37 @@
   </div>
 
   <!-- CONTENT -->
-  <div *ngIf="!loading">
+  <ng-container *ngIf="activeTab$ | async as activeTab">
 
-    <div *ngIf="activeTab === 'overview'">
+    <div [hidden]="activeTab !== 'overview'">
       <app-admin-overview [stats]="dashboardStats"></app-admin-overview>
     </div>
 
-    <div *ngIf="activeTab === 'categories'">
+    <div [hidden]="activeTab !== 'categories'">
       <app-category></app-category>
     </div>
 
-    <div *ngIf="activeTab === 'products'">
+    <div [hidden]="activeTab !== 'products'">
       <app-admin-products></app-admin-products>
     </div>
 
-    <div *ngIf="activeTab === 'stocks'">
+    <div [hidden]="activeTab !== 'stocks'">
       <app-admin-stocks></app-admin-stocks>
     </div>
 
-    <div *ngIf="activeTab === 'orders'">
+    <div [hidden]="activeTab !== 'orders'">
       <app-admin-orders></app-admin-orders>
     </div>
 
-    <div *ngIf="activeTab === 'reclamations'">
-      <app-admin-reclamations></app-admin-reclamations>
-    </div>
-
-    <div *ngIf="activeTab === 'ai'">
+    <div [hidden]="activeTab !== 'ai'">
       <app-admin-ai></app-admin-ai>
     </div>
 
-    <!-- NOTIFICATIONS -->
-    <div *ngIf="activeTab === 'notifications'">
+    <div [hidden]="activeTab !== 'reclamations'">
+      <app-admin-reclamations></app-admin-reclamations>
+    </div>
+
+    <div [hidden]="activeTab !== 'notifications'">
 
       <h3>🔔 Notifications</h3>
 
@@ -75,5 +74,6 @@
 
     </div>
 
-  </div>
+  </ng-container>
+
 </div>

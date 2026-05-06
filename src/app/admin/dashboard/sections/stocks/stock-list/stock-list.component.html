@@ -1,6 +1,6 @@
+<!--
 <div class="page-wrapper">
 
-  <!-- Stats -->
   <div class="stats-grid">
     <div class="stat-card">
       <span class="stat-label">Total lots</span>
@@ -20,7 +20,6 @@
     </div>
   </div>
 
-  <!-- Filtres -->
   <div class="filters-bar">
     <input
       type="text"
@@ -50,123 +49,52 @@
     {{ filteredLots.length }} lot(s) affiché(s)
   </p>
 
-  <!-- Loading -->
   <div class="loading-state" *ngIf="loading">
     Chargement des stocks...
   </div>
 
-  <!-- Tableau -->
   <div class="table-wrapper" *ngIf="!loading">
     <table>
       <thead>
         <tr>
-          <th class="sortable" (click)="setSort('produitNom')">
-            Produit
-            <span class="sort-icon"
-              [class.active]="sortField === 'produitNom'">
-              {{ sortField==='produitNom' ? (sortAsc?'↑':'↓') : '↕' }}
-            </span>
-          </th>
-          <th class="sortable" (click)="setSort('numeroLot')">
-            N° lot
-            <span class="sort-icon"
-              [class.active]="sortField === 'numeroLot'">
-              {{ sortField==='numeroLot' ? (sortAsc?'↑':'↓') : '↕' }}
-            </span>
-          </th>
-          <th class="sortable" (click)="setSort('fournisseur')">
-            Fournisseur
-            <span class="sort-icon"
-              [class.active]="sortField === 'fournisseur'">
-              {{ sortField==='fournisseur' ? (sortAsc?'↑':'↓') : '↕' }}
-            </span>
-          </th>
-          <th class="sortable" (click)="setSort('quantiteRestante')">
-            Qté restante
-            <span class="sort-icon"
-              [class.active]="sortField === 'quantiteRestante'">
-              {{ sortField==='quantiteRestante' ? (sortAsc?'↑':'↓') : '↕' }}
-            </span>
-          </th>
-          <th class="sortable" (click)="setSort('dateReception')">
-            Date réception
-            <span class="sort-icon"
-              [class.active]="sortField === 'dateReception'">
-              {{ sortField==='dateReception' ? (sortAsc?'↑':'↓') : '↕' }}
-            </span>
-          </th>
+          <th (click)="setSort('produitNom')">Produit</th>
+          <th (click)="setSort('numeroLot')">N° lot</th>
+          <th (click)="setSort('fournisseur')">Fournisseur</th>
+          <th (click)="setSort('quantiteRestante')">Qté restante</th>
+          <th (click)="setSort('dateReception')">Date réception</th>
           <th>Statut</th>
         </tr>
       </thead>
+
       <tbody>
 
         <tr *ngIf="filteredLots.length === 0">
-          <td colspan="6" class="empty-row">
-            Aucun lot ne correspond aux filtres.
-          </td>
+          <td colspan="6">Aucun lot ne correspond aux filtres.</td>
         </tr>
 
-        <tr *ngFor="let lot of filteredLots"
-          [class.row-vide]="statut(lot) === 'vide'">
+        <tr *ngFor="let lot of filteredLots">
 
-          <!-- Produit -->
-          <td class="td-produit">
-            {{ lot.achatLot?.produit?.nom || '—' }}
-          </td>
+          <td>{{ lot.achatLot?.produit?.nom || '—' }}</td>
+          <td>{{ lot.achatLot?.numeroLot || '—' }}</td>
+          <td>{{ lot.achatLot?.fournisseur || '—' }}</td>
 
-          <!-- N° lot -->
-          <td class="td-mono">
-            {{ lot.achatLot?.numeroLot || '—' }}
-          </td>
-
-          <!-- Fournisseur -->
-          <td class="td-secondary">
-            {{ lot.achatLot?.fournisseur || '—' }}
-          </td>
-
-          <!-- Quantité + barre -->
           <td>
-            <div class="qty-cell">
-              <span class="qty-value"
-                [class.qty-zero]="lot.quantiteRestante === 0">
-                {{ lot.quantiteRestante }}
-                <span class="qty-total">
-                  / {{ lot.achatLot?.quantiteAchetee }}
-                </span>
-              </span>
-              <div class="progress-bar">
-                <div
-                  class="progress-fill"
-                  [style.width.%]="pct(lot)"
-                  [class.fill-ok]="statut(lot) === 'ok'"
-                  [class.fill-faible]="statut(lot) === 'faible'"
-                  [class.fill-vide]="statut(lot) === 'vide'"
-                ></div>
-              </div>
-            </div>
+            {{ lot.quantiteRestante }}
           </td>
 
-          <!-- Date réception -->
-          <td class="td-secondary">
+          <td>
             {{ lot.dateReception | date:'dd/MM/yyyy' }}
           </td>
 
-          <!-- Statut -->
           <td>
-            <span [class]="'statut-badge statut-' + statut(lot)">
-              <ng-container [ngSwitch]="statut(lot)">
-                <ng-container *ngSwitchCase="'ok'">OK</ng-container>
-                <ng-container *ngSwitchCase="'faible'">
-                  Stock faible
-                </ng-container>
-                <ng-container *ngSwitchCase="'vide'">Vide</ng-container>
-              </ng-container>
-            </span>
+            {{ statut(lot) }}
           </td>
 
         </tr>
+
       </tbody>
     </table>
   </div>
 
 </div>
+-->

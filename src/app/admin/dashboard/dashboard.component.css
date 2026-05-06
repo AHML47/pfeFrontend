@@ -1,227 +1,155 @@
+/* =========================
+   GLOBAL DASHBOARD STYLE
+========================= */
 .admin-dashboard {
-  background: #f8f9fa;
+  background: #f4f6fb;
   min-height: 100vh;
-  padding-bottom: 40px;
+  font-family: Arial, sans-serif;
 }
 
+/* =========================
+   HEADER
+========================= */
 .dashboard-header {
-  background: white;
-  border-bottom: 2px solid #eee;
-  padding: 30px;
-  margin-bottom: 0;
+  background: linear-gradient(135deg, #667eea, #764ba2);
+  color: white;
+  padding: 25px 30px;
   display: flex;
   justify-content: space-between;
   align-items: center;
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
-}
-
-.header-left {
-  flex: 1;
+  border-bottom-left-radius: 20px;
+  border-bottom-right-radius: 20px;
 }
 
 .dashboard-header h1 {
-  font-size: 32px;
-  color: #333;
-  margin: 0 0 5px 0;
-  font-weight: 700;
-}
-
-.dashboard-header .subtitle {
-  font-size: 14px;
-  color: #999;
+  font-size: 26px;
   margin: 0;
 }
 
-.btn-logout {
-  background: linear-gradient(135deg, #ff6b6b 0%, #ee5a3f 100%);
-  color: white;
-  border: none;
-  padding: 12px 24px;
-  border-radius: 8px;
-  cursor: pointer;
-  font-weight: 600;
-  font-size: 14px;
-  transition: all 0.3s ease;
-}
-
-.btn-logout:hover {
-  transform: translateY(-2px);
-  box-shadow: 0 8px 20px rgba(255, 107, 107, 0.3);
-}
-
-.dashboard-tabs {
-  background: white;
-  display: flex;
-  gap: 0;
-  border-bottom: 2px solid #e0e0e0;
-  padding: 0 30px;
-  overflow-x: auto;
-}
-
-.tab-btn {
-  background: none;
-  border: none;
-  padding: 16px 24px;
-  font-size: 15px;
-  font-weight: 600;
-  color: #999;
-  cursor: pointer;
-  position: relative;
-  transition: color 0.3s ease;
-  white-space: nowrap;
-}
-
-.tab-btn:hover {
-  color: #667eea;
-}
-
-.tab-btn.active {
-  color: #667eea;
-}
-
-.tab-btn.active::after {
-  content: '';
-  position: absolute;
-  bottom: -2px;
-  left: 0;
-  right: 0;
-  height: 2px;
-  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-}
-
-.dashboard-content {
-  max-width: 1400px;
-  margin: 0 auto;
-  padding: 30px 30px;
-}
-
-/* ← CORRECTION : suppression de position et z-index */
-.tab-content {
-  animation: fadeIn 0.3s ease;
-}
-
-@keyframes fadeIn {
-  from { opacity: 0; }
-  to   { opacity: 1; }
-}
-
-.loading {
-  text-align: center;
-  padding: 60px 20px;
-  font-size: 16px;
-  color: #999;
-}
-
-@media (max-width: 768px) {
-  .dashboard-header {
-    flex-direction: column;
-    gap: 20px;
-    align-items: flex-start;
-  }
-
-  .btn-logout {
-    align-self: flex-end;
-  }
-
-  .dashboard-tabs {
-    padding: 0;
-  }
-
-  .tab-btn {
-    padding: 12px 16px;
-    font-size: 13px;
-  }
-
-  .dashboard-content {
-    padding: 20px;
-  }
-
-  .dashboard-header h1 {
-    font-size: 24px;
-  }
-}
-
-.stat-card h3 {
-  margin: 0 0 15px 0;
-  font-size: 14px;
+.dashboard-header p {
+  margin: 5px 0 0;
+  font-size: 13px;
   opacity: 0.9;
 }
 
-.stat-value {
-  margin: 0;
-  font-size: 32px;
-  font-weight: 700;
+/* bouton logout (tu utilises btn btn-danger) */
+.dashboard-header .btn.btn-danger {
+  background: #ff4d4d;
+  border: none;
+  padding: 10px 18px;
+  border-radius: 8px;
+  font-weight: bold;
+  transition: 0.3s;
 }
 
-.orders-section {
+.dashboard-header .btn.btn-danger:hover {
+  background: #e60000;
+  transform: scale(1.05);
+}
+
+/* =========================
+   TABS (IMPORTANT FIX)
+========================= */
+.tabs {
+  display: flex;
+  gap: 10px;
+  padding: 15px 20px;
   background: white;
+  overflow-x: auto;
+  border-bottom: 1px solid #eee;
+}
+
+/* boutons tabs (sans changer HTML) */
+.tabs button {
+  border: none;
+  background: #f1f1f1;
+  padding: 10px 15px;
+  border-radius: 20px;
+  cursor: pointer;
+  font-weight: 600;
+  color: #555;
+  transition: 0.3s;
+  white-space: nowrap;
+}
+
+.tabs button:hover {
+  background: #e0e0e0;
+}
+
+/* active tab */
+.tabs button.active {
+  background: linear-gradient(135deg, #667eea, #764ba2);
+  color: white;
+}
+
+/* =========================
+   CONTENT AREA
+========================= */
+.admin-dashboard > div:not(.dashboard-header):not(.tabs) {
+  padding: 20px;
+}
+
+/* loading */
+.admin-dashboard .loading,
+.admin-dashboard div[ng-reflect-ng-if="true"] {
+  text-align: center;
+  padding: 40px;
+  color: #777;
+  font-size: 16px;
+}
+
+/* =========================
+   CARDS / SECTIONS
+========================= */
+app-admin-overview,
+app-admin-products,
+app-admin-stocks,
+app-admin-orders,
+app-admin-reclamations,
+app-admin-ai {
+  display: block;
+  background: white;
+  padding: 20px;
   border-radius: 12px;
-  padding: 25px;
-  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.08);
+  box-shadow: 0 4px 15px rgba(0,0,0,0.08);
+  margin-top: 15px;
 }
 
-.orders-section h2 {
-  margin-top: 0;
-  margin-bottom: 20px;
-  color: #333;
-  font-size: 22px;
-}
-
-.orders-table {
+/* =========================
+   TABLE STYLE (orders etc.)
+========================= */
+table {
   width: 100%;
   border-collapse: collapse;
 }
 
-.orders-table thead {
-  background: #f9fafb;
-  border-bottom: 2px solid #e5e7eb;
-}
-
-.orders-table th {
-  padding: 15px;
+th {
+  background: #f8f9fc;
+  padding: 12px;
   text-align: left;
-  font-weight: 600;
-  color: #666;
   font-size: 13px;
-  text-transform: uppercase;
 }
 
-.orders-table td {
-  padding: 15px;
-  border-bottom: 1px solid #e5e7eb;
-  font-size: 14px;
+td {
+  padding: 12px;
+  border-bottom: 1px solid #eee;
 }
 
-.orders-table tbody tr:hover {
-  background: #f9fafb;
+tr:hover {
+  background: #f9f9ff;
 }
 
-.status-badge {
-  display: inline-block;
-  padding: 6px 12px;
-  border-radius: 6px;
-  font-size: 12px;
-  font-weight: 600;
-  text-transform: uppercase;
+/* =========================
+   RESPONSIVE
+========================= */
+@media (max-width: 768px) {
+  .dashboard-header {
+    flex-direction: column;
+    gap: 10px;
+    text-align: center;
+  }
+
+  .tabs {
+    flex-wrap: nowrap;
+  }
 }
-
-.status-pending   { background: #fef3c7; color: #92400e; }
-.status-confirmed { background: #d1fae5; color: #065f46; }
-.status-shipped   { background: #dbeafe; color: #0c2d6b; }
-.status-delivered { background: #dcfce7; color: #166534; }
-
-.alert {
-  padding: 15px;
-  border-radius: 8px;
-  text-align: center;
-  color: #666;
-}
-
-.alert-info {
-  background: #eff6ff;
-  border: 1px solid #bfdbfe;
-  color: #1e40af;
-}
-
-.text-center { text-align: center; }
-.mt-5        { margin-top: 30px; }

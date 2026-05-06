@@ -1,6 +1,7 @@
 import { Component, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { Router } from '@angular/router';
+import { BehaviorSubject } from 'rxjs';
 
 import { OrderService } from '../../shared/services/order.service';
 import { Order } from '../../shared/models/order.model';
@@ -53,8 +54,11 @@ export interface DashboardStats {
 })
 export class AdminDashboardComponent implements OnInit {
 
-  // ✅ notifications corrigé
-  notifications: string[] = [];
+  // ✅ REACTIF (comme categories$)
+  private activeTabSubject = new BehaviorSubject<string>('overview');
+  activeTab$ = this.activeTabSubject.asObservable();
+
+  notifications: { message: string }[] = [];
 
   tabs: Tab[] = [
     { id: 'overview', label: 'Tableau de bord', icon: '📊' },
@@ -66,8 +70,6 @@ export class AdminDashboardComponent implements OnInit {
     { id: 'reclamations', label: 'Réclamations', icon: '💬' },
     { id: 'notifications', label: 'Notifications', icon: '🔔' }
   ];
-
-  activeTab: string = 'overview';
 
   orders: Order[] = [];
   products: any[] = [];
@@ -99,13 +101,10 @@ export class AdminDashboardComponent implements OnInit {
     this.checkAuth();
     this.loadDashboard();
 
-    // ✅ SignalR safe init
     this.signalR.startConnection();
-    // this.signalR.joinAdminGroup();
 
     this.signalR.onNotification((msg: any) => {
       this.notifications.push(msg);
-      console.log('📢 Notification:', msg);
     });
   }
 
@@ -146,10 +145,8 @@ export class AdminDashboardComponent implements OnInit {
     this.stockService.getAllStockLots().subscribe((stocks: any[]) => {
       this.stocks = stocks;
 
-      this.dashboardStats.totalStock = stocks.reduce(
-        (sum: number, s: any) => sum + (s.quantity || 0),
-        0
-      );
+      this.dashboardStats.totalStock =
+        stocks.reduce((sum: number, s: any) => sum + (s.quantity || 0), 0);
 
       this.dashboardStats.lowStockProducts =
         stocks.filter((s: any) => (s.quantity || 0) <= 5).length;
@@ -161,26 +158,21 @@ export class AdminDashboardComponent implements OnInit {
     this.loading = false;
   }
 
+  // ✅ SWITCH TAB (amélioré)
   switchTab(tabId: string) {
-    this.activeTab = tabId;
+    // éviter refresh inutile si même tab
+    if (this.activeTabSubject.value === tabId) return;
+
+    this.activeTabSubject.next(tabId);
+  }
+
+  // ✅ IMPORTANT pour éviter bugs Angular
+  trackByTab(index: number, tab: Tab) {
+    return tab.id;
   }
 
   logout() {
     localStorage.clear();
     this.router.navigate(['/admin/login']);
-  }
-
-  getStatusLabel(status: string): string {
-    const labels: any = {
-      EnAttente: 'En attente',
-      Confirmee: 'Confirmée',
-      Livree: 'Livrée',
-      Annulee: 'Annulée'
-    };
-    return labels[status] || status;
-  }
-
-  getOrderCountByStatus(status: string): number {
-    return this.orders.filter(o => o.statut === status).length;
   }
 }

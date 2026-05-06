@@ -19,11 +19,12 @@ export class AdminOrdersComponent implements OnInit {
   searchQuery = '';
   filterStatus: OrderStatus | '' = '';
 
-  selectedOrder!: Order;
+  selectedOrder: Order | null = null;
   showDetailModal = false;
 
-  constructor(private orderService: OrderService,
-    private cdr : ChangeDetectorRef
+  constructor(
+    private orderService: OrderService,
+    private cdr: ChangeDetectorRef
   ) {}
 
   ngOnInit(): void {
@@ -53,14 +54,24 @@ export class AdminOrdersComponent implements OnInit {
     this.filteredOrders = result;
   }
 
+  // ✅ MODAL FIX
   viewDetails(order: Order) {
     this.selectedOrder = order;
     this.showDetailModal = true;
-    this.cdr.detectChanges(); // Force update to ensure modal shows updated data
+    this.cdr.detectChanges();
   }
 
   closeModal() {
     this.showDetailModal = false;
+    this.selectedOrder = null;
+  }
+
+  updateStatus(order: Order) {
+    this.orderService.updateOrderStatus(order.id, order.statut)
+      .subscribe({
+        next: () => this.loadOrders(),
+        error: () => alert('Erreur mise à jour statut')
+      });
   }
 
   cancelOrder(order: Order) {
@@ -73,22 +84,20 @@ export class AdminOrdersComponent implements OnInit {
   }
 
   getStatusLabel(status: OrderStatus) {
-    const map = {
+    return {
       EnAttente: '⏳ En attente',
       Confirmee: '✅ Confirmée',
       Livree: '🚚 Livrée',
       Annulee: '❌ Annulée'
-    };
-    return map[status];
+    }[status];
   }
 
   getStatusColor(status: OrderStatus) {
-    const map = {
+    return {
       EnAttente: 'status-pending',
       Confirmee: 'status-confirmed',
       Livree: 'status-delivered',
       Annulee: 'status-cancelled'
-    };
-    return map[status];
+    }[status];
   }
 }

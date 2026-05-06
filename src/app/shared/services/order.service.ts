@@ -35,4 +35,9 @@ export class OrderService {
   createOrder(dto: any): Observable<any> {
     return this.http.post(this.API_URL, dto);
   }
+
+  // ================= FIXED HERE =================
+  updateOrderStatus(id: number, statut: string): Observable<any> {
+    return this.http.put(`${this.API_URL}/${id}/status`, { statut });
+  }
 }

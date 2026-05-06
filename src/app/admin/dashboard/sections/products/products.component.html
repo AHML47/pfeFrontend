@@ -1,7 +1,8 @@
+<!-- ================= PRODUCTS LIST ================= -->
 <div class="products-container">
 
   <div class="header">
-    <h2>📦 Produits</h2>
+    <h2>Produits</h2>
     <button class="btn-primary" (click)="openAddForm()">➕ Ajouter</button>
   </div>
 
@@ -9,44 +10,56 @@
 
   <input
     type="text"
-    [(ngModel)]="searchQuery"
-    (keyup)="onSearch()"
+    (input)="onSearch($event.target.value)"
     placeholder="🔍 Rechercher..."
     class="search-input"
   />
 
-  <!-- TABLE -->
-  <table *ngIf="filteredProducts.length > 0">
-    <thead>
-      <tr>
-        <th>#</th>
-        <th>Nom</th>
-        <th>Prix</th>
-        <th>Catégorie</th>
-        <th>Actions</th>
-      </tr>
-    </thead>
+  <ng-container *ngIf="filteredProducts$ | async as products">
+    
+    <ng-container *ngIf="categories$ | async as categories">
 
-    <tbody>
-      <tr *ngFor="let p of filteredProducts">
-        <td>{{ p.id }}</td>
-        <td>{{ p.nom }}</td>
-        <td>{{ p.prixAchat }} TND</td>
-        <td>{{ getCategoryName(p.categorieId) }}</td>
-        <td>
-          <button (click)="openEditForm(p)">✏️</button>
-          <button (click)="delete(p.id)">🗑️</button>
-        </td>
-      </tr>
-    </tbody>
-  </table>
+      <table *ngIf="products.length > 0">
 
-  <p *ngIf="filteredProducts.length === 0">
-    Aucun produit
-  </p>
+        <thead>
+          <tr>
+            <th>#</th>
+            <th>Nom</th>
+            <th>Prix</th>
+            <th>Catégorie</th>
+            <th>Actions</th>
+          </tr>
+        </thead>
 
-  <!-- ================= FORMULAIRE SIMPLE ================= -->
-  <div class="form-container" *ngIf="showForm">
+        <tbody>
+          <tr *ngFor="let p of products">
+            <td>{{ p.id }}</td>
+            <td>{{ p.nom }}</td>
+            <td>{{ p.prixAchat }} TND</td>
+            <td>{{ getCategoryName(categories, p.categorieId) }}</td>
+            <td>
+              <button (click)="openEditForm(p)">✏️</button>
+              <button (click)="delete(p.id)">🗑️</button>
+            </td>
+          </tr>
+        </tbody>
+
+      </table>
+
+      <p *ngIf="products.length === 0">
+        Aucun produit
+      </p>
+
+    </ng-container>
+
+  </ng-container>
+
+</div>
+
+<!-- ================= MODAL ================= -->
+<div class="modal-overlay" *ngIf="showForm" (click)="closeForm()">
+
+  <div class="modal-content" (click)="$event.stopPropagation()">
 
     <h3>
       {{ editMode ? '✏️ Modifier produit' : '➕ Ajouter produit' }}
@@ -55,17 +68,17 @@
     <p class="error" *ngIf="error">{{ error }}</p>
 
     <input type="text" [(ngModel)]="form.nom" placeholder="Nom" />
-
     <input type="text" [(ngModel)]="form.description" placeholder="Description" />
-
     <input type="number" [(ngModel)]="form.prix" placeholder="Prix" />
 
-    <select [(ngModel)]="form.categorieId">
-      <option [ngValue]="0">-- Catégorie --</option>
-      <option *ngFor="let c of categories" [ngValue]="c.id">
-        {{ c.nom }}
-      </option>
-    </select>
+    <ng-container *ngIf="categories$ | async as categories">
+      <select [(ngModel)]="form.categorieId">
+        <option [ngValue]="0">-- Catégorie --</option>
+        <option *ngFor="let c of categories" [ngValue]="c.id">
+          {{ c.nom }}
+        </option>
+      </select>
+    </ng-container>
 
     <div class="actions">
       <button class="btn-primary" (click)="save()">💾 Enregistrer</button>

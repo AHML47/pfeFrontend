@@ -12,7 +12,7 @@ export class SignalRService {
   startConnection(): void {
 
     this.hubConnection = new signalR.HubConnectionBuilder()
-      .withUrl('http://localhost:5045/hubs/notifications') // ✔ FIX ICI
+      .withUrl('https://localhost:7278/hubs/notifications') // ✔ FIX ICI
       .withAutomaticReconnect()
       .build();
 

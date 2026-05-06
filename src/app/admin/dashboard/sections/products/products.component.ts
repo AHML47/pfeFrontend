@@ -2,6 +2,9 @@ import { Component, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 
+import { BehaviorSubject, combineLatest, Observable, of } from 'rxjs';
+import { catchError, map, startWith, switchMap } from 'rxjs/operators';
+
 import { ProductService } from '../../../../shared/services/product.service';
 import { CategoryService } from '../../../../shared/services/category.service';
 import { Product, ProductFormData } from '../../../../shared/models/product.model';
@@ -16,15 +19,16 @@ import { Category } from '../../../../shared/models/category.model';
 })
 export class AdminProductsComponent implements OnInit {
 
-  products: Product[] = [];
-  filteredProducts: Product[] = [];
-  categories: Category[] = [];
+  private refresh$ = new BehaviorSubject<void>(undefined);
 
-  searchQuery = '';
-  loading = false;
-  error = '';
+  private search$ = new BehaviorSubject<string>('');
 
-  // FORM SIMPLE (SANS MODAL)
+  products$!: Observable<Product[]>;
+  categories$!: Observable<Category[]>;
+  filteredProducts$!: Observable<Product[]>;
+
+  error: string | null = null;
+
   showForm = false;
   editMode = false;
   selectedId: number | null = null;
@@ -42,41 +46,48 @@ export class AdminProductsComponent implements OnInit {
   ) {}
 
   ngOnInit(): void {
-    this.loadProducts();
-    this.loadCategories();
+    this.initStreams();
   }
 
-  // ================= LOAD =================
-  loadProducts(): void {
-    this.loading = true;
-    this.productService.getAllProducts().subscribe({
-      next: (data) => {
-        this.products = data;
-        this.filteredProducts = data;
-        this.loading = false;
-      },
-      error: () => {
-        this.error = 'Erreur chargement produits';
-        this.loading = false;
-      }
-    });
-  }
+  initStreams(): void {
 
-  loadCategories(): void {
-    this.categoryService.getAll().subscribe({
-      next: (data) => this.categories = data
-    });
-  }
+    this.products$ = this.refresh$.pipe(
+      switchMap(() =>
+        this.productService.getAllProducts().pipe(
+          catchError(() => {
+            this.error = 'Erreur chargement produits';
+            return of([]);
+          })
+        )
+      )
+    );
 
-  // ================= SEARCH =================
-  onSearch(): void {
-    const q = this.searchQuery.toLowerCase();
-    this.filteredProducts = this.products.filter(p =>
-      p.nom.toLowerCase().includes(q)
+    this.categories$ = this.categoryService.getAll().pipe(
+      catchError(() => of([]))
+    );
+
+    this.filteredProducts$ = combineLatest([
+      this.products$,
+      this.search$.pipe(startWith(''))
+    ]).pipe(
+      map(([products, search]) => {
+        const q = search.toLowerCase();
+
+        return products.filter(p =>
+          p.nom.toLowerCase().includes(q)
+        );
+      })
     );
   }
 
-  // ================= FORM OPEN =================
+  onSearch(value: string): void {
+    this.search$.next(value);
+  }
+
+  private reload(): void {
+    this.refresh$.next();
+  }
+
   openAddForm(): void {
     this.showForm = true;
     this.editMode = false;
@@ -105,7 +116,7 @@ export class AdminProductsComponent implements OnInit {
 
   closeForm(): void {
     this.showForm = false;
-    this.error = '';
+    this.error = null;
   }
 
   // ================= SAVE =================
@@ -116,7 +127,7 @@ export class AdminProductsComponent implements OnInit {
       return;
     }
 
-    if (this.form.categorieId === 0) {
+    if (!this.form.categorieId) {
       this.error = 'Choisir catégorie';
       return;
     }
@@ -126,26 +137,18 @@ export class AdminProductsComponent implements OnInit {
       return;
     }
 
-    this.error = '';
+    this.error = null;
 
-    if (this.editMode && this.selectedId) {
+    const request$ = this.editMode && this.selectedId
+      ? this.productService.updateProduct(this.selectedId, this.form)
+      : this.productService.addProduct(this.form);
 
-      this.productService.updateProduct(this.selectedId, this.form).subscribe({
-        next: () => {
-          this.loadProducts();
-          this.closeForm();
-        }
-      });
-
-    } else {
-
-      this.productService.addProduct(this.form).subscribe({
-        next: () => {
-          this.loadProducts();
-          this.closeForm();
-        }
-      });
-    }
+    request$.subscribe({
+      next: () => {
+        this.closeForm();
+        this.reload();
+      }
+    });
   }
 
   // ================= DELETE =================
@@ -153,11 +156,11 @@ export class AdminProductsComponent implements OnInit {
     if (!confirm('Supprimer ce produit ?')) return;
 
     this.productService.deleteProduct(id).subscribe({
-      next: () => this.loadProducts()
+      next: () => this.reload()
     });
   }
 
-  getCategoryName(id: number): string {
-    return this.categories.find(c => c.id === id)?.nom || 'N/A';
+  getCategoryName(categories: Category[], id: number): string {
+    return categories.find(c => c.id === id)?.nom || 'N/A';
   }
 }

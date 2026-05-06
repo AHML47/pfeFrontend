@@ -1,68 +1,80 @@
 <div class="orders-container">
+
   <div class="orders-header">
     <h1>📋 Mes Commandes</h1>
+
     <button class="btn btn-primary" (click)="continueShopping()">
       Continuer vos achats
     </button>
   </div>
 
-  <!-- Loading -->
-  <div *ngIf="loading" class="text-center mt-5">
-    <p>Chargement de vos commandes...</p>
-  </div>
+  <!-- ASYNC ONLY HERE -->
+  <ng-container *ngIf="orders$ | async as orders">
 
-  <!-- No Orders -->
-  <div *ngIf="!loading && orders.length === 0" class="alert alert-info mt-5">
-    <p>Vous n'avez pas encore de commandes</p>
-    <button class="btn btn-primary mt-3" (click)="continueShopping()">
-      Commencer vos achats
-    </button>
-  </div>
+    <div *ngIf="orders.length === 0" class="alert alert-info mt-5">
+      <p>Vous n'avez pas encore de commandes</p>
+    </div>
 
-  <!-- Orders List -->
-  <div *ngIf="!loading && orders.length > 0" class="orders-list">
-    <div class="order-card" *ngFor="let order of orders">
-      <div class="order-header">
-        <div class="order-info">
-          <h3>Commande #{{ order.id }}</h3>
-          <p class="order-date">{{ order.dateCommande | date:'dd/MM/yyyy' }}</p>
-        </div>
-        <div class="order-statu" [class]="'status-' + order.statut">
-          <span class="status-icon">{{ getStatusIcon(order.statut) }}</span>
-          <span class="status-label">{{ getStatusLabel(order.statut) }}</span>
-        </div>
-      </div>
+    <div *ngIf="orders.length > 0" class="orders-list">
 
-      <div class="order-items">
-        <div class="items-title">Articles commandés:</div>
-        <div *ngFor="let item of order.orderDetails" class="item">
-          <div class="item-info">
-            <p class="item-name">{{ item.produit?.nom ?? 'Produit #' + item.produitId }}</p>
-            <p class="item-qty">Quantité: {{ item.quantite }}</p>
+      <div class="order-card" *ngFor="let order of orders">
+
+        <div class="order-header">
+          <div class="order-info">
+            <h3>Commande #{{ order.id }}</h3>
+            <p class="order-date">{{ order.dateCommande | date:'dd/MM/yyyy' }}</p>
           </div>
-          <div class="item-price">
-            {{ item.prixUnitaire * item.quantite | number:'1.2-2' }} TND
+
+          <div class="order-statu" [class]="'status-' + order.statut">
+            <span class="status-icon">{{ getStatusIcon(order.statut) }}</span>
+            <span class="status-label">{{ getStatusLabel(order.statut) }}</span>
           </div>
         </div>
-      </div>
 
-      <div class="order-footer">
-        <div class="order-total">
-          <span>Sous-total:</span>
-          <span class="total-price">{{ order.totalProduits | number:'1.2-2' }} TND</span>
+        <div class="order-items">
+
+          <div class="items-title">Articles commandés:</div>
+
+          <div *ngFor="let item of order.orderDetails" class="item">
+            <div class="item-info">
+              <p class="item-name">
+                {{ item.produit?.nom ?? 'Produit #' + item.produitId }}
+              </p>
+              <p class="item-qty">Quantité: {{ item.quantite }}</p>
+            </div>
+
+            <div class="item-price">
+              {{ item.prixUnitaire * item.quantite | number:'1.2-2' }} TND
+            </div>
+          </div>
+
         </div>
-        <div class="order-total">
-          <span>Frais de livraison:</span>
-          <span>{{ order.fraisLivraison | number:'1.2-2' }} TND</span>
+
+        <div class="order-footer">
+
+          <div class="order-total">
+            <span>Sous-total:</span>
+            <span class="total-price">{{ order.totalProduits | number:'1.2-2' }} TND</span>
+          </div>
+
+          <div class="order-total">
+            <span>Frais de livraison:</span>
+            <span>{{ order.fraisLivraison | number:'1.2-2' }} TND</span>
+          </div>
+
+          <div class="order-total">
+            <span>Total:</span>
+            <span class="total-price">
+              {{ order.totalProduits + order.fraisLivraison | number:'1.2-2' }} TND
+            </span>
+          </div>
+
         </div>
-        <div class="order-total">
-          <span>Total:</span>
-          <span class="total-price">
-            {{ order.totalProduits + order.fraisLivraison | number:'1.2-2' }} TND
-          </span>
-        </div>
+
       </div>
 
     </div>
-  </div>
+
+  </ng-container>
+
 </div>

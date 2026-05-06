@@ -17,10 +17,13 @@ import { ReclamationType } from '../../../shared/models/reclamation.model';
   styleUrls: ['./create-reclamation.component.css'],
 })
 export class CreateReclamationComponent implements OnInit {
+
   form!: FormGroup;
   loading = false;
   success = false;
   error = '';
+
+  orders: any[] = [];
 
   readonly types: ReclamationType[] = [
     'Produit manquant',
@@ -51,31 +54,73 @@ export class CreateReclamationComponent implements OnInit {
       sujet: ['', Validators.required],
       description: ['', [Validators.required, Validators.minLength(20)]],
     });
+
+    this.loadOrders();
   }
 
+  // ================= ORDERS =================
+  loadOrders(): void {
+    this.reclamationService.getOrders().subscribe({
+      next: (data) => {
+        this.orders = data ?? [];
+      },
+      error: () => {
+        this.orders = [];
+      }
+    });
+  }
+
+  // ================= TYPE =================
   selectType(type: ReclamationType): void {
     this.form.patchValue({ sujet: type });
   }
 
+  // ================= RANDOM ORDER =================
+  selectRandomOrder(): void {
+    if (!this.orders || this.orders.length === 0) return;
+
+    const random = this.orders[Math.floor(Math.random() * this.orders.length)];
+
+    if (random?.id) {
+      this.form.patchValue({
+        orderId: random.id
+      });
+    }
+  }
+
+  // ================= SUBMIT =================
   submit(): void {
     if (this.form.invalid) {
       this.form.markAllAsTouched();
       return;
     }
+
     this.loading = true;
     this.error = '';
-    this.reclamationService.create(this.form.value).subscribe({
+
+    const userId = Number(localStorage.getItem('userId'));
+
+    const dto = {
+      orderId: this.form.value.orderId,
+      sujet: this.form.value.sujet,
+      description: this.form.value.description,
+      userId: userId
+    };
+
+    this.reclamationService.create(dto).subscribe({
       next: () => {
         this.success = true;
         this.form.reset();
         this.loading = false;
       },
       error: (err) => {
-        this.error = err.error?.message || 'Une erreur est survenue.';
+        this.error = err.error?.message || 'Erreur serveur';
         this.loading = false;
-      },
+      }
     });
   }
 
-  get f() { return this.form.controls; }
+  get f() {
+    return this.form.controls;
+  }
 }

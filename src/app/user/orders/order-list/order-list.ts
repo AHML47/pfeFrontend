@@ -1,9 +1,10 @@
-import { Component, OnInit } from '@angular/core';
+import { Component } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { Router } from '@angular/router';
 import { OrderService } from '../../../shared/services/order.service';
-import { Order } from '../../../shared/models/order.model';
 import { AuthService } from '../../../shared/services/auth.service';
+import { Observable, map } from 'rxjs';
+import { Order } from '../../../shared/models/order.model';
 
 @Component({
   selector: 'app-order-list',
@@ -12,26 +13,20 @@ import { AuthService } from '../../../shared/services/auth.service';
   templateUrl: './order-list.html',
   styleUrl: './order-list.css'
 })
-export class OrderListComponent implements OnInit {
+export class OrderListComponent {
 
-  orders: Order[] = [];
-  loading = true;
+  orders$!: Observable<Order[]>;
 
   constructor(
     private orderService: OrderService,
     private authService: AuthService,
     private router: Router
-  ) {}
+  ) {
 
-  ngOnInit() {
     this.loadOrders();
   }
 
   loadOrders() {
-    if (!this.authService.isLoggedIn()) {
-      this.router.navigate(['/user/login']);
-      return;
-    }
 
     const token = this.authService.getAccessToken();
     const payload = this.authService.decodeToken(token!);
@@ -40,22 +35,10 @@ export class OrderListComponent implements OnInit {
       payload?.['http://schemas.xmlsoap.org/ws/2005/05/identity/claims/nameidentifier']
     );
 
-    if (isNaN(userId)) {
-      console.error('userId invalide');
-      this.loading = false;
-      return;
-    }
-
-    // 👈 récupérer toutes les commandes et filtrer par userId
-    this.orderService.getAllOrders().subscribe({
-      next: (data) => {
-        this.orders = data.filter(o => o.userId === userId);
-        this.loading = false;
-      },
-      error: () => {
-        this.loading = false;
-      }
-    });
+    // ✅ ASYNC STYLE (comme admin)
+    this.orders$ = this.orderService.getAllOrders().pipe(
+      map(orders => orders.filter(o => o.userId === userId))
+    );
   }
 
   continueShopping() {
@@ -68,7 +51,7 @@ export class OrderListComponent implements OnInit {
       case 'Confirmee': return '✅';
       case 'Livree': return '📦';
       case 'Annulee': return '❌';
-      default: return '❓';
+      default: return '';
     }
   }
 
@@ -78,7 +61,7 @@ export class OrderListComponent implements OnInit {
       case 'Confirmee': return 'Confirmée';
       case 'Livree': return 'Livrée';
       case 'Annulee': return 'Annulée';
-      default: return 'Inconnue';
+      default: return '';
     }
   }
 }
