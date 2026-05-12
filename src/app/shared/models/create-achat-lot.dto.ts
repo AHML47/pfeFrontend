@@ -4,5 +4,4 @@ export interface CreateAchatLotDto {
   prixUnitaire: number;
   fournisseur?: string;
   numeroLot?: string;
-  datePeremption?: string | null;
 }

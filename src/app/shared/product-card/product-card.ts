@@ -27,8 +27,15 @@ export class ProductCard {
       return;
     }
 
-    this.cartService.addToCart(this.product);
-    alert(`${this.product.name} a été ajouté au panier!`);
+  const productNormalized = {
+    id: this.product.id,
+    name: this.product.nom || this.product.name,
+price: this.product.prixAchat ?? this.product.prix ?? this.product.prixVente ?? this.product.price ?? 0,    image: this.product.image || ''
+  };
+
+
+    this.cartService.addToCart(productNormalized);
+    alert(`${productNormalized.name} a été ajouté au panier!`);
   }
 
   goToDetails() {

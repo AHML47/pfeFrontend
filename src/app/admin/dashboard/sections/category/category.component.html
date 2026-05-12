@@ -1,69 +1,71 @@
-<div class="container">
+<div class="layout">
 
-  <div class="header">
-    <h2>Catégories</h2>
-    <button class="btn btn-primary" (click)="openCreate()">+ Ajouter</button>
+  <!-- TABLE -->
+  <div class="table-card">
+
+    <div class="header">
+      <div>
+        <h2>🗂️ Catégories</h2>
+        <p>Gestion des catégories</p>
+      </div>
+
+      <button class="btn-primary" (click)="openCreate()">
+        ➕ Ajouter
+      </button>
+    </div>
+
+    <p class="error" *ngIf="error">{{ error }}</p>
+
+    <ng-container *ngIf="categories$ | async as categories">
+
+      <table *ngIf="categories.length > 0">
+        <thead>
+          <tr>
+            <th>#</th>
+            <th>Nom</th>
+            <th>Description</th>
+            <th>Actions</th>
+          </tr>
+        </thead>
+
+        <tbody>
+          <tr *ngFor="let c of categories">
+            <td>{{ c.id }}</td>
+
+            <td class="label">{{ c.nom }}</td>
+
+            <td>
+              <span class="badge">{{ c.description }}</span>
+            </td>
+
+            <td class="actions">
+              <button class="edit" (click)="openEdit(c)">✏️</button>
+              <button class="delete" (click)="delete(c.id)">🗑️</button>
+            </td>
+          </tr>
+        </tbody>
+      </table>
+
+      <p *ngIf="categories.length === 0">Aucune catégorie</p>
+
+    </ng-container>
+
   </div>
 
-  <p class="error" *ngIf="error">{{ error }}</p>
-
-  <ng-container *ngIf="categories$ | async as categories">
-
-    <table *ngIf="categories.length > 0">
-      <thead>
-        <tr>
-          <th>#</th>
-          <th>Nom</th>
-          <th>Description</th>
-          <th>Actions</th>
-        </tr>
-      </thead>
-
-      <tbody>
-        <tr *ngFor="let c of categories">
-          <td>{{ c.id }}</td>
-          <td>{{ c.nom }}</td>
-          <td>{{ c.description }}</td>
-          <td>
-            <button class="btn btn-edit" (click)="openEdit(c)">Modifier</button>
-            <button class="btn btn-delete" (click)="delete(c.id)">Supprimer</button>
-          </td>
-        </tr>
-      </tbody>
-    </table>
-
-    <p *ngIf="categories.length === 0">
-      Aucune catégorie
-    </p>
-
-  </ng-container>
-
-</div>
-
-<!-- ================= MODAL ================= -->
-<div class="modal-overlay" *ngIf="showForm" (click)="resetForm()">
-
-  <div class="modal-content" (click)="$event.stopPropagation()">
+  <!-- FORM -->
+  <div class="form-card" *ngIf="showForm">
 
     <h3>
       {{ editingCategory ? 'Modifier catégorie' : 'Ajouter catégorie' }}
     </h3>
 
-    <input
-      type="text"
-      placeholder="Nom"
-      [(ngModel)]="formNom"
-    />
+    <input type="text" placeholder="Nom" [(ngModel)]="formNom" />
 
-    <input
-      type="text"
-      placeholder="Description"
-      [(ngModel)]="formDescription"
-    />
+    <input type="text" placeholder="Description" [(ngModel)]="formDescription" />
 
-    <div class="actions">
-      <button class="btn btn-cancel" (click)="resetForm()">Annuler</button>
-      <button class="btn btn-primary" (click)="submitForm()">Enregistrer</button>
+    <div class="form-actions">
+      <button class="btn-primary" (click)="submitForm()">💾 Enregistrer</button>
+      <button class="btn-secondary" (click)="resetForm()">Annuler</button>
     </div>
 
   </div>

@@ -13,6 +13,8 @@ import { Order, OrderStatus } from '../../../../shared/models/order.model';
 })
 export class AdminOrdersComponent implements OnInit {
 
+  OrderStatus = OrderStatus;
+
   orders: Order[] = [];
   filteredOrders: Order[] = [];
 
@@ -31,18 +33,28 @@ export class AdminOrdersComponent implements OnInit {
     this.loadOrders();
   }
 
+  // ================= LOAD ORDERS (FIX IMPORTANT STATUS)
   loadOrders() {
     this.orderService.getAllOrders().subscribe(data => {
-      this.orders = data;
+
+      this.orders = (data ?? []).map(o => ({
+        ...o,
+        // 🔥 FIX IMPORTANT: force enum compatibility
+        statut: o.statut as OrderStatus
+      }));
+
       this.applyFilters();
     });
   }
 
+  // ================= FILTERS SAFE
   applyFilters() {
-    let result = this.orders;
+    let result = [...this.orders];
 
-    if (this.filterStatus) {
-      result = result.filter(o => o.statut === this.filterStatus);
+    if (this.filterStatus !== '') {
+      result = result.filter(o =>
+        String(o.statut) === String(this.filterStatus)
+      );
     }
 
     if (this.searchQuery.trim()) {
@@ -51,14 +63,28 @@ export class AdminOrdersComponent implements OnInit {
       );
     }
 
-    this.filteredOrders = result;
+    this.filteredOrders = [...result];
   }
 
-  // ✅ MODAL FIX
+  // ================= UPDATE STATUS
+  updateStatus(order: Order) {
+    console.log("STATUS SENT:", order.statut);
+
+    this.orderService.updateOrderStatus(order.id, order.statut)
+      .subscribe({
+        next: () => {
+          this.loadOrders(); // refresh UI
+        },
+        error: (err) => {
+          console.error("UPDATE ERROR:", err);
+        }
+      });
+  }
+
+  // ================= VIEW DETAILS
   viewDetails(order: Order) {
     this.selectedOrder = order;
     this.showDetailModal = true;
-    this.cdr.detectChanges();
   }
 
   closeModal() {
@@ -66,38 +92,14 @@ export class AdminOrdersComponent implements OnInit {
     this.selectedOrder = null;
   }
 
-  updateStatus(order: Order) {
-    this.orderService.updateOrderStatus(order.id, order.statut)
-      .subscribe({
-        next: () => this.loadOrders(),
-        error: () => alert('Erreur mise à jour statut')
-      });
-  }
-
-  cancelOrder(order: Order) {
-    if (confirm('Annuler cette commande ?')) {
-      this.orderService.cancelOrder(order.id).subscribe(() => {
-        this.loadOrders();
-        this.closeModal();
-      });
-    }
-  }
-
+  // ================= LABEL STATUS
   getStatusLabel(status: OrderStatus) {
-    return {
-      EnAttente: '⏳ En attente',
-      Confirmee: '✅ Confirmée',
-      Livree: '🚚 Livrée',
-      Annulee: '❌ Annulée'
-    }[status];
-  }
-
-  getStatusColor(status: OrderStatus) {
-    return {
-      EnAttente: 'status-pending',
-      Confirmee: 'status-confirmed',
-      Livree: 'status-delivered',
-      Annulee: 'status-cancelled'
-    }[status];
+    switch (status) {
+      case OrderStatus.EnAttente: return '⏳ En attente';
+      case OrderStatus.Confirmee: return '✅ Confirmée';
+      case OrderStatus.Livree: return '📦 Livrée';
+      case OrderStatus.Annulee: return '❌ Annulée';
+      default: return '';
+    }
   }
 }

@@ -1,19 +1,13 @@
 import { Component, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
-
-import { BehaviorSubject, Observable, of } from 'rxjs';
-import { catchError, map, switchMap, tap } from 'rxjs/operators';
+import { BehaviorSubject, Observable } from 'rxjs';
+import { switchMap, map, tap } from 'rxjs/operators';
 
 import { StockService } from '../../../../shared/services/stock.service';
-import { ProductService } from '../../../../shared/services/product.service';
 import { CreateAchatLotDto } from '../../../../shared/models/create-achat-lot.dto';
-
-interface GroupedStock {
-  productId: number;
-  productName: string;
-  totalQuantity: number;
-}
+import { AchatLotResponse } from '../../../../shared/models/stock-lot.model';
+import { StockGrouped } from '../../../../shared/models/stock-grouped.model';
 
 @Component({
   selector: 'app-admin-stocks',
@@ -26,166 +20,109 @@ export class AdminStockComponent implements OnInit {
 
   private refresh$ = new BehaviorSubject<void>(undefined);
 
-  stocks$!: Observable<any[]>;
-  groupedStocks$!: Observable<GroupedStock[]>;
-  produits$!: Observable<any[]>;
-
-  message = '';
-  error: string | null = null;
-
-  showForm = false;
-
-  // ✅ VIEW MODE (dashboard navigation)
-  viewMode: 'products' | 'lots' | 'stock' | null = null;
-
-  currentPage = 1;
-  pageSize = 10;
-  totalPages = 1;
-
-  selectedProductId: number | null = null;
-
-  stock: CreateAchatLotDto = this.emptyStock();
-
+  groupedStocks$!: Observable<StockGrouped[]>;
+  produits: any[] = [];
   totalLots = 0;
   totalStock = 0;
+  showForm = false;
 
-  constructor(
-    private stockService: StockService,
-    private productService: ProductService
-  ) {}
+  stock: CreateAchatLotDto = {
+    produitId: 0,
+    quantiteAchetee: 0,
+    prixUnitaire: 0,
+    fournisseur: '',
+    numeroLot: ''
+  };
+
+  constructor(private stockService: StockService) {}
 
   ngOnInit(): void {
-    this.initStreams();
-  }
+    this.loadProduits();
 
-  // ================= VIEW =================
-  setView(mode: 'products' | 'lots' | 'stock') {
-    this.viewMode = mode;
-  }
-
-  // ================= STREAMS =================
-  initStreams(): void {
-
-    this.produits$ = this.productService.getAllProducts().pipe(
-      catchError(() => of([]))
-    );
-
-    this.stocks$ = this.refresh$.pipe(
-      switchMap(() =>
-        this.stockService.getAllStockLots().pipe(
-          tap(data => {
-            this.totalLots = data.length;
-
-            this.totalStock = data.reduce(
-              (sum: number, s: any) => sum + (s.quantiteRestante || 0),
-              0
-            );
-          }),
-          catchError(() => {
-            this.error = 'Erreur chargement stocks';
-            return of([]);
-          })
-        )
+    this.groupedStocks$ = this.refresh$.pipe(
+      switchMap(() => this.stockService.getStock()),
+      tap((data: AchatLotResponse[]) => {
+        this.totalLots = data.length;
+        this.totalStock = data.reduce(
+          (sum, a) => sum + a.stockLots.reduce(
+            (s, lot) => s + (lot.quantiteRestante ?? 0), 0
+          ), 0
+        );
+      }),
+      map((data: AchatLotResponse[]) =>
+        data.map(a => ({
+          achatLotId: a.id,
+          numeroLot: a.numeroLot || '—',
+          nomProduit: a.produit?.nom ?? '—',
+          fournisseur: a.fournisseur || '—',
+          dateAchat: a.dateAchat,
+          // ← qté achetée en unités = stockLots restante initiale
+          // on affiche le total restant uniquement, plus cohérent
+          totalQuantity: a.stockLots.reduce(
+            (s, lot) => s + (lot.quantiteRestante ?? 0), 0
+          )
+        }))
       )
     );
-
-    this.groupedStocks$ = this.stocks$.pipe(
-      map(stocks => {
-
-        const mapGroup = new Map<number, GroupedStock>();
-
-        for (const s of stocks) {
-
-          if (this.selectedProductId && s.produitId !== this.selectedProductId) {
-            continue;
-          }
-
-          const productId = s.produitId;
-          const productName = s.produitNom || 'Produit';
-
-          if (!mapGroup.has(productId)) {
-            mapGroup.set(productId, {
-              productId,
-              productName,
-              totalQuantity: 0
-            });
-          }
-
-          mapGroup.get(productId)!.totalQuantity += (s.quantiteRestante || 0);
-        }
-
-        const list = Array.from(mapGroup.values());
-
-        this.totalPages = Math.max(1, Math.ceil(list.length / this.pageSize));
-
-        const start = (this.currentPage - 1) * this.pageSize;
-        const end = start + this.pageSize;
-
-        return list.slice(start, end);
-      })
-    );
   }
 
-  // ================= FILTER =================
-  onProductChange(event: Event): void {
-    const value = (event.target as HTMLSelectElement).value;
-
-    this.selectedProductId = value ? Number(value) : null;
-    this.currentPage = 1;
-    this.reload();
+  loadProduits() {
+    this.stockService.getProduits().subscribe(data => {
+      this.produits = data;
+    });
   }
 
-  // ================= RELOAD =================
-  private reload(): void {
-    this.refresh$.next();
+  reload() { this.refresh$.next(); }
+
+  openAchatForm() {
+    const count = this.totalLots + 1;
+    const numero = count.toString().padStart(3, '0');
+    this.stock.numeroLot = `LOT-${numero}`;
+    this.showForm = true;
   }
 
-  // ================= STOCK STATUS =================
-  getStockClass(qty: number): string {
-    if (qty <= 10) return 'stock-low';
-    if (qty <= 30) return 'stock-medium';
-    return 'stock-high';
-  }
+  onSubmit() {
+    if (this.stock.produitId === 0) {
+      alert('Veuillez choisir un produit.');
+      return;
+    }
+    if (this.stock.quantiteAchetee <= 0) {
+      alert('La quantité doit être supérieure à 0.');
+      return;
+    }
+    if (!this.stock.numeroLot) {
+      const count = this.totalLots + 1;
+      this.stock.numeroLot = `LOT-${count.toString().padStart(3, '0')}`;
+    }
 
-  getStockLabel(qty: number): string {
-    if (qty <= 10) return 'Faible';
-    if (qty <= 30) return 'Moyen';
-    return 'Bon';
-  }
-
-  // ================= SUBMIT =================
-  onSubmit(): void {
-
-    this.stock.numeroLot = this.generateLotNumber();
-
-    this.stockService.addAchatLot(this.stock).pipe(
-      tap(() => {
-        this.message = '✔ Achat créé avec succès';
-        this.stock = this.emptyStock();
+    this.stockService.createAchat(this.stock).subscribe({
+      next: () => {
         this.showForm = false;
-        setTimeout(() => this.reload(), 300);
-      }),
-      catchError(() => {
-        this.message = '❌ Erreur lors de l’ajout';
-        return of(null);
-      })
-    ).subscribe();
+        this.stock = {
+          produitId: 0,
+          quantiteAchetee: 0,
+          prixUnitaire: 0,
+          fournisseur: '',
+          numeroLot: ''
+        };
+        this.reload();
+      },
+      error: (err) => {
+        alert('Erreur : ' + (err.error?.message ?? err.status));
+      }
+    });
   }
 
-  generateLotNumber(): string {
-    return 'LOT-' +
-      Date.now().toString(36).toUpperCase() +
-      '-' +
-      Math.random().toString(36).substring(2, 8).toUpperCase();
+  // Statut basé sur quantité absolue
+  getStockStatus(qty: number): string {
+    if (qty === 0) return 'RUPTURE';
+    if (qty <= 20) return 'FAIBLE';
+    return 'OK';
   }
 
-  private emptyStock(): CreateAchatLotDto {
-    return {
-      produitId: null as any,
-      quantiteAchetee: 0,
-      prixUnitaire: 0,
-      fournisseur: '',
-      numeroLot: ''
-    };
+  getStatusClass(qty: number): string {
+    if (qty === 0) return 'rupture';
+    if (qty <= 20) return 'faible';
+    return 'ok';
   }
 }

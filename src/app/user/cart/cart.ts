@@ -36,11 +36,14 @@ export class CartComponent implements OnInit {
   loadCart() {
     this.cartItems = this.cartService.getCart();
     this.calculateTotal();
+    console.log('PANIER:', this.cartItems);
   }
 
   calculateTotal() {
-    this.totalPrice = this.cartItems.reduce((sum, item) => sum + (item.price * item.quantity), 0);
-  }
+this.totalPrice = this.cartItems.reduce(
+  (sum, item) => sum + ((item.price || 0) * (item.quantity || 0)),
+  0
+);  }
 
   removeItem(id: number) {
     this.cartService.removeFromCart(id);
@@ -72,11 +75,11 @@ export class CartComponent implements OnInit {
     this.savedTotal = this.totalPrice;
 
     const orderDto = {
-      items: this.cartItems.map(item => ({
-        produitId: item.id,
-        quantite: item.quantity
-      }))
-    };
+  items: this.cartItems.map(item => ({
+    produitId: item.id,
+    quantite: item.quantity
+  }))
+};
 
     this.orderService.createOrder(orderDto).subscribe({
       next: (order) => {

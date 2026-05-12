@@ -2,7 +2,7 @@ import { Injectable } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { Observable } from 'rxjs';
 import { environment } from '../../../environments/environment';
-import { Order } from '../models/order.model';
+import { Order, OrderStatus } from '../models/order.model';
 
 @Injectable({
   providedIn: 'root'
@@ -13,17 +13,14 @@ export class OrderService {
 
   constructor(private http: HttpClient) {}
 
-  // ================= ADMIN =================
   getAllOrders(): Observable<Order[]> {
     return this.http.get<Order[]>(this.API_URL);
   }
 
-  // ================= USER =================
   getOrdersByUser(userId: number): Observable<Order[]> {
     return this.http.get<Order[]>(`${this.API_URL}/user/${userId}`);
   }
 
-  // ================= COMMON =================
   getOrderById(id: number): Observable<Order> {
     return this.http.get<Order>(`${this.API_URL}/${id}`);
   }
@@ -36,8 +33,11 @@ export class OrderService {
     return this.http.post(this.API_URL, dto);
   }
 
-  // ================= FIXED HERE =================
-  updateOrderStatus(id: number, statut: string): Observable<any> {
-    return this.http.put(`${this.API_URL}/${id}/status`, { statut });
-  }
+  // ✅ FIX IMPORTANT
+   updateOrderStatus(id: number, statut: string) {
+  return this.http.put(`${this.API_URL}/${id}/status`, {
+    statut: statut
+  });
 }
+}
+

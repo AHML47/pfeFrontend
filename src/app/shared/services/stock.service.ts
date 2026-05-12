@@ -1,9 +1,8 @@
 import { Injectable } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { Observable } from 'rxjs';
-import { tap } from 'rxjs/operators';
-
 import { environment } from '../../../environments/environment';
+import { AchatLotResponse } from '../models/stock-lot.model'; // ← remplace StockDetails
 import { CreateAchatLotDto } from '../models/create-achat-lot.dto';
 
 @Injectable({
@@ -11,36 +10,22 @@ import { CreateAchatLotDto } from '../models/create-achat-lot.dto';
 })
 export class StockService {
 
-  private apiAchatLot = `${environment.apiEndpoint}/AchatLot`;
-
-  // 🔴 FIX IMPORTANT : backend = StockController => /api/Stock
   private apiStock = `${environment.apiEndpoint}/Stock`;
+  private apiAchat = `${environment.apiEndpoint}/AchatLot`;
+  private apiProduits = `${environment.apiEndpoint}/Products`;
+
 
   constructor(private http: HttpClient) {}
 
-  // ─────────────────────────────
-  // AchatLot
-  // ─────────────────────────────
-
-  addAchatLot(dto: CreateAchatLotDto): Observable<any> {
-    return this.http.post<any>(this.apiAchatLot, dto);
+  // 📦 STOCK RÉEL (IMPORTANT)
+  getStock(): Observable<any[]> {
+  return this.http.get<any[]>(this.apiAchat);  // ← apiAchat pas apiStock
+}
+  // ➕ CREATE ACHAT
+  createAchat(dto: CreateAchatLotDto): Observable<any> {
+    return this.http.post(this.apiAchat, dto);
   }
-
-  getAllAchatLots(): Observable<any[]> {
-    return this.http.get<any[]>(this.apiAchatLot);
-  }
-
-  // ─────────────────────────────
-  // STOCK (CORRIGÉ)
-  // ─────────────────────────────
-
-  getAllStockLots(): Observable<any[]> {
-    return this.http.get<any[]>(this.apiStock).pipe(
-      tap(data => console.log('STOCK API RESPONSE:', data))
-    );
-  }
-
-  getProductStock(produitId: number): Observable<any> {
-    return this.http.get<any>(`${this.apiStock}/${produitId}`);
-  }
+  getProduits(): Observable<any[]> {
+  return this.http.get<any[]>(this.apiProduits);
+}
 }

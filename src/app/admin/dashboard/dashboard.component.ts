@@ -4,12 +4,12 @@ import { Router } from '@angular/router';
 import { BehaviorSubject } from 'rxjs';
 
 import { OrderService } from '../../shared/services/order.service';
-import { Order } from '../../shared/models/order.model';
 import { ProductService } from '../../shared/services/product.service';
 import { StockService } from '../../shared/services/stock.service';
 import { AIRecommendationService } from '../../shared/services/ai-recommendation.service';
-
 import { SignalRService } from '../../shared/services/signalr.service';
+
+import { Order, OrderStatus } from '../../shared/models/order.model';
 
 import { AdminOverviewComponent } from './sections/overview/overview.component';
 import { AdminProductsComponent } from './sections/products/products.component';
@@ -54,7 +54,9 @@ export interface DashboardStats {
 })
 export class AdminDashboardComponent implements OnInit {
 
-  // ✅ REACTIF (comme categories$)
+  // ✅ ENUM ACCESSIBLE DANS TEMPLATE SI BESOIN
+  OrderStatus = OrderStatus;
+
   private activeTabSubject = new BehaviorSubject<string>('overview');
   activeTab$ = this.activeTabSubject.asObservable();
 
@@ -120,21 +122,27 @@ export class AdminDashboardComponent implements OnInit {
     this.orderService.getAllOrders().subscribe((orders: Order[]) => {
       this.orders = orders;
 
+      // ✅ TOTAL ORDERS
       this.dashboardStats.totalOrders = orders.length;
 
-      this.dashboardStats.totalRevenue =
-        orders.reduce((sum: number, order: Order) => {
-          const orderTotal = order.orderDetails.reduce(
-            (s, d) => s + d.prixUnitaire * d.quantite, 0
-          );
-          return sum + orderTotal + (order.fraisLivraison ?? 0);
-        }, 0);
+      // ✅ TOTAL REVENUE (SAFE FIX)
+      this.dashboardStats.totalRevenue = orders.reduce((sum, order) => {
 
+        const orderTotal = order.orderDetails?.reduce(
+          (s, d) => s + (d.prixUnitaire || 0) * (d.quantite || 0),
+          0
+        ) || 0;
+
+        return sum + orderTotal + (order.fraisLivraison || 0);
+
+      }, 0);
+
+      // ✅ FIX ENUM (IMPORTANT)
       this.dashboardStats.pendingOrders =
-        orders.filter(o => o.statut === 'EnAttente').length;
+        orders.filter(o => o.statut === OrderStatus.EnAttente).length;
 
       this.dashboardStats.confirmedOrders =
-        orders.filter(o => o.statut === 'Confirmee').length;
+        orders.filter(o => o.statut === OrderStatus.Confirmee).length;
     });
 
     this.productService.getAllProducts().subscribe((products: any[]) => {
@@ -142,31 +150,29 @@ export class AdminDashboardComponent implements OnInit {
       this.dashboardStats.totalProducts = products.length;
     });
 
-    this.stockService.getAllStockLots().subscribe((stocks: any[]) => {
+    this.stockService.getStock().subscribe((stocks: any[]) => {
       this.stocks = stocks;
 
       this.dashboardStats.totalStock =
-        stocks.reduce((sum: number, s: any) => sum + (s.quantity || 0), 0);
+        stocks.reduce((sum: number, s: any) =>
+          sum + (s.quantiteTotalRestante || 0), 0
+        );
 
       this.dashboardStats.lowStockProducts =
-        stocks.filter((s: any) => (s.quantity || 0) <= 5).length;
+        stocks.filter((s: any) =>
+          (s.quantiteTotalRestante || 0) <= 5
+        ).length;
     });
-
-    this.dashboardStats.urgentRecommendations =
-      this.aiService.getUrgentRecommendations().length;
 
     this.loading = false;
   }
 
-  // ✅ SWITCH TAB (amélioré)
+  // ✅ SWITCH TAB SAFE
   switchTab(tabId: string) {
-    // éviter refresh inutile si même tab
     if (this.activeTabSubject.value === tabId) return;
-
     this.activeTabSubject.next(tabId);
   }
 
-  // ✅ IMPORTANT pour éviter bugs Angular
   trackByTab(index: number, tab: Tab) {
     return tab.id;
   }

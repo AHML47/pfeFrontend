@@ -4,7 +4,7 @@ import { Router } from '@angular/router';
 import { OrderService } from '../../../shared/services/order.service';
 import { AuthService } from '../../../shared/services/auth.service';
 import { Observable, map } from 'rxjs';
-import { Order } from '../../../shared/models/order.model';
+import { Order, OrderStatus } from '../../../shared/models/order.model';
 
 @Component({
   selector: 'app-order-list',
@@ -17,17 +17,18 @@ export class OrderListComponent {
 
   orders$!: Observable<Order[]>;
 
+  // 🔥 important pour HTML si besoin
+  OrderStatus = OrderStatus;
+
   constructor(
     private orderService: OrderService,
     private authService: AuthService,
     private router: Router
   ) {
-
     this.loadOrders();
   }
 
   loadOrders() {
-
     const token = this.authService.getAccessToken();
     const payload = this.authService.decodeToken(token!);
 
@@ -35,7 +36,6 @@ export class OrderListComponent {
       payload?.['http://schemas.xmlsoap.org/ws/2005/05/identity/claims/nameidentifier']
     );
 
-    // ✅ ASYNC STYLE (comme admin)
     this.orders$ = this.orderService.getAllOrders().pipe(
       map(orders => orders.filter(o => o.userId === userId))
     );
@@ -45,22 +45,23 @@ export class OrderListComponent {
     this.router.navigate(['/user/products']);
   }
 
-  getStatusIcon(status: string) {
+  // ✅ FIX IMPORTANT : plus de number → OrderStatus
+  getStatusIcon(status: OrderStatus): string {
     switch (status) {
-      case 'EnAttente': return '⏳';
-      case 'Confirmee': return '✅';
-      case 'Livree': return '📦';
-      case 'Annulee': return '❌';
+      case OrderStatus.EnAttente: return '⏳';
+      case OrderStatus.Confirmee: return '✅';
+      case OrderStatus.Livree: return '📦';
+      case OrderStatus.Annulee: return '❌';
       default: return '';
     }
   }
 
-  getStatusLabel(status: string) {
+  getStatusLabel(status: OrderStatus): string {
     switch (status) {
-      case 'EnAttente': return 'En attente';
-      case 'Confirmee': return 'Confirmée';
-      case 'Livree': return 'Livrée';
-      case 'Annulee': return 'Annulée';
+      case OrderStatus.EnAttente: return 'En attente';
+      case OrderStatus.Confirmee: return 'Confirmée';
+      case OrderStatus.Livree: return 'Livrée';
+      case OrderStatus.Annulee: return 'Annulée';
       default: return '';
     }
   }

@@ -2,7 +2,6 @@ import { Injectable } from '@angular/core';
 import { BehaviorSubject, Observable, of } from 'rxjs';
 import { HttpClient } from '@angular/common/http';
 import { AuthService } from './auth.service';
-import { environment } from '../../../environments/environment';
 
 export interface CartItem {
   id: number;
@@ -12,21 +11,16 @@ export interface CartItem {
   image: string;
 }
 
-export interface AddToCartRequest {
-  productId: number;
-  quantity: number;
-}
-
-export interface CartResponse {
-  items: CartItem[];
-  totalPrice: number;
-}
-
 @Injectable({
   providedIn: 'root'
 })
 export class CartService {
-  private cart$ = new BehaviorSubject<CartItem[]>([]);
+
+  // ✅ Charger depuis localStorage
+  private cart$ = new BehaviorSubject<CartItem[]>(
+    JSON.parse(localStorage.getItem('cart') || '[]')
+  );
+
   public cart = this.cart$.asObservable();
 
   constructor(
@@ -34,35 +28,48 @@ export class CartService {
     private http: HttpClient
   ) {}
 
-  addToCart(product: any): Observable<boolean> {
-    if (!this.authService.isLoggedIn()) return of(false);
-
-    const currentCart = this.cart$.value;
-    const existingItem = currentCart.find(item => item.id === product.id);
-
-    if (existingItem) {
-      existingItem.quantity++;
-      this.cart$.next([...currentCart]);
-    } else {
-      this.cart$.next([...currentCart, {
-        id: product.id,
-        name: product.nom || product.name,
-        price: product.prixVente || product.price,
-        quantity: 1,
-        image: product.image || ''
-      }]);
-    }
-    return of(true);
+  // ✅ Sauvegarde automatique
+  private saveCart(cart: CartItem[]) {
+    localStorage.setItem('cart', JSON.stringify(cart));
   }
 
+  addToCart(product: any): Observable<boolean> {
+
+  const currentCart = this.cart$.value;
+
+  const existingItem = currentCart.find(item => item.id === product.id);
+
+  const price =
+    product.prixVente ??
+    product.prixAchat ??
+    product.price ??
+    0;
+
+  if (existingItem) {
+    existingItem.quantity++;
+  } else {
+    currentCart.push({
+      id: product.id,
+      name: product.nom || product.name,
+      price: price,
+      quantity: 1,
+      image: product.image || ''
+    });
+  }
+
+  this.cart$.next([...currentCart]);
+  return of(true);
+}
   removeFromCart(id: number): Observable<void> {
     const updatedCart = this.cart$.value.filter(item => item.id !== id);
     this.cart$.next(updatedCart);
+    this.saveCart(updatedCart); // ✅ IMPORTANT
     return of(void 0);
   }
 
   clearCart(): Observable<void> {
     this.cart$.next([]);
+    localStorage.removeItem('cart'); // ✅ IMPORTANT
     return of(void 0);
   }
 
@@ -71,7 +78,10 @@ export class CartService {
   }
 
   getTotalPrice(): number {
-    return this.cart$.value.reduce((total, item) => total + item.price * item.quantity, 0);
+    return this.cart$.value.reduce(
+      (total, item) => total + ((item.price || 0) * (item.quantity || 0)),
+      0
+    );
   }
 
   getTotalItems(): number {

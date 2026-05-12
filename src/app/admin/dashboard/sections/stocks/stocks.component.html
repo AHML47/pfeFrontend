@@ -1,131 +1,89 @@
-<div class="container">
+<div class="layout">
 
-  <h2 *ngIf="!viewMode">Achat Produit</h2>
-
-  <!-- ================= CARDS ================= -->
-  <div class="dashboard-cards" *ngIf="!viewMode">
-
-    <div class="card clickable" (click)="setView('products')">
-      <h4>📦 Produits</h4>
-      <p>{{ (groupedStocks$ | async)?.length || 0 }}</p>
-    </div>
-
-    <div class="card clickable" (click)="setView('lots')">
+  <!-- DASHBOARD CARDS -->
+  <div class="cards-row">
+    <div class="stat-card">
       <h4>📑 Lots</h4>
       <p>{{ totalLots }}</p>
     </div>
-
-    <div class="card clickable" (click)="setView('stock')">
-      <h4>📊 Stock global</h4>
-      <p>{{ totalStock }}</p>
+    <div class="stat-card">
+      <h4>📊 Stock total</h4>
+      <p>{{ totalStock }} <span>unités</span></p>
     </div>
-
   </div>
 
-  <!-- ================= FULL VIEW ================= -->
-  <div class="view-panel" *ngIf="viewMode">
+  <div class="page-layout">
 
-    <div class="panel-header">
-      <h3>
-        {{
-          viewMode === 'products' ? '📦 Produits' :
-          viewMode === 'lots' ? '📑 Lots' :
-          '📊 Stock'
-        }}
-      </h3>
+    <!-- TABLE CARD -->
+    <div class="table-card">
 
-      <button class="btn-back" (click)="viewMode = null">
-        🔙 Retour
-      </button>
-    </div>
+      <div class="header">
+        <div>
+          <h2>📦 Stock </h2>
+          <p>Gestion des lots et achats</p>
+        </div>
+        <button class="btn-primary" (click)="openAchatForm()">➕ Ajouter achat</button>
+      </div>
 
-    <!-- ================= PRODUCTS ================= -->
-    <div *ngIf="viewMode === 'products'">
-
-      <ng-container *ngIf="produits$ | async as produits">
-        <ng-container *ngIf="groupedStocks$ | async as grouped">
-
-          <table>
-            <tr>
-              <th>Nom</th>
-              <th>Quantité</th>
-              <th>Prix Achat</th>
-              <th>Prix Vente</th>
-            </tr>
-
-            <tr *ngFor="let p of produits">
-              <td>{{ p.nom }}</td>
-
-              <td>
-                {{ grouped.find(s => s.productId === p.id)?.totalQuantity || 0 }}
-              </td>
-
-              <td>{{ p.prixAchat || '-' }}</td>
-              <td>{{ p.prixVente || '-' }}</td>
-            </tr>
-
-          </table>
-
-        </ng-container>
-      </ng-container>
-
-    </div>
-
-    <!-- ================= LOTS ================= -->
-    <div *ngIf="viewMode === 'lots'">
-
-      <ng-container *ngIf="stocks$ | async as stocks">
-
-        <table>
+      <table>
+        <thead>
           <tr>
+            <th>N° Lot</th>
             <th>Produit</th>
-            <th>Lot</th>
-            <th>Quantité</th>
-          </tr>
-
-          <tr *ngFor="let s of stocks">
-            <td>{{ s.produitNom }}</td>
-            <td>{{ s.numeroLot }}</td>
-            <td>{{ s.quantiteRestante }}</td>
-          </tr>
-
-        </table>
-
-      </ng-container>
-
-    </div>
-
-    <!-- ================= STOCK ================= -->
-    <div *ngIf="viewMode === 'stock'">
-
-      <ng-container *ngIf="groupedStocks$ | async as stocks">
-
-        <table>
-          <tr>
-            <th>Produit</th>
-            <th>Quantité</th>
+            <th>Fournisseur</th>
+            <th>Stock disponible</th>
+            <th>Date achat</th>
             <th>Statut</th>
           </tr>
-
-          <tr *ngFor="let s of stocks">
-            <td>{{ s.productName }}</td>
-
-            <td><strong>{{ s.totalQuantity }}</strong></td>
-
+        </thead>
+        <tbody>
+          <tr *ngFor="let s of (groupedStocks$ | async)">
+            <td class="label">{{ s.numeroLot }}</td>
+            <td>{{ s.nomProduit }}</td>
+            <td>{{ s.fournisseur }}</td>
+            <td>{{ s.totalQuantity }} unités</td>
+            <td>{{ s.dateAchat | date:'dd/MM/yyyy' }}</td>
             <td>
-              <span class="badge" [ngClass]="getStockClass(s.totalQuantity)">
-                {{ getStockLabel(s.totalQuantity) }}
+              <span [ngClass]="getStatusClass(s.totalQuantity)">
+                {{ getStockStatus(s.totalQuantity) }}
               </span>
             </td>
-
           </tr>
+        </tbody>
+      </table>
 
-        </table>
+      <p *ngIf="(groupedStocks$ | async)?.length === 0">
+        Aucun lot en stock.
+      </p>
 
-      </ng-container>
+    </div>
+
+    <!-- FORM CARD -->
+    <div class="form-card" *ngIf="showForm">
+
+      <h3>Nouvel achat</h3>
+
+      <select [(ngModel)]="stock.produitId">
+        <option [value]="0" disabled>-- Produit --</option>
+        <option *ngFor="let p of produits" [value]="p.id">
+          {{ p.nom }}
+        </option>
+      </select>
+
+      <input type="number" placeholder="Quantité achetée (packs)" [(ngModel)]="stock.quantiteAchetee" min="1" />
+
+      <input type="number" placeholder="Prix unitaire" [(ngModel)]="stock.prixUnitaire" min="0" />
+
+      <input type="text" placeholder="Fournisseur" [(ngModel)]="stock.fournisseur" />
+
+      <input type="text" placeholder="Numéro Lot" [(ngModel)]="stock.numeroLot" />
+
+      <div class="form-actions">
+        <button class="btn-primary" (click)="onSubmit()">💾 Valider</button>
+        <button class="btn-secondary" (click)="showForm = false">Annuler</button>
+      </div>
 
     </div>
 
   </div>
-
 </div>

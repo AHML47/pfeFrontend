@@ -1,7 +1,8 @@
-<!-- TABLE -->
+<!-- ================= FILTERS ================= -->
 <div class="orders-container">
 
   <div class="filters-section">
+
     <input
       type="text"
       placeholder="Rechercher par ID..."
@@ -16,13 +17,17 @@
       class="filter-select"
     >
       <option value="">Tous les statuts</option>
-      <option value="EnAttente">⏳ En attente</option>
-      <option value="Confirmee">✅ Confirmée</option>
-      <option value="Livree">🚚 Livrée</option>
-      <option value="Annulee">❌ Annulée</option>
+
+      <option [ngValue]="OrderStatus.EnAttente">⏳ En attente</option>
+      <option [ngValue]="OrderStatus.Confirmee">✅ Confirmée</option>
+      <option [ngValue]="OrderStatus.Livree">🚚 Livrée</option>
+      <option [ngValue]="OrderStatus.Annulee">❌ Annulée</option>
+
     </select>
+
   </div>
 
+  <!-- ================= TABLE ================= -->
   <div class="card">
     <div class="card-header">
       <h3>📦 Commandes ({{ filteredOrders.length }})</h3>
@@ -42,19 +47,29 @@
 
       <tbody>
         <tr *ngFor="let order of filteredOrders">
+
           <td>{{ order.id }}</td>
-          <td>{{ order.userId }}</td>
-          <td>{{ order.dateCommande | date:'dd/MM/yyyy HH:mm' }}</td>
-          <td>{{ order.totalProduits + order.fraisLivraison }} TND</td>
 
           <td>
-            <select [(ngModel)]="order.statut"
-                    (change)="updateStatus(order)"
-                    class="status-select">
-              <option value="EnAttente">En attente</option>
-              <option value="Confirmee">Confirmée</option>
-              <option value="Livree">Livrée</option>
-              <option value="Annulee">Annulée</option>
+            {{ (order.user?.prenom || '') + ' ' + (order.user?.nom || '') || 'Client' }}
+          </td>
+
+          <td>{{ order.dateCommande | date:'dd/MM/yyyy HH:mm' }}</td>
+
+          <td>
+            {{ (order.totalProduits + order.fraisLivraison) | number:'1.2-2' }} TND
+          </td>
+
+          <td>
+            <select
+              [(ngModel)]="order.statut"
+              (change)="updateStatus(order)">
+
+              <option [ngValue]="OrderStatus.EnAttente">⏳ En attente</option>
+              <option [ngValue]="OrderStatus.Confirmee">✅ Confirmée</option>
+              <option [ngValue]="OrderStatus.Livree">🚚 Livrée</option>
+              <option [ngValue]="OrderStatus.Annulee">❌ Annulée</option>
+
             </select>
           </td>
 
@@ -63,13 +78,15 @@
               👁 Voir
             </button>
           </td>
+
         </tr>
       </tbody>
     </table>
+
   </div>
 </div>
 
-<!-- ================= MODAL MODERNE ================= -->
+<!-- ================= MODAL ================= -->
 <div class="modal-backdrop" *ngIf="showDetailModal">
 
   <div class="modal-box">
@@ -81,25 +98,18 @@
 
     <div class="modal-content">
 
-      <div class="info">
-        <p><b>User:</b> {{ selectedOrder?.userId }}</p>
-        <p><b>Date:</b> {{ selectedOrder?.dateCommande | date }}</p>
-        <p><b>Statut:</b> {{ getStatusLabel(selectedOrder?.statut!) }}</p>
-      </div>
+      <p>
+        <b>User:</b>
+        {{ (selectedOrder?.user?.prenom || '') + ' ' + (selectedOrder?.user?.nom || '') || 'Client' }}
+      </p>
 
-      <h4>Produits</h4>
+      <p><b>Date:</b> {{ selectedOrder?.dateCommande | date }}</p>
 
-      <div class="products">
-        <div *ngFor="let item of selectedOrder?.orderDetails">
-          <span>{{ item.produit?.nom }}</span>
-          <span>{{ item.quantite }} x {{ item.prixUnitaire }} TND</span>
-        </div>
-      </div>
+      <p>
+        <b>Statut:</b>
+        {{ getStatusLabel(selectedOrder?.statut!) }}
+      </p>
 
-    </div>
-
-    <div class="modal-footer">
-      <button class="btn-close" (click)="closeModal()">Fermer</button>
     </div>
 
   </div>
