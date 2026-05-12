@@ -67,20 +67,22 @@ export class AdminOrdersComponent implements OnInit {
   }
 
   // ================= UPDATE STATUS
-  updateStatus(order: Order) {
-    console.log("STATUS SENT:", order.statut);
+ updateStatus(order: Order) {
+  console.log("STATUS SENT:", order.statut);
 
-    this.orderService.updateOrderStatus(order.id, order.statut)
-      .subscribe({
-        next: () => {
-          this.loadOrders(); // refresh UI
-        },
-        error: (err) => {
-          console.error("UPDATE ERROR:", err);
+  this.orderService.updateOrderStatus(order.id, order.statut)
+    .subscribe({
+      next: () => {
+        const index = this.orders.findIndex(o => o.id === order.id);
+        if (index !== -1) {
+          this.orders[index] = { ...this.orders[index], statut: order.statut };
         }
-      });
-  }
-
+        this.applyFilters();
+        this.cdr.detectChanges();
+      },
+      error: (err) => console.error("UPDATE ERROR:", err)
+    });
+}
   // ================= VIEW DETAILS
   viewDetails(order: Order) {
     this.selectedOrder = order;

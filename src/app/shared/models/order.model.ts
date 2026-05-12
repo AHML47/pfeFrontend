@@ -16,11 +16,9 @@ export interface Order {
   };
 
   dateCommande: string;
-
-  totalProduits: number;
-  fraisLivraison: number;
-  totalFinal: number;
-
+totalProduits: number | null;
+fraisLivraison: number | null;
+totalFinal: number | null;
   statut: OrderStatus;
 
   orderDetails: OrderDetail[];

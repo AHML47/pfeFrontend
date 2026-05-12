@@ -36,8 +36,8 @@
     <table *ngIf="filteredOrders.length > 0" class="orders-table">
       <thead>
         <tr>
-          <th>ID</th>
-          <th>User</th>
+          
+          <th>Client</th>
           <th>Date</th>
           <th>Total</th>
           <th>Statut</th>
@@ -48,16 +48,16 @@
       <tbody>
         <tr *ngFor="let order of filteredOrders">
 
-          <td>{{ order.id }}</td>
+         
 
           <td>
-            {{ (order.user?.prenom || '') + ' ' + (order.user?.nom || '') || 'Client' }}
+          {{ order.user ? (order.user.prenom + ' ' + order.user.nom) : 'Client #' + order.userId }}
           </td>
 
           <td>{{ order.dateCommande | date:'dd/MM/yyyy HH:mm' }}</td>
 
           <td>
-            {{ (order.totalProduits + order.fraisLivraison) | number:'1.2-2' }} TND
+           {{ ((order.totalProduits ?? 0) + (order.fraisLivraison ?? 0)) | number:'1.2-2' }} TND
           </td>
 
           <td>

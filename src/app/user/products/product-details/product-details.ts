@@ -47,7 +47,7 @@ export class ProductDetails implements OnInit {
           this.product = {
             id: found.id,
             name: found.nom,
-            price: found.prixAchat,
+            price: found.prixVente,
             description: found.description,
             stock: found.stockDisponible ?? 0,
             category: categorieMap[found.categorieId] ?? 'Sans catégorie',

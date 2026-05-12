@@ -6,6 +6,7 @@ export interface Product {
   isActive: boolean;
   categorieId: number;
   categorieNom?: string;
+  nbUnite: number;     // reçu du backend en GET
 }
 
 export interface ProductFormData {
@@ -13,4 +14,5 @@ export interface ProductFormData {
   description: string;
   prix: number;        // envoyé au backend en POST/PUT
   categorieId: number;
+  nbUnite: number;
 }

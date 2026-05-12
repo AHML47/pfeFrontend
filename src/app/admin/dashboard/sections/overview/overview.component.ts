@@ -35,7 +35,11 @@ export class AdminOverviewComponent implements OnInit {
     private aiService: AIRecommendationService
   ) {}
 
-  ngOnInit(): void {}
+ ngOnInit(): void {
+  this.orderService.getAllOrders().subscribe(data => {
+    this.orders = data;
+  });
+}
 
   getStatusLabel(status: string): string {
     const labels: { [key: string]: string } = {

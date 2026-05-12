@@ -65,7 +65,7 @@
           <div class="order-total">
             <span>Total:</span>
             <span class="total-price">
-              {{ order.totalProduits + order.fraisLivraison | number:'1.2-2' }} TND
+              {{ ((order.totalProduits ?? 0) + (order.fraisLivraison ?? 0)) | number:'1.2-2' }} TND
             </span>
           </div>
 

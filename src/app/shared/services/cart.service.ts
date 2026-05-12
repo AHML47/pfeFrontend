@@ -58,6 +58,10 @@ export class CartService {
   }
 
   this.cart$.next([...currentCart]);
+
+  // ✅🔥 AJOUT IMPORTANT
+  this.saveCart(currentCart);
+
   return of(true);
 }
   removeFromCart(id: number): Observable<void> {

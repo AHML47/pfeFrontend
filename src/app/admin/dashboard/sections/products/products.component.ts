@@ -37,6 +37,7 @@ export class AdminProductsComponent implements OnInit {
     nom: '',
     description: '',
     prix: 0,
+    nbUnite: 0,
     categorieId: 0
   };
 
@@ -97,7 +98,9 @@ export class AdminProductsComponent implements OnInit {
       nom: '',
       description: '',
       prix: 0,
+      nbUnite:0,
       categorieId: 0
+
     };
   }
 
@@ -110,6 +113,7 @@ export class AdminProductsComponent implements OnInit {
       nom: p.nom,
       description: p.description,
       prix: p.prixAchat,
+      nbUnite: p.nbUnite,
       categorieId: p.categorieId
     };
   }
@@ -160,7 +164,7 @@ export class AdminProductsComponent implements OnInit {
     });
   }
 
-  getCategoryName(categories: Category[], id: number): string {
-    return categories.find(c => c.id === id)?.nom || 'N/A';
-  }
+  getCategoryName(categories: Category[] | null, id: number): string {
+  return categories?.find(c => c.id === id)?.nom || 'N/A';
+}
 }

@@ -75,7 +75,7 @@ export class ProductListComponent implements OnInit {
     return {
       id: p.id,
       name: p.nom,
-      price: p.prixAchat,
+      price: p.prixVente,
       description: p.description,
       stock: p.stockDisponible ?? 0,
       category: this.categories[p.categorieId] ?? 'Sans catégorie',
