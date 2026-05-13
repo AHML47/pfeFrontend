@@ -28,8 +28,9 @@
 
       <thead>
         <tr>
-          <th>#</th>
+       
           <th>Libellé</th>
+          <th>Unités</th>
           <th>Prix</th>
           <th>Catégorie</th>
           <th>Actions</th>
@@ -39,11 +40,14 @@
       <tbody>
         <tr *ngFor="let p of (filteredProducts$ | async)">
 
-          <td>{{ p.id }}</td>
+         
 
           <td class="label">
             {{ p.nom }}
           </td>
+          <td>
+  {{ p.nbUnite }}
+</td>
 
           <td>
             {{ p.prixAchat }} TND
@@ -83,11 +87,11 @@
         <input type="number" placeholder="Nombre d'unités" [(ngModel)]="form.nbUnite">
 
     <select [(ngModel)]="form.categorieId">
-      <option value="0">-- Catégorie --</option>
-      <option *ngFor="let c of (categories$ | async)" [value]="c.id">
-        {{ c.nom }}
-      </option>
-    </select>
+  <option [ngValue]="0">-- Catégorie --</option>
+  <option *ngFor="let c of (categories$ | async)" [ngValue]="c.id">
+    {{ c.nom }}
+  </option>
+</select>
 
     <div class="form-actions">
       <button class="btn-primary" (click)="save()">💾 Sauvegarder</button>

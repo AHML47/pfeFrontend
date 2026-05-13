@@ -26,34 +26,48 @@ export class ProductService {
       })
     );
   }
+addProduct(data: ProductFormData): Observable<Product | null> {
+  const formData = new FormData();
+  formData.append('Nom', data.nom);
+  formData.append('Description', data.description);
+formData.append('Prix', data.prix.toString());  
+  formData.append('NbUnite', data.nbUnite.toString());
+  formData.append('CategorieId', data.categorieId.toString());
 
-  addProduct(data: ProductFormData): Observable<Product | null> {
-    return this.http.post<Product>(this.API_URL, data).pipe(
-      tap(p => {
-        this.productsSubject.next([...this.productsSubject.value, p]);
-      }),
-      catchError(error => {
-        console.error('Erreur ADD produit:', error);
-        return of(null);
-      })
-    );
-  }
+  return this.http.post<Product>(this.API_URL, formData).pipe(
+    tap(p => {
+      this.productsSubject.next([...this.productsSubject.value, p]);
+    }),
+    catchError(error => {
+      console.error('Erreur ADD produit:', error.error);
+       console.error('Validation errors:', JSON.stringify(error.error?.errors));
+      return of(null);
+    })
+  );
+}
 
-  updateProduct(id: number, data: ProductFormData): Observable<Product | null> {
-    return this.http.put<Product>(`${this.API_URL}/${id}`, data).pipe(
-      tap(updated => {
-        const list = this.productsSubject.value.map(p =>
-          p.id === id ? updated : p
-        );
-        this.productsSubject.next(list);
-      }),
-      catchError(error => {
-        console.error('Erreur UPDATE produit:', error);
-        return of(null);
-      })
-    );
-  }
+updateProduct(id: number, data: ProductFormData): Observable<Product | null> {
+  const formData = new FormData();
+  formData.append('Nom', data.nom);
+  formData.append('Description', data.description);
+  formData.append('PrixAchat', data.prix.toString());  // ← Prix → PrixAchat
+  formData.append('NbUnite', data.nbUnite.toString());
+  formData.append('CategorieId', data.categorieId.toString());
 
+  return this.http.put<Product>(`${this.API_URL}/${id}`, formData).pipe(
+    tap(updated => {
+      const list = this.productsSubject.value.map(p =>
+        p.id === id ? updated : p
+      );
+      this.productsSubject.next(list);
+    }),
+    catchError(error => {
+      console.error('Erreur UPDATE produit:', error.error);
+      console.error('Validation errors:', JSON.stringify(error.error?.errors));
+      return of(null);
+    })
+  );
+}
   deleteProduct(id: number): Observable<boolean> {
     return this.http.delete<void>(`${this.API_URL}/${id}`).pipe(
       tap(() => {

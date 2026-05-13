@@ -47,11 +47,10 @@ export class ProductDetails implements OnInit {
           this.product = {
             id: found.id,
             name: found.nom,
-            price: found.prixVente,
-            description: found.description,
+  price: found.prixAchat ?? found.prixVente ?? 0,             description: found.description,
             stock: found.stockDisponible ?? 0,
             category: categorieMap[found.categorieId] ?? 'Sans catégorie',
-            image: found.image ?? '/assets/default.png'
+    image: found.imageUrl ?? found.image ?? '/assets/default.png'  // ← fix image
           };
           this.cdr.detectChanges(); // 👈 forcer la mise à jour
         }

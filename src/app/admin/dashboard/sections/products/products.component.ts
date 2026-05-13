@@ -124,22 +124,18 @@ export class AdminProductsComponent implements OnInit {
   }
 
   // ================= SAVE =================
-  save(): void {
+ save(): void {
+  this.form.categorieId = Number(this.form.categorieId); // 🔒 force number
 
-    if (!this.form.nom.trim()) {
-      this.error = 'Nom obligatoire';
-      return;
-    }
+  if (!this.form.nom.trim()) {
+    this.error = 'Nom obligatoire';
+    return;
+  }
 
-    if (!this.form.categorieId) {
-      this.error = 'Choisir catégorie';
-      return;
-    }
-
-    if (this.form.prix <= 0) {
-      this.error = 'Prix invalide';
-      return;
-    }
+  if (!this.form.categorieId || this.form.categorieId === 0) {
+    this.error = 'Choisir une catégorie';
+    return;
+  }
 
     this.error = null;
 

@@ -28,4 +28,14 @@ export class StockService {
   getProduits(): Observable<any[]> {
   return this.http.get<any[]>(this.apiProduits);
 }
+updateAchat(id: number, dto: CreateAchatLotDto): Observable<any> {
+  return this.http.put(`${this.apiAchat}/${id}`, dto);
+}
+
+deleteAchat(id: number): Observable<any> {
+  return this.http.delete(`${this.apiAchat}/${id}`);
+}
+getAchatById(id: number): Observable<AchatLotResponse> {
+  return this.http.get<AchatLotResponse>(`${this.apiAchat}/${id}`);
+}
 }

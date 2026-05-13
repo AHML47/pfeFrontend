@@ -1,3 +1,9 @@
+export interface StockLotDetail {
+  id: number;
+  quantiteRestante: number;
+  dateReception: string;
+}
+
 export interface AchatLotResponse {
   id: number;
   produitId: number;
@@ -11,9 +17,5 @@ export interface AchatLotResponse {
   prixUnitaire: number;
   fournisseur: string;
   numeroLot: string;
-  stockLots: {
-    id: number;
-    quantiteRestante: number;
-    dateReception: string;
-  }[];
+  stockLots: StockLotDetail[];
 }

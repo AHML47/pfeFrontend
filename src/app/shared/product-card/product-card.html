@@ -1,14 +1,14 @@
 <div class="product-card">
   <div class="card-img">
     <span *ngIf="product.stock <= 5" class="badge-stock">⚠️ Stock faible</span>
-    <img [src]="product.image" [alt]="product.name" />
+    <img [src]="product.image" [alt]="product.nom || product.name" />
   </div>
 
   <div class="card-body">
-    <p class="product-category">{{ product.category }}</p>
-    <h3 class="product-name">{{ product.name }}</h3>
+    <p class="product-category">{{ product.categorieNom || product.category }}</p>
+    <h3 class="product-name">{{ product.nom || product.name }}</h3>
     <p class="product-description">{{ product.description }}</p>
-    <p class="product-price">{{ product.price | number:'1.1-2' }} TND</p>
+    <p class="product-price">{{ (product.prixAchat ?? product.prix ?? product.price) | number:'1.1-2' }} TND</p>
 
     <div class="card-actions">
       <button class="btn-add-cart" (click)="addToCart()" title="Ajouter au panier">🛒</button>

@@ -6,4 +6,5 @@ export interface StockGrouped {
   dateAchat: string;
 
   totalQuantity: number;
+    transactions?: any[];
 }

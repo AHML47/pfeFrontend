@@ -75,11 +75,11 @@ export class ProductListComponent implements OnInit {
     return {
       id: p.id,
       name: p.nom,
-      price: p.prixVente,
+    price: p.prixAchat ?? p.prixVente ?? 0,  // ← fix ici
       description: p.description,
       stock: p.stockDisponible ?? 0,
       category: this.categories[p.categorieId] ?? 'Sans catégorie',
-      image: p.image ?? '/assets/default.png'
+    image: p.imageUrl ?? p.image ?? '/assets/default.png'  // ← aussi imageUrl
     };
   }
 

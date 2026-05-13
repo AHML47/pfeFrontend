@@ -1,86 +1,227 @@
 <div class="layout">
 
-  <!-- DASHBOARD CARDS -->
+  <!-- CARDS -->
   <div class="cards-row">
-    <div class="stat-card">
+
+    <div class="stat-card" (click)="activePanel = 'stock'">
       <h4>📑 Lots</h4>
       <p>{{ totalLots }}</p>
     </div>
-    <div class="stat-card">
+
+    <div class="stat-card" (click)="activePanel = 'stock'">
       <h4>📊 Stock total</h4>
       <p>{{ totalStock }} <span>unités</span></p>
     </div>
+
+    <div class="stat-card clickable" (click)="toggleProductsPanel()">
+      <h4>📦 Produits en stock</h4>
+      <p>{{ totalProducts }}</p>
+    </div>
+
   </div>
 
   <div class="page-layout">
 
-    <!-- TABLE CARD -->
-    <div class="table-card">
+    <!-- ================= STOCK TABLE ================= -->
+    <div class="table-card" *ngIf="activePanel === 'stock'">
 
       <div class="header">
         <div>
-          <h2>📦 Stock </h2>
+          <h2>📦 Stock</h2>
           <p>Gestion des lots et achats</p>
         </div>
-        <button class="btn-primary" (click)="openAchatForm()">➕ Ajouter achat</button>
+
+        <button class="btn-primary" (click)="openAchatForm()">
+          ➕ Ajouter achat
+        </button>
       </div>
 
-      <table>
-        <thead>
-          <tr>
-            <th>N° Lot</th>
-            <th>Produit</th>
-            <th>Fournisseur</th>
-            <th>Stock disponible</th>
-            <th>Date achat</th>
-            <th>Statut</th>
-          </tr>
-        </thead>
-        <tbody>
-          <tr *ngFor="let s of (groupedStocks$ | async)">
-            <td class="label">{{ s.numeroLot }}</td>
-            <td>{{ s.nomProduit }}</td>
-            <td>{{ s.fournisseur }}</td>
-            <td>{{ s.totalQuantity }} unités</td>
-            <td>{{ s.dateAchat | date:'dd/MM/yyyy' }}</td>
-            <td>
-              <span [ngClass]="getStatusClass(s.totalQuantity)">
-                {{ getStockStatus(s.totalQuantity) }}
-              </span>
-            </td>
-          </tr>
-        </tbody>
-      </table>
+      <ng-container *ngIf="groupedStocks$ | async as stocks">
 
-      <p *ngIf="(groupedStocks$ | async)?.length === 0">
-        Aucun lot en stock.
-      </p>
+        <table *ngIf="stocks.length > 0; else empty">
+
+          <thead>
+            <tr>
+              <th>N° Lot</th>
+              <th>Produit</th>
+              <th>Fournisseur</th>
+              <th>Stock</th>
+              <th>Date</th>
+              <th>Statut</th>
+              <th>Actions</th>
+            </tr>
+          </thead>
+
+          <tbody>
+            <ng-container *ngFor="let s of stocks">
+
+              <tr
+                (click)="selectLot(s.achatLotId)"
+                [class.selected]="selectedLot?.id === s.achatLotId">
+
+                <td>{{ s.numeroLot }}</td>
+                <td>{{ s.nomProduit }}</td>
+                <td>{{ s.fournisseur }}</td>
+                <td>{{ s.totalQuantity }}</td>
+                <td>{{ s.dateAchat | date:'dd/MM/yyyy' }}</td>
+                <td>
+                  <span [ngClass]="getStatusClass(s.totalQuantity)">
+                    {{ getStockStatus(s.totalQuantity) }}
+                  </span>
+                </td>
+
+                <td (click)="$event.stopPropagation()">
+  <button (click)="openEditForm(s); $event.stopPropagation()">✏️</button>
+  <button (click)="deleteLot(s.achatLotId); $event.stopPropagation()">🗑️</button>
+  <button (click)="toggleTransactions(s.achatLotId); $event.stopPropagation()">👁</button>
+</td>
+
+              </tr>
+
+<tr *ngIf="expandedId === s.achatLotId && (transactionsMap[s.achatLotId] !== undefined)">                <td colspan="7" style="padding: 0;">
+                  <div style="background:#f8fafc; border-top: 2px solid #e2e8f0; padding: 1rem;">
+
+                    <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:0.75rem;">
+                      <strong style="color:#1e293b;">📊 Mouvements — {{ s.numeroLot }}</strong>
+                      <button
+                        (click)="expandedId = null"
+                        style="background:none; border:none; cursor:pointer; color:#94a3b8; font-size:1rem;">
+                        ✕
+                      </button>
+                    </div>
+
+                    <table *ngIf="(transactionsMap[s.achatLotId] || []).length > 0; else noMov"
+                      style="width:100%; border-collapse:collapse; font-size:0.875rem;">
+                      <thead>
+                        <tr style="background:#f1f5f9;">
+                          <th style="padding:0.5rem 0.75rem; text-align:left; color:#000813;">Type</th>
+                          <th style="padding:0.5rem 0.75rem; text-align:left; color:#010d1d;">Quantité</th>
+                          <th style="padding:0.5rem 0.75rem; text-align:left; color:#010a17;">Date</th>
+                        </tr>
+                      </thead>
+                      <tbody>
+                        <tr *ngFor="let t of (transactionsMap[s.achatLotId] || [])"
+                          style="border-bottom:1px solid #f1f5f9;">
+                          <td style="padding:0.5rem 0.75rem;">
+                            <span [style.background]="t.type === 'Entree' ? '#dcfce7' : '#fee2e2'"
+                                  [style.color]="t.type === 'Entree' ? '#16a34a' : '#dc2626'"
+                                  style="padding:0.2rem 0.6rem; border-radius:999px; font-size:0.8rem; font-weight:600;">
+                              {{ t.type === 'Entree' ? '📥 Entrée' : '📤 Sortie' }}
+                            </span>
+                          </td>
+                          <td style="padding:0.5rem 0.75rem;">{{ t.quantite }} unités</td>
+                          <td style="padding:0.5rem 0.75rem;">{{ t.dateMouvement | date:'dd/MM/yyyy HH:mm' }}</td>
+                        </tr>
+                      </tbody>
+                    </table>
+
+                    <ng-template #noMov>
+                      <p style="color:#94a3b8; font-style:italic;">Aucun mouvement enregistré.</p>
+                    </ng-template>
+
+                  </div>
+                </td>
+              </tr>
+
+            </ng-container>
+          </tbody>
+
+        </table>
+
+        <ng-template #empty>
+          <p>Aucun lot.</p>
+        </ng-template>
+
+      </ng-container>
 
     </div>
 
-    <!-- FORM CARD -->
+
+    <!-- ================= PRODUCTS PANEL ================= -->
+    <div class="table-card" *ngIf="activePanel === 'products'">
+
+      <div class="header">
+        <h2>📦 Produits en stock</h2>
+        <button class="btn-close" (click)="activePanel='stock'">✕</button>
+      </div>
+
+      <table *ngIf="productsStock.length > 0">
+  <thead>
+    <tr>
+      <th>Produit</th>
+      <th>Nombre de lots</th>
+      <th>Quantité totale</th>
+    </tr>
+  </thead>
+
+  <tbody>
+    <tr *ngFor="let p of productsStock">
+      <td>{{ p.nomProduit }}</td>
+      <td>{{ p.lots }}</td>
+      <td>{{ p.quantite }}</td>
+    </tr>
+  </tbody>
+</table>
+
+    </div>
+
+    <!-- ================= LOT DETAIL ================= -->
+   <div class="table-card" *ngIf="activePanel === 'lots'">
+
+  <div class="header">
+    <h2>📋 Détail Lot</h2>
+    <button class="btn-close" (click)="activePanel='stock'">✕</button>
+  </div>
+
+  <ng-container *ngIf="selectedLot; else loadingOrEmpty">
+
+    <table *ngIf="selectedLot && selectedLot.stockLots && selectedLot.stockLots.length > 0; else emptyLots">
+      <thead>
+        <tr>
+          <th>#</th>
+          <th>Quantité restante</th>
+          <th>Date réception</th>
+        </tr>
+      </thead>
+
+      <tbody>
+        <tr *ngFor="let lot of selectedLot.stockLots">
+          <td>{{ lot.id }}</td>
+          <td>{{ lot.quantiteRestante }}</td>
+          <td>{{ lot.dateReception | date:'dd/MM/yyyy HH:mm' }}</td>
+        </tr>
+      </tbody>
+    </table>
+
+    <ng-template #emptyLots>
+      <p>Aucun lot détaillé.</p>
+    </ng-template>
+
+  </ng-container>
+
+  <ng-template #loadingOrEmpty>
+    <p>Chargement du lot...</p>
+  </ng-template>
+
+</div>
+    <!-- ================= FORM ================= -->
     <div class="form-card" *ngIf="showForm">
 
-      <h3>Nouvel achat</h3>
+      <h3>{{ editingId ? '✏️ Modifier achat' : '➕ Nouvel achat' }}</h3>
 
-      <select [(ngModel)]="stock.produitId">
-        <option [value]="0" disabled>-- Produit --</option>
-        <option *ngFor="let p of produits" [value]="p.id">
-          {{ p.nom }}
-        </option>
+      <select [(ngModel)]="stock.produitId" [disabled]="!!editingId">
+        <option [value]="0">-- Produit --</option>
+        <option *ngFor="let p of produits" [value]="p.id">{{ p.nom }}</option>
       </select>
 
-      <input type="number" placeholder="Quantité achetée (packs)" [(ngModel)]="stock.quantiteAchetee" min="1" />
-
-      <input type="number" placeholder="Prix unitaire" [(ngModel)]="stock.prixUnitaire" min="0" />
-
+      <input type="number" placeholder="Quantité" [(ngModel)]="stock.quantiteAchetee" />
+      <input type="number" placeholder="Prix unitaire" [(ngModel)]="stock.prixUnitaire" />
       <input type="text" placeholder="Fournisseur" [(ngModel)]="stock.fournisseur" />
-
       <input type="text" placeholder="Numéro Lot" [(ngModel)]="stock.numeroLot" />
 
       <div class="form-actions">
         <button class="btn-primary" (click)="onSubmit()">💾 Valider</button>
-        <button class="btn-secondary" (click)="showForm = false">Annuler</button>
+        <button class="btn-secondary" (click)="showForm=false">Annuler</button>
       </div>
 
     </div>

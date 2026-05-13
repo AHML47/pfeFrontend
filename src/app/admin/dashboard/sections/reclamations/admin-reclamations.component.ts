@@ -93,10 +93,12 @@ export class AdminReclamationsComponent implements OnInit {
     const dto: TraiterReclamationDto = this.traiterForm.value;
     this.reclamationService.traiter(this.selectedReclamation.id, dto).subscribe({
       next: (updated) => {
+        console.log("TRAITERED:", this.traiterSuccess);
         const idx = this.reclamations.findIndex(r => r.id === updated.id);
         if (idx > -1) this.reclamations[idx] = updated;
         this.applyFilter();
         this.traiterSuccess = true;
+          console.log("TRAITERED:", this.traiterSuccess);
         this.savingTraiter = false;
         setTimeout(() => this.closeTraiter(), 1500);
       },
