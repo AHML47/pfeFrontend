@@ -1,12 +1,17 @@
-<div class="auth-shell">
-  <div class="blob blob-a"></div><div class="blob blob-b"></div>
-  <section class="glass-panel auth-card organic-drift">
-    <h1 class="text-center text-3xl text-olive-900 dark:text-lime-300">Connexion Admin</h1>
-    <form (ngSubmit)="login()" class="mt-6 space-y-4">
-      <label class="float-field"><input name="email" [(ngModel)]="email" type="email" placeholder=" " required><span>Email admin</span></label>
-      <label class="float-field"><input name="password" [(ngModel)]="password" type="password" placeholder=" " required><span>Mot de passe</span></label>
+<div class="auth-shell admin-shell">
+  <div class="orb orb-start"></div>
+  <div class="orb orb-end"></div>
+
+  <section class="auth-card glass-panel">
+    <p class="kicker">Espace sécurisé</p>
+    <h1 class="title">Connexion Administrateur</h1>
+    <p class="subtitle">Contrôlez stocks, commandes et opérations depuis le dashboard centralisé.</p>
+
+    <form (ngSubmit)="login()" class="form-grid">
+      <label class="float-field"><input [(ngModel)]="email" name="email" type="email" placeholder=" " required /><span>Email admin</span></label>
+      <label class="float-field"><input [(ngModel)]="password" name="password" type="password" placeholder=" " required /><span>Mot de passe</span></label>
       <p *ngIf="error" class="error-msg">{{ error }}</p>
-      <button class="submit-btn" [disabled]="loading">{{ loading ? 'Connexion en cours...' : 'Se connecter' }}</button>
+      <button type="submit" class="cta-btn" [disabled]="loading">{{ loading ? 'Connexion en cours...' : 'Se connecter au dashboard' }}</button>
     </form>
   </section>
 </div>

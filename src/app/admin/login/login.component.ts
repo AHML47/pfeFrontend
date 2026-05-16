@@ -4,7 +4,9 @@ import { FormsModule } from '@angular/forms';
 import { Router } from '@angular/router';
 import { AuthService } from '../../shared/services/auth.service';
 
-/** Admin-only login screen with floating labels and animated organic background. */
+/**
+ * Admin authentication screen with secure role validation.
+ */
 @Component({
   selector: 'app-admin-login',
   standalone: true,
@@ -17,17 +19,31 @@ export class AdminLoginComponent {
   password = '';
   loading = false;
   error = '';
+
   constructor(private router: Router, private auth: AuthService) {}
+
+  /** Authenticates user and grants access only for admin role. */
   login(): void {
     this.loading = true;
     this.error = '';
+
     this.auth.login(this.email, this.password).subscribe({
       next: () => {
-        if (this.auth.getRole() === 'Admin') this.router.navigate(['/admin/dashboard']);
-        else { this.error = 'Accès refusé — pas un admin'; this.auth.logout(); }
+        const role = this.auth.getRole();
+        if (role === 'Admin') {
+          this.router.navigate(['/admin/dashboard']);
+        } else {
+          this.error = 'Accès refusé — compte non administrateur.';
+          this.auth.logout();
+        }
       },
-      error: () => { this.error = 'Email ou mot de passe incorrect'; this.loading = false; },
-      complete: () => { this.loading = false; },
+      error: () => {
+        this.error = 'Email ou mot de passe incorrect';
+        this.loading = false;
+      },
+      complete: () => {
+        this.loading = false;
+      },
     });
   }
 }

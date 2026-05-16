@@ -1,22 +1,38 @@
 <div class="auth-shell">
-  <div class="blob blob-a"></div><div class="blob blob-b"></div>
-  <section class="glass-panel auth-card organic-drift">
-    <h1 class="text-center text-3xl text-olive-900 dark:text-lime-300">DeliverWholesale</h1>
-    <p class="mb-4 text-center text-sm">{{ isRegisterMode ? 'Créer un compte' : 'Se connecter' }}</p>
-    <button type="button" class="switch-btn" (click)="toggleMode()">{{ isRegisterMode ? 'Retour connexion' : 'Créer un compte' }}</button>
+  <div class="orb orb-start"></div>
+  <div class="orb orb-end"></div>
+
+  <section class="auth-card glass-panel">
+    <p class="kicker">Wholesale alimentaire premium</p>
+    <h1 class="title">Bienvenue sur DeliverWholesale</h1>
+    <p class="subtitle">Accédez à vos commandes B2B, gérez votre activité et profitez d'une expérience fluide.</p>
+
+    <div class="mode-switch" role="tablist" aria-label="Authentication mode">
+      <button type="button" [class.active]="!isRegisterMode" (click)="isRegisterMode || toggleMode()">Connexion</button>
+      <button type="button" [class.active]="isRegisterMode" (click)="!isRegisterMode || toggleMode()">Inscription</button>
+    </div>
+
     <p *ngIf="error" class="error-msg">{{ error }}</p>
-    <form *ngIf="!isRegisterMode" (ngSubmit)="login()" class="space-y-4">
-      <label class="float-field"><input name="loginEmail" [(ngModel)]="loginEmail" type="email" required placeholder=" "><span>Email</span></label>
-      <label class="float-field"><input name="loginPassword" [(ngModel)]="loginPassword" type="password" required placeholder=" "><span>Mot de passe</span></label>
-      <button class="submit-btn" [disabled]="loading">{{loading?'Connexion...':'Se connecter'}}</button>
+
+    <form *ngIf="!isRegisterMode" (ngSubmit)="login()" class="form-grid">
+      <label class="float-field">
+        <input [(ngModel)]="loginEmail" name="loginEmail" type="email" placeholder=" " required />
+        <span>Email professionnel</span>
+      </label>
+      <label class="float-field">
+        <input [(ngModel)]="loginPassword" name="loginPassword" type="password" placeholder=" " required />
+        <span>Mot de passe</span>
+      </label>
+      <button type="submit" class="cta-btn" [disabled]="loading">{{ loading ? 'Connexion...' : 'Se connecter' }}</button>
     </form>
-    <form *ngIf="isRegisterMode" (ngSubmit)="register()" class="space-y-4">
-      <label class="float-field"><input name="registerName" [(ngModel)]="registerName" type="text" placeholder=" "><span>Nom complet</span></label>
-      <label class="float-field"><input name="registerEmail" [(ngModel)]="registerEmail" type="email" placeholder=" "><span>Email</span></label>
-      <label class="float-field"><input name="registerAddress" [(ngModel)]="registerAddress" type="text" placeholder=" "><span>Adresse</span></label>
-      <label class="float-field"><input name="registerPassword" [(ngModel)]="registerPassword" type="password" placeholder=" "><span>Mot de passe</span></label>
-      <label class="float-field"><input name="registerConfirmPassword" [(ngModel)]="registerConfirmPassword" type="password" placeholder=" "><span>Confirmer le mot de passe</span></label>
-      <button class="submit-btn" [disabled]="loading">{{loading?'Création...':'Créer mon compte'}}</button>
+
+    <form *ngIf="isRegisterMode" (ngSubmit)="register()" class="form-grid">
+      <label class="float-field"><input [(ngModel)]="registerName" name="registerName" type="text" placeholder=" " /><span>Nom complet</span></label>
+      <label class="float-field"><input [(ngModel)]="registerEmail" name="registerEmail" type="email" placeholder=" " /><span>Email professionnel</span></label>
+      <label class="float-field"><input [(ngModel)]="registerAddress" name="registerAddress" type="text" placeholder=" " /><span>Adresse</span></label>
+      <label class="float-field"><input [(ngModel)]="registerPassword" name="registerPassword" type="password" placeholder=" " /><span>Mot de passe</span></label>
+      <label class="float-field"><input [(ngModel)]="registerConfirmPassword" name="registerConfirmPassword" type="password" placeholder=" " /><span>Confirmer le mot de passe</span></label>
+      <button type="submit" class="cta-btn" [disabled]="loading">{{ loading ? 'Création...' : 'Créer un compte' }}</button>
     </form>
   </section>
 </div>
