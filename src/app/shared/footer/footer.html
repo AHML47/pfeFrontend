@@ -1,41 +1,23 @@
-<footer class="footer">
-  <div class="footer-container">
-    <div class="footer-content">
-      <!-- Branding -->
-      <div class="footer-section">
-        <h4>🛍️ DeliverWholesale</h4>
-        <p>Votre plateforme de commerce en gros en ligne</p>
+<footer class="mt-12 border-t border-olive-900/15 bg-white/55 px-4 py-8 backdrop-blur-md dark:border-lime-300/20 dark:bg-slate-950/65">
+  <div class="mx-auto grid max-w-7xl gap-6 text-start text-sm text-slate-700 dark:text-slate-300 md:grid-cols-3">
+    <section>
+      <h4 class="text-lg text-olive-900 dark:text-lime-300">DeliverWholesale</h4>
+      <p class="mt-2">Premium wholesale alimentaire platform for modern retailers.</p>
+    </section>
+    <section>
+      <h5 class="font-semibold text-olive-800 dark:text-lime-300">Navigation</h5>
+      <div class="mt-2 flex flex-col gap-2">
+        <a routerLink="/user/home" class="footer-link">Accueil</a>
+        <a routerLink="/user/products" class="footer-link">Produits</a>
+        <a routerLink="/user/orders" class="footer-link">Commandes</a>
       </div>
-
-      <!-- Links -->
-      <div class="footer-section">
-        <h5>Navigation</h5>
-        <ul>
-          <li><a routerLink="/user/home">Accueil</a></li>
-          <li><a routerLink="/user/products">Produits</a></li>
-          <li><a routerLink="/user/orders">Commandes</a></li>
-        </ul>
+    </section>
+    <section>
+      <h5 class="font-semibold text-olive-800 dark:text-lime-300">Gestion</h5>
+      <div class="mt-2 flex flex-col gap-2">
+        <a routerLink="/admin/login" class="footer-link">Admin</a>
       </div>
-
-      <!-- Info -->
-      <div class="footer-section">
-        <h5>Informations</h5>
-        <ul>
-          <li><a href="#">À propos</a></li>
-          <li><a href="#">Conditions d'utilisation</a></li>
-          <li><a href="#">Politique de confidentialité</a></li>
-        </ul>
-      </div>
-    </div>
-
-    <!-- Admin Link (Discret) -->
-    <div class="footer-admin">
-      <a routerLink="/admin/login" class="admin-link-footer">Admin</a>
-    </div>
-
-    <!-- Copyright -->
-    <div class="footer-copyright">
-      <p>&copy; {{ currentYear }} DeliverWholesale. Tous droits réservés.</p>
-    </div>
+    </section>
   </div>
+  <p class="mx-auto mt-8 max-w-7xl border-t border-olive-900/10 pt-4 text-center text-xs text-slate-600 dark:border-lime-400/15 dark:text-slate-400">© {{ currentYear }} DeliverWholesale. All rights reserved.</p>
 </footer>

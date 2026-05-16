@@ -1,68 +1,20 @@
-<nav class="navbar navbar-expand-lg navbar-dark custom-navbar px-4">
-  <a class="navbar-brand fw-bold brand-text">🛍️ DeliverWholesale</a>
-
-  <div class="collapse navbar-collapse">
-    <ul class="navbar-nav ms-auto gap-2">
-
-      <li class="nav-item">
-        <a routerLink="/user/home" routerLinkActive="active" class="nav-link nav-link-custom">
-          <span class="icon">🏠</span> Home
-        </a>
-      </li>
-
-      <li class="nav-item">
-        <a routerLink="/user/products" routerLinkActive="active" class="nav-link nav-link-custom">
-          <span class="icon">📦</span> Produits
-        </a>
-      </li>
-
-      <li class="nav-item">
-        <a routerLink="/user/orders" routerLinkActive="active" class="nav-link nav-link-custom">
-          <span class="icon">🛒</span> Commandes
-        </a>
-      </li>
-
-      <!-- ✅ Mes réclamations -->
-      <li class="nav-item">
-<a routerLink="/user/reclamations/new" routerLinkActive="active" class="nav-link nav-link-custom">          <span class="icon">📋</span> Mes réclamations
-        </a>
-      </li>
-
-     
-      <!-- Cart Button -->
-      <li class="nav-item">
-        <a routerLink="/user/cart" routerLinkActive="active" class="nav-link nav-link-custom cart-link">
-          <span class="icon">🛍️</span>
-          <span class="cart-badge" *ngIf="cartCount > 0">{{ cartCount }}</span>
-        </a>
-      </li>
-
-      <!-- Auth Section -->
-      <li class="nav-item" *ngIf="authService.isLoggedIn()">
-        <div class="user-info">
-          <span class="icon">👤</span>
-          <span class="user-name">{{ (authService.currentUser | async)?.name }}</span>
-        </div>
-      </li>
-
-      <li class="nav-item">
-        <button
-          *ngIf="authService.isLoggedIn()"
-          class="nav-link nav-link-custom btn-logout"
-          (click)="logout()"
-        >
-          <span class="icon">🚪</span> Déconnexion
-        </button>
-
-        <a
-          *ngIf="!authService.isLoggedIn()"
-          routerLink="/user/login"
-          class="nav-link nav-link-custom"
-        >
-          <span class="icon">🔐</span> Connexion
-        </a>
-      </li>
-
-    </ul>
+<nav class="sticky top-0 z-40 border-b border-olive-900/15 bg-white/65 px-4 py-3 backdrop-blur-md dark:border-lime-400/20 dark:bg-slate-950/70">
+  <div class="mx-auto flex max-w-7xl flex-wrap items-center justify-between gap-3">
+    <a class="text-xl font-semibold text-olive-900 dark:text-lime-300" routerLink="/user/home">DeliverWholesale</a>
+    <div class="flex flex-wrap items-center gap-2 text-sm">
+      <a routerLink="/user/home" routerLinkActive="is-active" class="nav-chip">Home</a>
+      <a routerLink="/user/products" routerLinkActive="is-active" class="nav-chip">Produits</a>
+      <a routerLink="/user/orders" routerLinkActive="is-active" class="nav-chip">Commandes</a>
+      <a routerLink="/user/reclamations/new" routerLinkActive="is-active" class="nav-chip">Réclamations</a>
+      <a routerLink="/user/cart" routerLinkActive="is-active" class="nav-chip relative">Panier <span *ngIf="cartCount > 0" class="badge">{{ cartCount }}</span></a>
+      <button type="button" class="nav-chip" (click)="toggleTheme()">{{ isDark ? '☀️ Light' : '🌙 Dark' }}</button>
+      <div class="flex items-center gap-1 rounded-full bg-olive-950/5 p-1 dark:bg-lime-200/10">
+        <button type="button" class="lang" [class.lang-active]="language==='en'" (click)="setLanguage('en')">EN</button>
+        <button type="button" class="lang" [class.lang-active]="language==='fr'" (click)="setLanguage('fr')">FR</button>
+        <button type="button" class="lang" [class.lang-active]="language==='ar'" (click)="setLanguage('ar')">AR</button>
+      </div>
+      <button *ngIf="authService.isLoggedIn()" class="nav-chip" (click)="logout()">Déconnexion</button>
+      <a *ngIf="!authService.isLoggedIn()" routerLink="/user/login" class="nav-chip">Connexion</a>
+    </div>
   </div>
 </nav>

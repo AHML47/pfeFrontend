@@ -1,14 +1,15 @@
+import { CommonModule } from '@angular/common';
 import { Component } from '@angular/core';
 import { RouterModule } from '@angular/router';
-import { CommonModule } from '@angular/common';
 
+/** Glassmorphic global footer for storefront navigation and legal links. */
 @Component({
   selector: 'app-footer',
   standalone: true,
   imports: [RouterModule, CommonModule],
   templateUrl: './footer.html',
-  styleUrl: './footer.css'
+  styleUrl: './footer.css',
 })
 export class FooterComponent {
-  currentYear: number = new Date().getFullYear();
+  currentYear = new Date().getFullYear();
 }

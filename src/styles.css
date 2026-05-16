@@ -1,11 +1,61 @@
+
+:root {
+  --dw-bg: #f8fcfb;
+  --dw-bg-soft: #fafaf8;
+  --dw-accent: #365314;
+  --dw-accent-strong: #14532d;
+  --dw-highlight: #e7c98b;
+  --dw-text: #1f2937;
+}
+
+.dark {
+  --dw-bg: #0f172a;
+  --dw-bg-soft: #111827;
+  --dw-accent: #84cc16;
+  --dw-accent-strong: #65a30d;
+  --dw-highlight: #d6b87f;
+  --dw-text: #e5e7eb;
+}
+
+html,
 body {
-  background-color: #f5f7fa;
+  min-height: 100%;
+  scroll-behavior: smooth;
 }
 
-.card {
-  border-radius: 12px;
+body {
+  margin: 0;
+  font-family: 'Inter', ui-sans-serif, system-ui, sans-serif;
+  color: var(--dw-text);
+  background:
+    radial-gradient(circle at 20% 20%, color-mix(in srgb, var(--dw-accent) 12%, transparent), transparent 45%),
+    radial-gradient(circle at 80% 15%, color-mix(in srgb, var(--dw-highlight) 18%, transparent), transparent 50%),
+    linear-gradient(160deg, var(--dw-bg), var(--dw-bg-soft));
+  background-attachment: fixed;
 }
 
-.navbar {
-  border-bottom: 2px solid #0d6efd;
+h1,
+h2,
+h3,
+h4,
+h5,
+h6 {
+  font-family: 'Playfair Display', serif;
 }
+
+.glass-panel {
+  background: color-mix(in srgb, white 70%, transparent);
+  backdrop-filter: blur(16px);
+  border: 1px solid color-mix(in srgb, var(--dw-accent) 18%, transparent);
+}
+
+.dark .glass-panel {
+  background: color-mix(in srgb, #0f172a 70%, transparent);
+}
+
+@keyframes drift {
+  0%,100% { transform: translate3d(0,0,0) scale(1); }
+  50% { transform: translate3d(0,-12px,0) scale(1.02); }
+}
+
+.organic-drift { animation: drift 12s ease-in-out infinite; }

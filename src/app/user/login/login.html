@@ -1,141 +1,22 @@
-<div class="login-container">
-  <div class="login-card">
-
-    <!-- Header -->
-    <div class="login-header">
-      <h1>🛍️ DeliverWholesale</h1>
-      <p>{{ isRegisterMode ? 'Créer un compte' : 'Se connecter' }}</p>
-    </div>
-
-    <!-- Mode Toggle -->
-    <div class="mode-toggle">
-      <button
-        [class.active]="!isRegisterMode"
-        (click)="toggleMode()"
-        class="toggle-btn"
-        *ngIf="isRegisterMode"
-      >
-        ← Retour à la connexion
-      </button>
-
-      <button
-        [class.active]="isRegisterMode"
-        (click)="toggleMode()"
-        class="toggle-btn"
-        *ngIf="!isRegisterMode"
-      >
-        Créer un compte →
-      </button>
-    </div>
-
-    <!-- Error -->
-    <div *ngIf="error" class="alert alert-danger">
-      {{ error }}
-    </div>
-
-    <!-- ========== LOGIN FORM ========== -->
-    <form *ngIf="!isRegisterMode" (ngSubmit)="login()" novalidate>
-
-      <div class="form-group">
-        <label>Email</label>
-        <input
-          type="email"
-          [(ngModel)]="loginEmail"
-          name="loginEmail"
-          class="form-control"
-          placeholder="votre@email.com"
-          [disabled]="loading"
-          required
-        />
-      </div>
-
-      <div class="form-group">
-        <label>Mot de passe</label>
-        <input
-          type="password"
-          [(ngModel)]="loginPassword"
-          name="loginPassword"
-          class="form-control"
-          placeholder="********"
-          [disabled]="loading"
-          required
-        />
-      </div>
-
-      <button type="submit" class="btn btn-login w-100" [disabled]="loading">
-        {{ loading ? 'Connexion...' : 'Se connecter' }}
-      </button>
-
+<div class="auth-shell">
+  <div class="blob blob-a"></div><div class="blob blob-b"></div>
+  <section class="glass-panel auth-card organic-drift">
+    <h1 class="text-center text-3xl text-olive-900 dark:text-lime-300">DeliverWholesale</h1>
+    <p class="mb-4 text-center text-sm">{{ isRegisterMode ? 'Créer un compte' : 'Se connecter' }}</p>
+    <button type="button" class="switch-btn" (click)="toggleMode()">{{ isRegisterMode ? 'Retour connexion' : 'Créer un compte' }}</button>
+    <p *ngIf="error" class="error-msg">{{ error }}</p>
+    <form *ngIf="!isRegisterMode" (ngSubmit)="login()" class="space-y-4">
+      <label class="float-field"><input name="loginEmail" [(ngModel)]="loginEmail" type="email" required placeholder=" "><span>Email</span></label>
+      <label class="float-field"><input name="loginPassword" [(ngModel)]="loginPassword" type="password" required placeholder=" "><span>Mot de passe</span></label>
+      <button class="submit-btn" [disabled]="loading">{{loading?'Connexion...':'Se connecter'}}</button>
     </form>
-
-    <!-- ========== REGISTER FORM ========== -->
-    <form *ngIf="isRegisterMode" (ngSubmit)="register()" novalidate>
-
-      <div class="form-group">
-        <label>Nom complet</label>
-        <input
-          type="text"
-          [(ngModel)]="registerName"
-          name="registerName"
-          class="form-control"
-          placeholder="Votre nom"
-          [disabled]="loading"
-        />
-      </div>
-
-      <div class="form-group">
-        <label>Email</label>
-        <input
-          type="email"
-          [(ngModel)]="registerEmail"
-          name="registerEmail"
-          class="form-control"
-          placeholder="votre@email.com"
-          [disabled]="loading"
-        />
-      </div>
-
-      <div class="form-group">
-        <label>Adresse</label>
-        <input
-          type="text"
-          [(ngModel)]="registerAddress"
-          name="registerAddress"
-          class="form-control"
-          placeholder="Votre adresse"
-          [disabled]="loading"
-        />
-      </div>
-
-      <div class="form-group">
-        <label>Mot de passe</label>
-        <input
-          type="password"
-          [(ngModel)]="registerPassword"
-          name="registerPassword"
-          class="form-control"
-          placeholder="********"
-          [disabled]="loading"
-        />
-      </div>
-
-      <div class="form-group">
-        <label>Confirmer mot de passe</label>
-        <input
-          type="password"
-          [(ngModel)]="registerConfirmPassword"
-          name="registerConfirmPassword"
-          class="form-control"
-          placeholder="********"
-          [disabled]="loading"
-        />
-      </div>
-
-      <button type="submit" class="btn btn-login w-100" [disabled]="loading">
-        {{ loading ? 'Création...' : 'Créer un compte' }}
-      </button>
-
+    <form *ngIf="isRegisterMode" (ngSubmit)="register()" class="space-y-4">
+      <label class="float-field"><input name="registerName" [(ngModel)]="registerName" type="text" placeholder=" "><span>Nom complet</span></label>
+      <label class="float-field"><input name="registerEmail" [(ngModel)]="registerEmail" type="email" placeholder=" "><span>Email</span></label>
+      <label class="float-field"><input name="registerAddress" [(ngModel)]="registerAddress" type="text" placeholder=" "><span>Adresse</span></label>
+      <label class="float-field"><input name="registerPassword" [(ngModel)]="registerPassword" type="password" placeholder=" "><span>Mot de passe</span></label>
+      <label class="float-field"><input name="registerConfirmPassword" [(ngModel)]="registerConfirmPassword" type="password" placeholder=" "><span>Confirmer le mot de passe</span></label>
+      <button class="submit-btn" [disabled]="loading">{{loading?'Création...':'Créer mon compte'}}</button>
     </form>
-
-  </div>
+  </section>
 </div>
