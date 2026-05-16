@@ -2,11 +2,12 @@ import { Component } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { RouterLink, Router } from '@angular/router';
 import { ProductCard } from '../../shared/product-card/product-card';
+import { HeroComponent } from '../../shared/hero/hero.component';
 
 @Component({
   selector: 'app-home',
   standalone: true,
-  imports: [CommonModule, ProductCard, RouterLink],
+  imports: [CommonModule, ProductCard, RouterLink, HeroComponent],
   templateUrl: './home.html',
   styleUrl: './home.css'
 })

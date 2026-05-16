@@ -1,18 +1,17 @@
-<div class="product-card">
-  <div class="card-img">
-    <span *ngIf="product.stock <= 5" class="badge-stock">⚠️ Stock faible</span>
-    <img [src]="product.image" [alt]="product.nom || product.name" />
+<article class="product-card">
+  <div class="card-img" (click)="goToDetails()">
+    <span *ngIf="stock <= 5" class="badge-stock">Stock limité</span>
+    <img [src]="image" [alt]="title" />
   </div>
 
   <div class="card-body">
-    <p class="product-category">{{ product.categorieNom || product.category }}</p>
-    <h3 class="product-name">{{ product.nom || product.name }}</h3>
-    <p class="product-description">{{ product.description }}</p>
-    <p class="product-price">{{ (product.prixAchat ?? product.prix ?? product.price) | number:'1.1-2' }} TND</p>
-
+    <p class="product-category">{{ category }}</p>
+    <h3 class="product-name">{{ title }}</h3>
+    <p class="product-description">{{ description }}</p>
+    <p class="product-price">{{ price | number:'1.1-2' }} TND</p>
     <div class="card-actions">
-      <button class="btn-add-cart" (click)="addToCart()" title="Ajouter au panier">🛒</button>
-      <button class="btn-details" (click)="goToDetails()" title="Voir détails">→</button>
+      <button class="btn-liquid" (click)="addToCart()">Ajouter au panier</button>
+      <button class="btn-ghost" (click)="goToDetails()">Détails</button>
     </div>
   </div>
-</div>
+</article>
