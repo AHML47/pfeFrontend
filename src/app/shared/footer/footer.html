@@ -1,0 +1,10 @@
+<footer class="mx-4 mb-4 mt-10 rounded-2xl px-4 py-6 md:mx-8 glass-panel">
+  <div class="flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
+    <p class="text-sm text-start">© 2026 DeliverWholesale · Premium Alimentaire Marketplace</p>
+    <div class="flex flex-wrap items-center gap-4">
+      @for (item of quickLinks; track item.label) {
+        <a class="liquid-link" [routerLink]="item.route" routerLinkActive="font-semibold" [routerLinkActiveOptions]="{ exact: item.route === '/' }">{{ item.label }}</a>
+      }
+    </div>
+  </div>
+</footer>

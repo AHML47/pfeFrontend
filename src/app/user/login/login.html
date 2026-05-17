@@ -1,0 +1,12 @@
+<section class="auth-shell">
+  <aside class="auth-media"><div class="overlay"><h2>{{ 'AUTH.PREMIUM_GROCERIES_TAGLINE' | translate }}</h2></div></aside>
+  <div class="auth-form-wrap">
+    <form class="auth-form" (ngSubmit)="login()">
+      <h1>{{ 'AUTH.WELCOME_BACK' | translate }}</h1>
+      <label class="floating"><input [(ngModel)]="email" name="email" type="email" placeholder=" " required><span>{{ 'AUTH.EMAIL' | translate }}</span></label>
+      <label class="floating"><input [(ngModel)]="password" name="password" type="password" placeholder=" " required><span>{{ 'AUTH.PASSWORD' | translate }}</span></label>
+      <button #submitBtn type="submit" (mousemove)="onBtnMove($event)" (mouseleave)="resetBtn()" class="primary-btn">{{ 'AUTH.SIGN_IN' | translate }}</button>
+      <p>{{ 'AUTH.NEED_ACCOUNT' | translate }} <a routerLink="/register">{{ 'AUTH.REGISTER' | translate }}</a></p>
+    </form>
+  </div>
+</section>

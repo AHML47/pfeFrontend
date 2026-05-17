@@ -1,0 +1,44 @@
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Playfair+Display:wght@600;700;800&display=swap');
+
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+:root {
+  color-scheme: light;
+}
+
+.dark {
+  color-scheme: dark;
+}
+
+body {
+  @apply m-0 min-h-screen bg-cream text-olive font-sans antialiased transition-colors duration-500 dark:bg-forest dark:text-mist;
+}
+
+.glass-panel {
+  @apply border border-white/35 bg-white/50 shadow-glass backdrop-blur-md dark:border-white/15 dark:bg-white/10;
+}
+
+.liquid-link {
+  @apply relative inline-flex items-center text-sm font-medium text-start;
+}
+
+.liquid-link::after {
+  content: '';
+  /* Replaced origin-start with origin-left rtl:origin-right */
+  @apply absolute -bottom-1 start-0 h-0.5 w-full origin-left rtl:origin-right scale-x-0 rounded-full bg-wheat transition-transform duration-300 ease-out;
+}
+
+.liquid-link:hover::after,
+.liquid-link:focus-visible::after {
+  @apply scale-x-100;
+}
+
+button.bg-olive-700, .primary-btn {
+  box-shadow: 0 8px 24px rgba(0,0,0,.18);
+  transition: transform .25s ease, box-shadow .25s ease;
+}
+button.bg-olive-700:hover, .primary-btn:hover {
+  box-shadow: 0 0 20px rgba(111,130,89,0.5), 0 14px 28px rgba(0,0,0,.2);
+}

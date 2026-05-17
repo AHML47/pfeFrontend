@@ -1,0 +1,11 @@
+:host { display: block; }
+.font-display { font-family: 'Playfair Display', serif; }
+
+.ambient-bg .orb { position:absolute; border-radius:999px; filter: blur(100px); opacity:.65; animation: drift 20s ease-in-out infinite alternate; }
+.orb-wheat { width:28rem; height:28rem; top:-9rem; left:18%; background:rgba(230,208,163,.55); }
+.orb-olive { width:32rem; height:32rem; right:-8rem; bottom:4%; background:rgba(111,130,89,.42); animation-duration:26s; }
+.orb-mist { width:20rem; height:20rem; left:-5rem; bottom:15%; background:rgba(204,214,194,.45); animation-duration:23s; }
+@keyframes drift { from { transform: translate3d(-2%, -2%, 0) rotate(0deg) scale(1);} to { transform: translate3d(3%, 2%, 0) rotate(12deg) scale(1.12);} }
+
+.magnetic-btn { background: rgba(255,255,255,.48); border: 1px solid rgba(255,255,255,.36); box-shadow: 0 10px 24px rgba(0,0,0,.12); transition: all .3s ease; }
+.magnetic-btn:hover { box-shadow: 0 0 20px rgba(111,130,89,0.5), 0 18px 30px rgba(0,0,0,0.15); }

@@ -1,0 +1,87 @@
+{
+  "NAV": {
+    "HOME": "Home",
+    "PRODUCTS": "Products",
+    "CART": "Cart",
+    "ADMIN": "Admin",
+    "LOGIN": "Login",
+    "LOGOUT": "Logout"
+  },
+  "LANG": {
+    "ENGLISH": "English",
+    "FRENCH": "Français",
+    "ARABIC": "العربية"
+  },
+  "HOME": {
+    "HERO": {
+      "KICKER": "Premium Wholesale Alimentaire",
+      "HEADLINE_LINE_1": "Curated Flavors",
+      "HEADLINE_LINE_2": "for Cinematic",
+      "HEADLINE_LINE_3": "Shelves.",
+      "SUBTITLE": "From boutique grocers to large hospitality chains, we orchestrate product lines that sell fast and feel premium.",
+      "CTA": "Start your assortment"
+    },
+    "FEATURED_PRODUCTS": {
+      "TITLE": "Featured Products"
+    }
+  },
+  "PRODUCTS": {
+    "TITLE": "Products",
+    "CATEGORIES": "Categories",
+    "ALL_PRODUCTS": "All Products",
+    "FILTER_BY_CATEGORY": "Filter by Category",
+    "ADD_TO_CART": "Add to Cart",
+    "OUT_OF_STOCK": "Out of Stock"
+  },
+  "CART": {
+    "YOUR_CART": "Your Cart",
+    "ORDER_SUMMARY": "Order Summary",
+    "SUBTOTAL": "Subtotal",
+    "TAXES": "Taxes",
+    "TOTAL": "Total",
+    "CHECKOUT": "Checkout",
+    "REMOVE": "Remove",
+    "UNIT": "unit",
+    "PROCEED_TO_CHECKOUT": "Proceed to Checkout"
+  },
+  "AUTH": {
+    "LOGIN_TO_ACCOUNT": "Login to your account",
+    "CREATE_ACCOUNT": "Create an account",
+    "WELCOME_BACK": "Welcome back",
+    "FULL_NAME": "Full name",
+    "EMAIL": "Email",
+    "PASSWORD": "Password",
+    "SUBMIT": "Submit",
+    "SIGN_IN": "Sign in",
+    "REGISTER": "Register",
+    "NEED_ACCOUNT": "Need an account?",
+    "ALREADY_MEMBER": "Already a member?",
+    "PREMIUM_GROCERIES_TAGLINE": "Premium Groceries, Delivered with Precision.",
+    "WHOLESALE_TAGLINE": "Wholesale Ingredients for Culinary Excellence."
+  },
+  "ADMIN": {
+    "DASHBOARD": "Dashboard",
+    "ADMIN_DASHBOARD": "Admin Dashboard",
+    "CONTROL_CENTER": "Control Center",
+    "TOTAL_REVENUE": "Total Revenue",
+    "RECENT_ORDERS": "Recent Orders",
+    "MANAGE_INVENTORY": "Manage Inventory",
+    "REVENUE": "Revenue",
+    "TOTAL_ORDERS": "Total Orders",
+    "ACTIVE_USERS": "Active Users",
+    "OVERVIEW": "Overview",
+    "ORDERS": "Orders",
+    "INVENTORY": "Inventory",
+    "RECLAMATIONS": "Reclamations",
+    "CLIENT": "Client",
+    "STATUS": "Status",
+    "TOTAL": "Total",
+    "PRODUCT": "Product",
+    "STOCK": "Stock",
+    "CATEGORY": "Category",
+    "CUSTOMER": "Customer",
+    "SUBJECT": "Subject",
+    "PRIORITY": "Priority",
+    "TICKET": "Ticket"
+  }
+}

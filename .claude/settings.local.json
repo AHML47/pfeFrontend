@@ -1,0 +1,9 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(Get-ChildItem -Path \"d:\\\\pfeChaima\\\\wholesale-pfe-main\\\\wholesale-pfe-main\" -Force)",
+      "Bash(Select-Object Name, FullName)",
+      "Bash(Format-List)"
+    ]
+  }
+}

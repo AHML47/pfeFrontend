@@ -1,0 +1,106 @@
+<div class="admin-shell">
+  <button class="menu-btn" (click)="isSidebarOpen = !isSidebarOpen" [attr.aria-label]="'ADMIN.DASHBOARD' | translate">☰</button>
+
+  <aside class="sidebar" [class.open]="isSidebarOpen">
+    <h2>{{ 'ADMIN.CONTROL_CENTER' | translate }}</h2>
+    <div #activeIndicator class="active-indicator"></div>
+    @for (tab of tabs; track tab.key) {
+      <button
+        #tabItem
+        class="tab"
+        [attr.data-tab]="tab.key"
+        [class.active]="activeTab === tab.key"
+        (click)="selectTab(tab.key)">
+        <span>{{ tab.icon }}</span>
+        <span>{{ tab.label | translate }}</span>
+      </button>
+    }
+  </aside>
+
+  <main class="panel">
+    <header class="topbar">
+      <h1>{{ 'ADMIN.ADMIN_DASHBOARD' | translate }}</h1>
+    </header>
+
+    @if (activeTab === 'overview') {
+      <section class="bento-grid">
+        <article #statCard class="stat-card big">
+          <p>{{ 'ADMIN.REVENUE' | translate }}</p>
+          <h3>{{ animatedRevenue | currency:'USD':'symbol':'1.0-0' }}</h3>
+        </article>
+        <article #statCard class="stat-card">
+          <p>{{ 'ADMIN.TOTAL_ORDERS' | translate }}</p>
+          <h3>{{ animatedOrders | number }}</h3>
+        </article>
+        <article #statCard class="stat-card">
+          <p>{{ 'ADMIN.ACTIVE_USERS' | translate }}</p>
+          <h3>{{ animatedUsers | number }}</h3>
+        </article>
+      </section>
+    }
+
+    @if (activeTab === 'orders') {
+      <section class="data-list">
+        <div class="list-head">
+          <span>ID</span>
+          <span>{{ 'ADMIN.CLIENT' | translate }}</span>
+          <span>{{ 'ADMIN.STATUS' | translate }}</span>
+          <span>{{ 'ADMIN.TOTAL' | translate }}</span>
+        </div>
+        @for (order of orders; track order.id) {
+          <article class="row">
+            <span>#{{ order.id }}</span>
+            <span>{{ order.clientNom ?? '—' }}</span>
+            <span>{{ order.statut }}</span>
+            <span>{{ (order.total ?? 0) | currency }}</span>
+          </article>
+        }
+        @if (!orders.length) {
+          <p class="empty-state">Aucune commande.</p>
+        }
+      </section>
+    }
+
+    @if (activeTab === 'products') {
+      <section class="data-list">
+        <div class="list-head">
+          <span>{{ 'ADMIN.PRODUCT' | translate }}</span>
+          <span>{{ 'ADMIN.STOCK' | translate }}</span>
+          <span>{{ 'ADMIN.CATEGORY' | translate }}</span>
+        </div>
+        @for (item of inventory; track item.produitId) {
+          <article class="row">
+            <span>{{ item.libelle ?? item.produitId }}</span>
+            <span>{{ item.quantiteDisponible }}</span>
+            <span>{{ item.categorie ?? '—' }}</span>
+          </article>
+        }
+        @if (!inventory.length) {
+          <p class="empty-state">Aucun stock.</p>
+        }
+      </section>
+    }
+
+    @if (activeTab === 'reclamations') {
+      <section class="data-list">
+        <div class="list-head">
+          <span>{{ 'ADMIN.TICKET' | translate }}</span>
+          <span>{{ 'ADMIN.CUSTOMER' | translate }}</span>
+          <span>{{ 'ADMIN.SUBJECT' | translate }}</span>
+          <span>{{ 'ADMIN.STATUS' | translate }}</span>
+        </div>
+        @for (ticket of reclamations; track ticket.id) {
+          <article class="row">
+            <span>#{{ ticket.id }}</span>
+            <span>{{ ticket.clientNom ?? '—' }}</span>
+            <span>{{ ticket.sujet ?? ticket.description ?? '—' }}</span>
+            <span>{{ ticket.status ?? '—' }}</span>
+          </article>
+        }
+        @if (!reclamations.length) {
+          <p class="empty-state">Aucune réclamation.</p>
+        }
+      </section>
+    }
+  </main>
+</div>

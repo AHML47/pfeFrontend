@@ -1,0 +1,20 @@
+:host { display:block; color-scheme: light dark; }
+.admin-shell { min-height: 100vh; display:grid; grid-template-columns: 280px 1fr; background: linear-gradient(145deg,#eff3ea,#e4eae0); }
+.sidebar { position:relative; padding:1rem; backdrop-filter: blur(18px); background: color-mix(in oklab, #182112 78%, transparent); color:#e9f1e3; border-inline-end: 1px solid rgba(255,255,255,.09); }
+.sidebar h2 { margin:0 0 1rem; letter-spacing:.02em; font-weight:600; }
+.tab { width:100%; display:flex; gap:.7rem; align-items:center; padding:.75rem 1rem; margin-bottom:.35rem; border:none; background:transparent; border-radius:12px; text-align:start; color:inherit; opacity:.85; }
+.tab:hover,.tab.active { background:rgba(255,255,255,.06); opacity:1; }
+.active-indicator { position:absolute; inset-inline-start:.6rem; top:3.75rem; width:4px; height:42px; border-radius:10px; background:#8ca66c; box-shadow:0 0 16px #8ca66c; }
+.panel { padding:1rem 1.2rem; }
+.topbar { position:sticky; top:0; z-index:4; padding:.7rem 1rem; border-radius:16px; background:rgba(255,255,255,.62); backdrop-filter: blur(14px); }
+.bento-grid { margin-top:1rem; display:grid; gap:1rem; grid-template-columns:2fr 1fr; }
+.stat-card { opacity:0; transform:translateY(24px); padding:1.2rem; border-radius:20px; background:rgba(255,255,255,.82); box-shadow: 0 20px 30px rgba(0,0,0,.07); }
+.stat-card.big { grid-row: span 2; min-height:220px; }
+.data-list { margin-top:1rem; border-radius:20px; overflow:hidden; background:rgba(255,255,255,.55); backdrop-filter: blur(12px); }
+.list-head { position:sticky; top:0; display:grid; grid-template-columns: repeat(4,minmax(0,1fr)); padding:.8rem 1rem; font-weight:600; background:rgba(239,244,233,.72); }
+.row { display:grid; grid-template-columns: repeat(4,minmax(0,1fr)); padding: .85rem 1rem; border-top:1px solid transparent; transition: background .2s ease, transform .2s ease; }
+.row:hover { background:rgba(111,130,89,.12); transform: translateY(-1px); }
+.menu-btn { display:none; }
+:host-context(.dark) .admin-shell { background:linear-gradient(145deg,#0f1510,#1c241d); color:#e9f1e3; }
+:host-context(.dark) .stat-card, :host-context(.dark) .topbar, :host-context(.dark) .data-list { background:rgba(28,36,29,.65); }
+@media (max-width: 960px){ .admin-shell { grid-template-columns:1fr; } .menu-btn { display:block; position:fixed; z-index:30; top:.8rem; inset-inline-start:.8rem; } .sidebar { position:fixed; inset-inline-start:-110%; top:0; bottom:0; width:260px; transition:.3s ease; z-index:20; } .sidebar.open { inset-inline-start:0; } .panel { padding-top:3.8rem; } }

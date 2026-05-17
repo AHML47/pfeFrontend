@@ -1,0 +1,13 @@
+<section class="auth-shell">
+  <aside class="auth-media"><div class="overlay"><h2>{{ 'AUTH.WHOLESALE_TAGLINE' | translate }}</h2></div></aside>
+  <div class="auth-form-wrap">
+    <form class="auth-form" (ngSubmit)="register()">
+      <h1>{{ 'AUTH.CREATE_ACCOUNT' | translate }}</h1>
+      <label class="floating"><input [(ngModel)]="fullName" name="fullName" type="text" placeholder=" " required><span>{{ 'AUTH.FULL_NAME' | translate }}</span></label>
+      <label class="floating"><input [(ngModel)]="email" name="email" type="email" placeholder=" " required><span>{{ 'AUTH.EMAIL' | translate }}</span></label>
+      <label class="floating"><input [(ngModel)]="password" name="password" type="password" placeholder=" " required><span>{{ 'AUTH.PASSWORD' | translate }}</span></label>
+      <button #submitBtn type="submit" (mousemove)="onBtnMove($event)" (mouseleave)="resetBtn()" class="primary-btn">{{ 'AUTH.CREATE_ACCOUNT' | translate }}</button>
+      <p>{{ 'AUTH.ALREADY_MEMBER' | translate }} <a routerLink="/login">{{ 'AUTH.SIGN_IN' | translate }}</a></p>
+    </form>
+  </div>
+</section>

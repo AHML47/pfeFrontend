@@ -1,0 +1,21 @@
+<section class="mx-auto w-full max-w-7xl px-4 py-8 sm:px-6 lg:px-8">
+  <div class="grid gap-6 lg:grid-cols-[280px_1fr]">
+    <aside class="top-24 h-fit rounded-2xl border border-white/40 bg-white/50 p-4 backdrop-blur-md dark:border-white/10 dark:bg-zinc-900/60 lg:sticky">
+      <h2 class="mb-3 text-sm font-semibold uppercase tracking-wider text-zinc-700 dark:text-zinc-300">{{ 'PRODUCTS.CATEGORIES' | translate }}</h2>
+      <div class="flex flex-wrap gap-2 lg:flex-col">
+        <button class="rounded-xl px-4 py-2 text-start transition-colors" [class.bg-zinc-900]="selectedCategoryId === 'all'" [class.text-white]="selectedCategoryId === 'all'" (click)="filterByCategory('all')">{{ 'PRODUCTS.ALL_PRODUCTS' | translate }}</button>
+        @for (category of categories; track category.id) {
+          <button class="rounded-xl px-4 py-2 text-start transition-colors" [class.bg-zinc-900]="selectedCategoryId === category.id" [class.text-white]="selectedCategoryId === category.id" (click)="filterByCategory(category.id)">{{ category.name }}</button>
+        }
+      </div>
+    </aside>
+
+    <div class="grid grid-cols-1 gap-6 md:grid-cols-2 xl:grid-cols-3 2xl:grid-cols-4">
+      @for (product of filteredProducts; track product.id) {
+        <div #gridItem>
+          <app-product-card [product]="product"></app-product-card>
+        </div>
+      }
+    </div>
+  </div>
+</section>

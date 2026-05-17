@@ -1,0 +1,87 @@
+{
+  "NAV": {
+    "HOME": "الرئيسية",
+    "PRODUCTS": "المنتجات",
+    "CART": "السلة",
+    "ADMIN": "الإدارة",
+    "LOGIN": "تسجيل الدخول",
+    "LOGOUT": "تسجيل الخروج"
+  },
+  "LANG": {
+    "ENGLISH": "الإنجليزية",
+    "FRENCH": "الفرنسية",
+    "ARABIC": "العربية"
+  },
+  "HOME": {
+    "HERO": {
+      "KICKER": "تجارة الجملة الغذائية المتميزة",
+      "HEADLINE_LINE_1": "نكهات مختارة",
+      "HEADLINE_LINE_2": "لرفوف",
+      "HEADLINE_LINE_3": "استثنائية.",
+      "SUBTITLE": "من المتاجر المتخصصة إلى سلاسل الضيافة الكبرى، نصمم تشكيلة منتجات تبيع بسرعة وتعكس طابعًا فاخرًا.",
+      "CTA": "ابدأ تشكيلتك"
+    },
+    "FEATURED_PRODUCTS": {
+      "TITLE": "المنتجات المميزة"
+    }
+  },
+  "PRODUCTS": {
+    "TITLE": "المنتجات",
+    "CATEGORIES": "الفئات",
+    "ALL_PRODUCTS": "كل المنتجات",
+    "FILTER_BY_CATEGORY": "تصفية حسب الفئة",
+    "ADD_TO_CART": "أضف إلى السلة",
+    "OUT_OF_STOCK": "غير متوفر"
+  },
+  "CART": {
+    "YOUR_CART": "سلتك",
+    "ORDER_SUMMARY": "ملخص الطلب",
+    "SUBTOTAL": "المجموع الفرعي",
+    "TAXES": "الضرائب",
+    "TOTAL": "الإجمالي",
+    "CHECKOUT": "إتمام الشراء",
+    "REMOVE": "إزالة",
+    "UNIT": "وحدة",
+    "PROCEED_TO_CHECKOUT": "متابعة إلى الدفع"
+  },
+  "AUTH": {
+    "LOGIN_TO_ACCOUNT": "سجّل الدخول إلى حسابك",
+    "CREATE_ACCOUNT": "إنشاء حساب",
+    "WELCOME_BACK": "مرحبًا بعودتك",
+    "FULL_NAME": "الاسم الكامل",
+    "EMAIL": "البريد الإلكتروني",
+    "PASSWORD": "كلمة المرور",
+    "SUBMIT": "إرسال",
+    "SIGN_IN": "تسجيل الدخول",
+    "REGISTER": "إنشاء حساب",
+    "NEED_ACCOUNT": "تحتاج إلى حساب؟",
+    "ALREADY_MEMBER": "لديك حساب بالفعل؟",
+    "PREMIUM_GROCERIES_TAGLINE": "بقالة فاخرة تُسلّم بدقة.",
+    "WHOLESALE_TAGLINE": "مكونات بالجملة للتميّز في الطهي."
+  },
+  "ADMIN": {
+    "DASHBOARD": "لوحة التحكم",
+    "ADMIN_DASHBOARD": "لوحة تحكم الإدارة",
+    "CONTROL_CENTER": "مركز التحكم",
+    "TOTAL_REVENUE": "إجمالي الإيرادات",
+    "RECENT_ORDERS": "الطلبات الأخيرة",
+    "MANAGE_INVENTORY": "إدارة المخزون",
+    "REVENUE": "الإيرادات",
+    "TOTAL_ORDERS": "إجمالي الطلبات",
+    "ACTIVE_USERS": "المستخدمون النشطون",
+    "OVERVIEW": "نظرة عامة",
+    "ORDERS": "الطلبات",
+    "INVENTORY": "المخزون",
+    "RECLAMATIONS": "الشكاوى",
+    "CLIENT": "العميل",
+    "STATUS": "الحالة",
+    "TOTAL": "الإجمالي",
+    "PRODUCT": "المنتج",
+    "STOCK": "المخزون",
+    "CATEGORY": "الفئة",
+    "CUSTOMER": "الزبون",
+    "SUBJECT": "الموضوع",
+    "PRIORITY": "الأولوية",
+    "TICKET": "تذكرة"
+  }
+}

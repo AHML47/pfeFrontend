@@ -1,0 +1,8 @@
+:host{display:block}.auth-shell{min-height:calc(100vh - 9rem);display:grid;grid-template-columns:1.1fr 1fr;border-radius:2rem;overflow:hidden;background:rgba(255,255,255,.55);backdrop-filter:blur(20px)}
+.auth-media{background:url('https://images.unsplash.com/photo-1542838132-92c53300491e?auto=format&fit=crop&w=1200&q=80') center/cover no-repeat;position:relative}
+.overlay{position:absolute;inset:0;background:linear-gradient(160deg,rgba(0,0,0,.2),rgba(0,0,0,.55));display:flex;align-items:flex-end;padding:2rem;color:#fff}
+.overlay h2{max-width:24rem;font-size:2rem;line-height:1.2}.auth-form-wrap{display:grid;place-items:center;padding:2rem}
+.auth-form{width:min(420px,100%);display:grid;gap:1rem}.auth-form h1{font-size:2rem}.floating{position:relative}.floating input{width:100%;padding:1.2rem .2rem .45rem;border:none;border-bottom:1px solid rgba(107,114,128,.35);background:transparent;outline:none}
+.floating span{position:absolute;left:.1rem;top:1rem;transition:.25s;color:#6b7280}.floating input:focus+span,.floating input:not(:placeholder-shown)+span{top:.1rem;font-size:.75rem;color:#6f8259}.floating input:focus{border-bottom-color:#6f8259;box-shadow:0 7px 16px -13px rgba(111,130,89,.85)}
+.primary-btn{border:none;border-radius:999px;padding:.9rem 1rem;background:#6f8259;color:white;font-weight:600}.auth-form a{color:#6f8259}
+@media (max-width:920px){.auth-shell{grid-template-columns:1fr}.auth-media{min-height:14rem}}

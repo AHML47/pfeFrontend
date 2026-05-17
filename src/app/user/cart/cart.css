@@ -1,0 +1,66 @@
+:host {
+  display: block;
+}
+
+.cart-item-panel {
+  @apply flex items-center gap-4 rounded-2xl border border-white/20 bg-white/40 p-4 backdrop-blur-md transition-all duration-300 dark:border-white/10 dark:bg-slate-900/40;
+}
+
+.qty-pill {
+  @apply inline-flex items-center rounded-full border border-white/40 bg-white/70 px-2 py-1 text-sm text-slate-700 shadow-sm dark:border-white/10 dark:bg-slate-800/80 dark:text-slate-200;
+}
+
+.qty-btn {
+  @apply inline-flex h-7 w-7 items-center justify-center rounded-full text-base font-semibold;
+}
+
+.qty-value {
+  @apply min-w-8 px-1 text-center font-semibold;
+}
+
+.remove-btn {
+  @apply rounded-xl border border-red-300/50 bg-red-50/70 px-3 py-2 text-sm font-medium text-red-600 transition-all duration-300 dark:border-red-400/40 dark:bg-red-500/10 dark:text-red-300;
+}
+
+.remove-btn:hover {
+  box-shadow: 0 0 15px rgba(239, 68, 68, 0.4);
+}
+
+.summary-shell {
+  @apply relative rounded-3xl p-[1px];
+}
+
+.summary-glow {
+  position: absolute;
+  inset: 0;
+  border-radius: inherit;
+  background: linear-gradient(120deg, rgba(148, 163, 184, 0.45), rgba(153, 27, 27, 0.18), rgba(67, 56, 202, 0.35));
+  background-size: 220% 220%;
+  animation: summaryGradient 7s ease infinite;
+}
+
+.summary-panel {
+  @apply relative rounded-[calc(theme(borderRadius.3xl)-1px)] border border-white/30 bg-white/65 p-6 shadow-2xl backdrop-blur-md dark:border-white/10 dark:bg-slate-900/70;
+}
+
+.checkout-btn {
+  background: linear-gradient(135deg, #6b7a2f 0%, #80913a 100%);
+  box-shadow: 0 8px 24px rgba(107, 122, 47, 0.35);
+  transition: transform 220ms ease, box-shadow 220ms ease, filter 220ms ease;
+}
+
+.checkout-btn:hover {
+  transform: translateY(-2px) scale(1.01);
+  box-shadow: 0 14px 32px rgba(107, 122, 47, 0.5), 0 0 20px rgba(128, 145, 58, 0.45);
+  filter: saturate(1.08);
+}
+
+:host-context([dir='rtl']) .cart-item-panel {
+  flex-direction: row-reverse;
+}
+
+@keyframes summaryGradient {
+  0% { background-position: 0% 50%; }
+  50% { background-position: 100% 50%; }
+  100% { background-position: 0% 50%; }
+}

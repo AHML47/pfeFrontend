@@ -1,0 +1,87 @@
+{
+  "NAV": {
+    "HOME": "Accueil",
+    "PRODUCTS": "Produits",
+    "CART": "Panier",
+    "ADMIN": "Admin",
+    "LOGIN": "Connexion",
+    "LOGOUT": "Déconnexion"
+  },
+  "LANG": {
+    "ENGLISH": "Anglais",
+    "FRENCH": "Français",
+    "ARABIC": "Arabe"
+  },
+  "HOME": {
+    "HERO": {
+      "KICKER": "Grossiste alimentaire premium",
+      "HEADLINE_LINE_1": "Saveurs sélectionnées",
+      "HEADLINE_LINE_2": "pour des rayons",
+      "HEADLINE_LINE_3": "spectaculaires.",
+      "SUBTITLE": "Des épiceries fines aux grandes chaînes hôtelières, nous orchestrons des gammes qui se vendent vite et valorisent votre image.",
+      "CTA": "Démarrer votre assortiment"
+    },
+    "FEATURED_PRODUCTS": {
+      "TITLE": "Produits vedettes"
+    }
+  },
+  "PRODUCTS": {
+    "TITLE": "Produits",
+    "CATEGORIES": "Catégories",
+    "ALL_PRODUCTS": "Tous les produits",
+    "FILTER_BY_CATEGORY": "Filtrer par catégorie",
+    "ADD_TO_CART": "Ajouter au panier",
+    "OUT_OF_STOCK": "Rupture de stock"
+  },
+  "CART": {
+    "YOUR_CART": "Votre panier",
+    "ORDER_SUMMARY": "Récapitulatif de commande",
+    "SUBTOTAL": "Sous-total",
+    "TAXES": "Taxes",
+    "TOTAL": "Total",
+    "CHECKOUT": "Paiement",
+    "REMOVE": "Retirer",
+    "UNIT": "unité",
+    "PROCEED_TO_CHECKOUT": "Passer à la caisse"
+  },
+  "AUTH": {
+    "LOGIN_TO_ACCOUNT": "Connectez-vous à votre compte",
+    "CREATE_ACCOUNT": "Créer un compte",
+    "WELCOME_BACK": "Bon retour",
+    "FULL_NAME": "Nom complet",
+    "EMAIL": "E-mail",
+    "PASSWORD": "Mot de passe",
+    "SUBMIT": "Valider",
+    "SIGN_IN": "Se connecter",
+    "REGISTER": "S'inscrire",
+    "NEED_ACCOUNT": "Besoin d'un compte ?",
+    "ALREADY_MEMBER": "Déjà membre ?",
+    "PREMIUM_GROCERIES_TAGLINE": "Épicerie premium, livrée avec précision.",
+    "WHOLESALE_TAGLINE": "Ingrédients de gros pour l'excellence culinaire."
+  },
+  "ADMIN": {
+    "DASHBOARD": "Tableau de bord",
+    "ADMIN_DASHBOARD": "Tableau de bord admin",
+    "CONTROL_CENTER": "Centre de contrôle",
+    "TOTAL_REVENUE": "Revenu total",
+    "RECENT_ORDERS": "Commandes récentes",
+    "MANAGE_INVENTORY": "Gérer le stock",
+    "REVENUE": "Revenu",
+    "TOTAL_ORDERS": "Commandes totales",
+    "ACTIVE_USERS": "Utilisateurs actifs",
+    "OVERVIEW": "Aperçu",
+    "ORDERS": "Commandes",
+    "INVENTORY": "Inventaire",
+    "RECLAMATIONS": "Réclamations",
+    "CLIENT": "Client",
+    "STATUS": "Statut",
+    "TOTAL": "Total",
+    "PRODUCT": "Produit",
+    "STOCK": "Stock",
+    "CATEGORY": "Catégorie",
+    "CUSTOMER": "Client",
+    "SUBJECT": "Sujet",
+    "PRIORITY": "Priorité",
+    "TICKET": "Ticket"
+  }
+}

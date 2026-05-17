@@ -1,0 +1,27 @@
+<div class="relative min-h-screen bg-gradient-to-b from-slate-50 to-wheat/10 text-slate-900 dark:from-slate-950 dark:to-slate-900 dark:text-slate-50">
+  
+  <app-custom-cursor />
+
+  <div class="ambient-bg pointer-events-none fixed inset-0 -z-10">
+    <div class="orb orb-wheat"></div>
+    <div class="orb orb-olive"></div>
+    <div class="orb orb-mist"></div>
+  </div>
+
+  <app-navbar class="fixed top-0 left-0 w-full z-50" /> 
+
+  <div class="fixed inset-0 z-0 h-screen w-full overflow-hidden">
+    
+    <div #smoothContent class="w-full will-change-transform">
+      
+      <main class="relative z-10 mx-auto w-full max-w-7xl space-y-14 overflow-x-hidden px-4 pb-20 pt-28 md:px-8">
+        <div [@routeAnimations]="prepareRoute(outlet)">
+          <router-outlet #outlet="outlet" />
+        </div>
+      </main>
+
+      <app-footer />
+      
+    </div>
+  </div>
+</div>
