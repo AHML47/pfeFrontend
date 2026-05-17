@@ -1,9 +1,8 @@
-import { AfterViewInit, Component, ElementRef, QueryList, ViewChildren, inject } from '@angular/core';
+import { AfterViewInit, Component, ElementRef, OnInit, QueryList, ViewChildren, computed, inject } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { TranslateModule } from '@ngx-translate/core';
-import { CartService } from '../../core/services/cart.service';
-import { OrderService } from '../../core/services/order.service';
-import { CartItem } from '../../user.products';
+import { PanierService } from '../../core/services/panier.service';
+import { PanierItemDto } from '../../user.products';
 
 declare const gsap: any;
 
@@ -13,69 +12,50 @@ declare const gsap: any;
   templateUrl: './cart.html',
   styleUrl: './cart.css'
 })
-export class CartComponent implements AfterViewInit {
+export class CartComponent implements OnInit, AfterViewInit {
   @ViewChildren('cartCard') cartCards!: QueryList<ElementRef<HTMLElement>>;
 
-  private readonly cartService = inject(CartService);
-  private readonly orderService = inject(OrderService);
+  private readonly panierService = inject(PanierService);
 
-  readonly items = this.cartService.items;
-  readonly subtotal = this.cartService.subtotal;
+  readonly panier = this.panierService.panier;
+  readonly items = computed(() => this.panier()?.Items ?? []);
+  readonly total = computed(() => this.panier()?.TotalPrix ?? 0);
 
+  loading = false;
   orderSuccess = false;
   orderError = '';
   isSubmitting = false;
 
-  get shipping(): number {
-    return this.items().length ? 8 : 0;
-  }
-
-  get total(): number {
-    return this.subtotal() + this.shipping;
+  ngOnInit(): void {
+    this.loading = true;
+    this.panierService.getPanier().subscribe({
+      next: () => (this.loading = false),
+      error: () => (this.loading = false)
+    });
   }
 
   ngAfterViewInit(): void {
-    this.animateEntrance();
+    this.cartCards.changes.subscribe(() => this.animateEntrance());
   }
 
   private animateEntrance(): void {
     if (typeof gsap === 'undefined') return;
-    const isRtl = document?.documentElement?.dir === 'rtl';
-    gsap.from(this.cartCards.map((card) => card.nativeElement), {
-      x: isRtl ? -80 : 80,
-      opacity: 0,
-      duration: 0.7,
-      stagger: 0.12,
-      ease: 'power3.out'
-    });
+    const cards = this.cartCards.map((c) => c.nativeElement);
+    if (!cards.length) return;
+    gsap.from(cards, { x: 80, opacity: 0, duration: 0.6, stagger: 0.1, ease: 'power3.out' });
   }
 
-  removeItem(item: CartItem, event?: Event): void {
-    const card = (event?.currentTarget as HTMLElement | null)?.closest(
-      '[data-cart-card]'
-    ) as HTMLElement | null;
+  removeItem(item: PanierItemDto): void {
+    this.panierService.deleteItem(item.ProduitId).subscribe();
+  }
 
-    if (typeof gsap === 'undefined' || !card) {
-      this.cartService.removeItem(item.product.id);
+  updateQuantity(item: PanierItemDto, delta: number): void {
+    const next = item.Quantite + delta;
+    if (next < 1) {
+      this.removeItem(item);
       return;
     }
-
-    gsap.to(card, {
-      height: 0,
-      opacity: 0,
-      marginTop: 0,
-      marginBottom: 0,
-      paddingTop: 0,
-      paddingBottom: 0,
-      scaleY: 0.92,
-      duration: 0.35,
-      ease: 'power2.inOut',
-      onComplete: () => this.cartService.removeItem(item.product.id)
-    });
-  }
-
-  updateQuantity(item: CartItem, delta: number): void {
-    this.cartService.updateQuantity(item.product.id, item.quantity + delta);
+    this.panierService.updateItem(item.ProduitId, { quantite: next }).subscribe();
   }
 
   checkout(): void {
@@ -83,10 +63,9 @@ export class CartComponent implements AfterViewInit {
     this.isSubmitting = true;
     this.orderError = '';
 
-    this.orderService.createOrder(this.cartService.toOrderPayload()).subscribe({
+    this.panierService.checkout().subscribe({
       next: () => {
         this.orderSuccess = true;
-        this.cartService.clear();
         this.isSubmitting = false;
       },
       error: () => {

@@ -9,10 +9,22 @@
     "secure": false,
     "changeOrigin": true
   },
+  "/uploads": {
+    "target": "http://localhost:5045",
+    "secure": false,
+    "changeOrigin": true
+  },
+  "/images": {
+    "target": "http://localhost:5045",
+    "secure": false,
+    "changeOrigin": true
+  },
   "/hubs": {
     "target": "http://localhost:5045",
     "secure": false,
     "changeOrigin": true,
     "ws": true
   }
+
+
 }

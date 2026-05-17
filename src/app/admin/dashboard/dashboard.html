@@ -63,20 +63,82 @@
 
     @if (activeTab === 'products') {
       <section class="data-list">
+        <div class="section-toolbar">
+          <h2>{{ 'ADMIN.PRODUCTS_MANAGEMENT' | translate }}</h2>
+          <button class="btn-primary" (click)="openNewProductForm()">+ {{ 'ADMIN.NEW_PRODUCT' | translate }}</button>
+        </div>
+
+        @if (showProductForm) {
+          <div class="product-form">
+            <div class="form-grid">
+              <div class="field">
+                <label>Nom *</label>
+                <input [(ngModel)]="productDraft.libelle" placeholder="Nom du produit" />
+              </div>
+              <div class="field">
+                <label>Prix *</label>
+                <input [(ngModel)]="productDraft.prixVente" type="number" min="0" step="0.01" placeholder="0.00" />
+              </div>
+              <div class="field">
+                <label>Catégorie</label>
+                <select [(ngModel)]="productDraft.idCategorie">
+                  <option [ngValue]="null">— Sélectionner —</option>
+                  @for (cat of categories; track cat.id) {
+                    <option [ngValue]="cat.id">{{ cat.name }}</option>
+                  }
+                </select>
+              </div>
+              <div class="field">
+                <label>Description</label>
+                <input [(ngModel)]="productDraft.description" placeholder="Description" />
+              </div>
+              <div class="field">
+                <label>Unités / lot</label>
+                <input [(ngModel)]="productDraft.nbUnite" type="number" min="1" placeholder="1" />
+              </div>
+              <div class="field">
+                <label>Seuil alerte stock</label>
+                <input [(ngModel)]="productDraft.seuil" type="number" min="0" placeholder="0" />
+              </div>
+              <div class="field field-check">
+                <label>
+                  <input type="checkbox" [(ngModel)]="productDraft.prixModifiable" />
+                  Prix modifiable
+                </label>
+              </div>
+              <div class="field">
+                <label>Image</label>
+                <input type="file" accept="image/*" (change)="onProductImageChange($event)" />
+              </div>
+            </div>
+            <div class="form-actions">
+              <button class="btn-primary" (click)="saveProduct()">
+                {{ editingProductId !== null ? ('ADMIN.UPDATE' | translate) : ('ADMIN.SAVE' | translate) }}
+              </button>
+              <button class="btn-ghost" (click)="cancelProductForm()">{{ 'ADMIN.CANCEL' | translate }}</button>
+            </div>
+          </div>
+        }
+
         <div class="list-head">
           <span>{{ 'ADMIN.PRODUCT' | translate }}</span>
-          <span>{{ 'ADMIN.STOCK' | translate }}</span>
+          <span>{{ 'ADMIN.PRICE' | translate }}</span>
           <span>{{ 'ADMIN.CATEGORY' | translate }}</span>
+          <span>{{ 'ADMIN.ACTIONS' | translate }}</span>
         </div>
-        @for (item of inventory; track item.produitId) {
+        @for (prod of products; track prod.id) {
           <article class="row">
-            <span>{{ item.libelle ?? item.produitId }}</span>
-            <span>{{ item.quantiteDisponible }}</span>
-            <span>{{ item.categorie ?? '—' }}</span>
+            <span>{{ prod.name }}</span>
+            <span>{{ prod.price | currency }}</span>
+            <span>{{ getCategoryName(prod.categoryId) }}</span>
+            <span class="row-actions">
+              <button class="btn-ghost" (click)="editProduct(prod)">✎</button>
+              <button class="btn-danger" (click)="deleteProduct(prod.id)">✕</button>
+            </span>
           </article>
         }
-        @if (!inventory.length) {
-          <p class="empty-state">Aucun stock.</p>
+        @if (!products.length) {
+          <p class="empty-state">Aucun produit.</p>
         }
       </section>
     }
@@ -99,6 +161,108 @@
         }
         @if (!reclamations.length) {
           <p class="empty-state">Aucune réclamation.</p>
+        }
+      </section>
+    }
+
+    @if (activeTab === 'categories') {
+      <section class="data-list">
+        <div class="section-toolbar">
+          <h2>{{ 'ADMIN.CATEGORIES' | translate }}</h2>
+          <button class="btn-primary" (click)="openNewCategoryForm()">+ {{ 'ADMIN.NEW_CATEGORY' | translate }}</button>
+        </div>
+
+        @if (showCategoryForm) {
+          <div class="category-form">
+            <input [(ngModel)]="categoryDraft.nom" placeholder="{{ 'ADMIN.CATEGORY_NAME' | translate }}" />
+            <input [(ngModel)]="categoryDraft.description" placeholder="{{ 'ADMIN.CATEGORY_DESCRIPTION' | translate }}" />
+            <div class="form-actions">
+              <button class="btn-primary" (click)="saveCategory()">{{ 'ADMIN.SAVE' | translate }}</button>
+              <button class="btn-ghost" (click)="cancelCategoryForm()">{{ 'ADMIN.CANCEL' | translate }}</button>
+            </div>
+          </div>
+        }
+
+        <div class="list-head cols-2">
+          <span>{{ 'ADMIN.CATEGORY_NAME' | translate }}</span>
+          <span>{{ 'ADMIN.ACTIONS' | translate }}</span>
+        </div>
+        @for (cat of categories; track cat.id) {
+          <article class="row cols-2">
+            <span>{{ cat.name }}</span>
+            <span class="row-actions">
+              <button class="btn-ghost" (click)="editCategory(cat)">✎</button>
+              <button class="btn-danger" (click)="deleteCategory(cat.id)">✕</button>
+            </span>
+          </article>
+        }
+        @if (!categories.length) {
+          <p class="empty-state">Aucune catégorie.</p>
+        }
+      </section>
+    }
+
+    @if (activeTab === 'achats') {
+      <section class="data-list">
+        <div class="section-toolbar">
+          <h2>{{ 'ADMIN.ACHAT_LOTS' | translate }}</h2>
+          <button class="btn-primary" (click)="openNewAchatForm()">+ {{ 'ADMIN.NEW_ACHAT' | translate }}</button>
+        </div>
+
+        @if (showAchatForm) {
+          <div class="product-form">
+            <div class="form-grid">
+              <div class="field">
+                <label>Produit *</label>
+                <select [(ngModel)]="achatDraft.produitId">
+                  <option [ngValue]="0">— Sélectionner —</option>
+                  @for (prod of products; track prod.id) {
+                    <option [ngValue]="prod.id">{{ prod.name }}</option>
+                  }
+                </select>
+              </div>
+              <div class="field">
+                <label>Fournisseur *</label>
+                <input [(ngModel)]="achatDraft.fournisseur" placeholder="Nom du fournisseur" />
+              </div>
+              <div class="field">
+                <label>Quantité achetée *</label>
+                <input [(ngModel)]="achatDraft.quantiteAchetee" type="number" min="1" placeholder="0" />
+              </div>
+              <div class="field">
+                <label>Prix unitaire *</label>
+                <input [(ngModel)]="achatDraft.prixUnitaire" type="number" min="0" step="0.01" placeholder="0.00" />
+              </div>
+              <div class="field">
+                <label>ID Fournisseur (optionnel)</label>
+                <input [(ngModel)]="achatDraft.supplierId" type="number" min="1" placeholder="—" />
+              </div>
+            </div>
+            <div class="form-actions">
+              <button class="btn-primary" (click)="saveAchat()">{{ 'ADMIN.SAVE' | translate }}</button>
+              <button class="btn-ghost" (click)="cancelAchatForm()">{{ 'ADMIN.CANCEL' | translate }}</button>
+            </div>
+          </div>
+        }
+
+        <div class="list-head">
+          <span>{{ 'ADMIN.PRODUCT' | translate }}</span>
+          <span>{{ 'ADMIN.SUPPLIER' | translate }}</span>
+          <span>{{ 'ADMIN.QUANTITY' | translate }}</span>
+          <span>{{ 'ADMIN.ACTIONS' | translate }}</span>
+        </div>
+        @for (lot of achatLots; track lot.Id) {
+          <article class="row">
+            <span>{{ getProductName(lot.ProduitId) }}</span>
+            <span>{{ lot.Fournisseur }}</span>
+            <span>{{ lot.QuantiteAchetee }} × {{ lot.PrixUnitaire | currency }}</span>
+            <span class="row-actions">
+              <button class="btn-danger" (click)="deleteAchatLot(lot.Id)">✕</button>
+            </span>
+          </article>
+        }
+        @if (!achatLots.length) {
+          <p class="empty-state">Aucun achat de lot.</p>
         }
       </section>
     }

@@ -1,4 +1,9 @@
-<article #card class="product-card group relative overflow-hidden rounded-3xl border border-black/10 bg-stone-50 p-3 shadow-sm transition-shadow duration-300 dark:border-white/10 dark:bg-zinc-900">
+<article
+  #card
+  class="product-card group relative cursor-pointer overflow-hidden rounded-3xl border border-black/10 bg-stone-50 p-3 shadow-sm transition-all duration-300 hover:-translate-y-1 hover:shadow-xl dark:border-white/10 dark:bg-zinc-900"
+  [routerLink]="['/products', product.id]"
+  role="link"
+  tabindex="0">
   <div class="overflow-hidden rounded-2xl bg-white/70 dark:bg-zinc-800/70">
     <img class="h-64 w-full object-cover" [src]="product.imageUrl" [alt]="product.name" loading="lazy" />
   </div>
@@ -9,12 +14,14 @@
   </div>
 
   <button
-    (click)="addToCart()"
+    (click)="$event.stopPropagation(); addToCart()"
     class="absolute inset-x-3 bottom-3 translate-y-16 rounded-xl px-4 py-3 text-sm font-medium text-white opacity-0 transition-all duration-500 group-hover:translate-y-0 group-hover:opacity-100 dark:text-zinc-900 rtl:font-semibold"
     [class.bg-green-600]="addedFeedback"
-    [class.bg-zinc-950]="!addedFeedback"
+    [class.bg-red-600]="addError"
+    [class.bg-zinc-950]="!addedFeedback && !addError"
     [class.dark:bg-green-500]="addedFeedback"
-    [class.dark:bg-white]="!addedFeedback">
-    {{ addedFeedback ? '✓ Ajouté' : 'Ajouter au panier' }}
+    [class.dark:bg-red-500]="addError"
+    [class.dark:bg-white]="!addedFeedback && !addError">
+    {{ addedFeedback ? '✓ Ajouté' : addError ? '✗ Erreur' : 'Ajouter au panier' }}
   </button>
 </article>

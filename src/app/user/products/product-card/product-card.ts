@@ -8,13 +8,14 @@ import {
   ViewChild,
   inject
 } from '@angular/core';
+import { RouterModule } from '@angular/router';
 import gsap from '../../../shared/gsap-lite';
 import { Product } from '../../../user.products';
-import { CartService } from '../../../core/services/cart.service';
+import { PanierService } from '../../../core/services/panier.service';
 
 @Component({
   selector: 'app-product-card',
-  imports: [CommonModule],
+  imports: [CommonModule, RouterModule],
   templateUrl: './product-card.html',
   styleUrl: './product-card.css'
 })
@@ -22,15 +23,23 @@ export class ProductCardComponent implements AfterViewInit, OnDestroy {
   @Input({ required: true }) product!: Product;
   @ViewChild('card', { static: true }) cardRef!: ElementRef<HTMLElement>;
 
-  private readonly cartService = inject(CartService);
+  private readonly panierService = inject(PanierService);
   private readonly rotateAmount = 6;
 
   addedFeedback = false;
+  addError = false;
 
   addToCart(): void {
-    this.cartService.addItem(this.product);
-    this.addedFeedback = true;
-    setTimeout(() => (this.addedFeedback = false), 1200);
+    this.panierService.addItem({ produitId: this.product.id, quantite: 1 }).subscribe({
+      next: () => {
+        this.addedFeedback = true;
+        setTimeout(() => (this.addedFeedback = false), 1200);
+      },
+      error: () => {
+        this.addError = true;
+        setTimeout(() => (this.addError = false), 1200);
+      }
+    });
   }
 
   ngAfterViewInit(): void {

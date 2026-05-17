@@ -4,7 +4,12 @@
 
     <div class="flex items-center gap-5 md:gap-7">
       @for (link of navLinks; track link.key) {
-        <a #liquidLink class="liquid-link bg-gradient-to-r from-wheat/40 to-transparent bg-[length:200%_100%] bg-no-repeat px-1" [routerLink]="link.route" routerLinkActive="font-semibold" [routerLinkActiveOptions]="{ exact: link.route === '/' }">{{ link.key | translate }}</a>
+        <a #liquidLink class="liquid-link relative bg-gradient-to-r from-wheat/40 to-transparent bg-[length:200%_100%] bg-no-repeat px-1" [routerLink]="link.route" routerLinkActive="font-semibold" [routerLinkActiveOptions]="{ exact: link.route === '/' }">
+          {{ link.key | translate }}
+          @if (link.route === '/cart' && cartCount() > 0) {
+            <span class="absolute -top-2 -end-3 flex h-4 w-4 items-center justify-center rounded-full bg-red-500 text-[10px] font-bold leading-none text-white">{{ cartCount() }}</span>
+          }
+        </a>
       }
       @if (auth.isAdmin()) {
         <a #liquidLink class="liquid-link bg-gradient-to-r from-wheat/40 to-transparent bg-[length:200%_100%] bg-no-repeat px-1" routerLink="/admin" routerLinkActive="font-semibold">{{ 'NAV.ADMIN' | translate }}</a>

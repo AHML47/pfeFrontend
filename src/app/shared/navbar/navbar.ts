@@ -4,6 +4,7 @@ import { Router, RouterModule } from '@angular/router';
 import { TranslateModule } from '@ngx-translate/core';
 import { App } from '../../app';
 import { AuthService } from '../../core/services/auth.service';
+import { PanierService } from '../../core/services/panier.service';
 
 declare global {
   interface Window {
@@ -26,7 +27,9 @@ export class NavbarComponent {
   private readonly actionButtons = viewChildren<ElementRef<HTMLElement>>('magneticBtn');
   private readonly router = inject(Router);
   private readonly app = inject(App);
+  private readonly panierService = inject(PanierService);
   readonly auth = inject(AuthService);
+  readonly cartCount = this.panierService.count;
   currentLanguage: 'en' | 'fr' | 'ar' = 'en';
 
   get isDarkMode(): boolean {
@@ -43,6 +46,9 @@ export class NavbarComponent {
     afterNextRender(() => {
       this.initializeGsapHover();
       this.initializeMagneticButtons();
+      if (this.auth.isAuthenticated()) {
+        this.panierService.getPanier().subscribe();
+      }
     });
   }
 

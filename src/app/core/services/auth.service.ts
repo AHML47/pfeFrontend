@@ -27,7 +27,7 @@ export class AuthService {
   }
 
   login(email: string, password: string): Observable<LoginResponse> {
-    return this.http.post<LoginResponse>('/api/auth/login', { email, password }).pipe(
+    return this.http.post<LoginResponse>('/api/auth/login', { Email: email, Password: password }).pipe(
       tap((res) => {
         localStorage.setItem(this.tokenKey, res.token);
         const user: SessionUser = {
@@ -42,7 +42,17 @@ export class AuthService {
   }
 
   register(fullName: string, email: string, password: string): Observable<{ message: string }> {
-    return this.http.post<{ message: string }>('/api/auth/register', { fullName, email, password });
+    return this.http.post<{ message: string }>('/api/auth/register', {
+      FullName: fullName,
+      Email: email,
+      Password: password
+    });
+  }
+
+  confirmEmail(email: string, token: string): Observable<{ message: boolean }> {
+    return this.http.get<{ message: boolean }>('/api/auth/confirm-email', {
+      params: { email, token }
+    });
   }
 
   logout(): void {

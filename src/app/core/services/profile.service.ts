@@ -1,14 +1,23 @@
 import { Injectable, inject } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
-import { Observable } from 'rxjs';
-import { UserProfile } from '../../user.products';
+import { Observable, map } from 'rxjs';
+import { UserProfile, UserProfileApi } from '../../user.products';
 
 @Injectable({ providedIn: 'root' })
 export class ProfileService {
   private readonly http = inject(HttpClient);
 
   getProfile(): Observable<UserProfile> {
-    return this.http.get<UserProfile>('/api/profile');
+    return this.http.get<UserProfileApi>('/api/profile').pipe(
+      map((profile) => ({
+        id: String(profile.Id),
+        nom: profile.Nom,
+        prenom: profile.Prenom,
+        email: profile.Email,
+        adresse: profile.Adresse,
+        role: profile.Role
+      }))
+    );
   }
 
   updateProfile(
@@ -16,23 +25,28 @@ export class ProfileService {
     prenom: string,
     email: string,
     adresse?: string
-  ): Observable<{ message: string }> {
-    return this.http.put<{ message: string }>('/api/profile', { nom, prenom, email, adresse });
+  ): Observable<string> {
+    return this.http.put<string>('/api/profile', {
+      Nom: nom,
+      Prenom: prenom,
+      Email: email,
+      Adresse: adresse
+    });
   }
 
   changePassword(
     oldPassword: string,
     newPassword: string
-  ): Observable<{ message: string }> {
-    return this.http.put<{ message: string }>('/api/profile/change-password', {
-      oldPassword,
-      newPassword
+  ): Observable<string> {
+    return this.http.put<string>('/api/profile/change-password', {
+      OldPassword: oldPassword,
+      NewPassword: newPassword
     });
   }
 
-  updateDeliveryAddress(adresseLivraisonActive: string): Observable<{ message: string }> {
-    return this.http.put<{ message: string }>('/api/profile/update-delivery-address', {
-      adresseLivraisonActive
+  updateDeliveryAddress(adresseLivraisonActive: string): Observable<string> {
+    return this.http.put<string>('/api/profile/update-delivery-address', {
+      AdresseLivraisonActive: adresseLivraisonActive
     });
   }
 }

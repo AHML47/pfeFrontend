@@ -1,12 +1,12 @@
 import { Injectable, inject } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { Observable, map } from 'rxjs';
-import { Category } from '../../user.products';
+import { BackendCategory, Category } from '../../user.products';
 
-interface BackendCategory {
-  id: number;
-  nom?: string;
-  name?: string;
+export interface CategoryDto {
+  nom: string;
+  description?: string;
+  parentId?: number | null;
 }
 
 @Injectable({ providedIn: 'root' })
@@ -15,19 +15,45 @@ export class CategoryService {
 
   getCategories(): Observable<Category[]> {
     return this.http.get<BackendCategory[]>('/api/categories').pipe(
-      map((cats) => cats.map((c) => ({ id: c.id, name: c.nom ?? c.name ?? '' })))
+      map((cats) => cats.map((c) => this.mapCategory(c)))
     );
   }
 
-  createCategory(dto: { name: string }): Observable<Category> {
-    return this.http.post<Category>('/api/categories', dto);
+  createCategory(dto: CategoryDto | { name: string }): Observable<Category> {
+    const payload = this.normalizeDto(dto);
+    return this.http
+      .post<BackendCategory>('/api/categories', {
+        Nom: payload.nom,
+        Description: payload.description,
+        ParentId: payload.parentId ?? null
+      })
+      .pipe(map((category) => this.mapCategory(category)));
   }
 
-  updateCategory(id: number, dto: { name: string }): Observable<void> {
-    return this.http.put<void>(`/api/categories/${id}`, dto);
+  updateCategory(id: number, dto: CategoryDto | { name: string }): Observable<void> {
+    const payload = this.normalizeDto(dto);
+    return this.http.put<void>(`/api/categories/${id}`, {
+      Nom: payload.nom,
+      Description: payload.description,
+      ParentId: payload.parentId ?? null
+    });
   }
 
   deleteCategory(id: number): Observable<void> {
     return this.http.delete<void>(`/api/categories/${id}`);
+  }
+
+  private mapCategory(category: BackendCategory): Category {
+    return {
+      id: category.id ?? category.Id ?? 0,
+      name: category.nom ?? category.Nom ?? ''
+    };
+  }
+
+  private normalizeDto(dto: CategoryDto | { name: string }): CategoryDto {
+    if ('name' in dto) {
+      return { nom: dto.name };
+    }
+    return dto;
   }
 }
