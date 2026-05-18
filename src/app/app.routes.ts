@@ -22,6 +22,11 @@ export const routes: Routes = [
     loadComponent: () => import('./user/cart/cart').then((m) => m.CartComponent)
   },
   {
+    path: 'orders',
+    data: { animation: 'OrdersPage' },
+    loadComponent: () => import('./user/orders/orders').then((m) => m.OrdersComponent)
+  },
+  {
     path: 'login',
     data: { animation: 'LoginPage' },
     loadComponent: () => import('./user/login/login').then((m) => m.LoginComponent)

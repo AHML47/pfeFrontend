@@ -59,6 +59,27 @@
 						</p>
 					</div>
 
+					<label class="block sm:col-span-2">
+						<span class="text-xs uppercase tracking-[0.25em] text-zinc-500 dark:text-zinc-400">Delivery address</span>
+						<input
+							type="text"
+							[(ngModel)]="deliveryAddress"
+							class="mt-2 w-full rounded-2xl border border-black/10 bg-white px-4 py-3 text-base text-zinc-950 outline-none transition focus:border-zinc-950 dark:border-white/10 dark:bg-zinc-900 dark:text-white dark:focus:border-white"
+							name="deliveryAddress"
+							placeholder="Enter the delivery address" />
+					</label>
+
+					<label class="block">
+						<span class="text-xs uppercase tracking-[0.25em] text-zinc-500 dark:text-zinc-400">Shipping fee</span>
+						<input
+							type="number"
+							min="0"
+							step="0.01"
+							[(ngModel)]="shippingFee"
+							class="mt-2 w-full rounded-2xl border border-black/10 bg-white px-4 py-3 text-base text-zinc-950 outline-none transition focus:border-zinc-950 dark:border-white/10 dark:bg-zinc-900 dark:text-white dark:focus:border-white"
+							name="shippingFee" />
+					</label>
+
 					<label class="block">
 						<span class="text-xs uppercase tracking-[0.25em] text-zinc-500 dark:text-zinc-400">Quantity</span>
 						<input

@@ -36,10 +36,21 @@ export class StockService {
   }
 
   private mapStock(item: StockDetailsApi): StockItem {
-    const produitId = item.Product?.idP ?? item.Product?.Id ?? 0;
+    const raw: any = (item as any).Product ?? (item as any).product ?? {};
+    const produitId = raw.idP ?? raw.Id ?? raw.produitId ?? 0;
+    const libelle = raw.libelle ?? raw.Libelle ?? raw.name ?? raw.nom ?? '';
+    const quantite = (item as any).QuantiteTotalRestante ?? (item as any).quantiteTotalRestante ?? 0;
+    const seuil = raw.seuil ?? raw.Seuil ?? undefined;
+    const categorie = raw.categorie?.name ?? raw.categorie ?? undefined;
+    const numeroLot = raw.stockLots?.[0]?.NumeroLot ?? raw.stockLots?.[0]?.numeroLot ?? undefined;
+
     return {
       produitId,
-      quantiteDisponible: item.QuantiteTotalRestante
+      libelle,
+      quantiteDisponible: quantite,
+      seuil,
+      categorie,
+      numeroLot
     };
   }
 }

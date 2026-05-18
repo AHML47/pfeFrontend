@@ -2,7 +2,8 @@
   <div class="mx-auto flex max-w-7xl flex-wrap items-center justify-between gap-4">
     <h1 class="font-display text-2xl font-bold text-start">DeliverWholesale</h1>
 
-    <div class="flex items-center gap-5 md:gap-7">
+    @if (!isAdminRoute) {
+      <div class="flex items-center gap-5 md:gap-7">
       @for (link of navLinks; track link.key) {
         <a #liquidLink class="liquid-link relative bg-gradient-to-r from-wheat/40 to-transparent bg-[length:200%_100%] bg-no-repeat px-1" [routerLink]="link.route" routerLinkActive="font-semibold" [routerLinkActiveOptions]="{ exact: link.route === '/' }">
           {{ link.key | translate }}
@@ -11,17 +12,24 @@
           }
         </a>
       }
+      @if (showOrdersLink) {
+        <a #liquidLink class="liquid-link bg-gradient-to-r from-wheat/40 to-transparent bg-[length:200%_100%] bg-no-repeat px-1" routerLink="/orders" routerLinkActive="font-semibold">
+          {{ 'NAV.ORDERS' | translate }}
+        </a>
+      }
       @if (auth.isAdmin()) {
         <a #liquidLink class="liquid-link bg-gradient-to-r from-wheat/40 to-transparent bg-[length:200%_100%] bg-no-repeat px-1" routerLink="/admin" routerLinkActive="font-semibold">{{ 'NAV.ADMIN' | translate }}</a>
       }
-    </div>
+      </div>
+    }
 
     <div class="flex items-center gap-3 ms-auto">
-      @if (!auth.isAuthenticated()) {
+      @if (!isAdminRoute && !auth.isAuthenticated()) {
         <a #magneticBtn class="magnetic-btn rounded-full px-4 py-2 text-xs font-semibold" routerLink="/login">{{ 'NAV.LOGIN' | translate }}</a>
-      } @else {
-        <button #magneticBtn type="button" class="magnetic-btn rounded-full px-4 py-2 text-xs font-semibold" (click)="logout()">{{ 'NAV.LOGOUT' | translate }}</button>
       }
+      @if (auth.isAuthenticated()) {
+        <button #magneticBtn type="button" class="magnetic-btn rounded-full px-4 py-2 text-xs font-semibold" (click)="logout()">{{ 'NAV.LOGOUT' | translate }}</button>
+      } 
 
       <button
         type="button"

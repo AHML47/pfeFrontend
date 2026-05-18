@@ -24,6 +24,8 @@ export class ProductDetailsComponent implements OnInit {
   product?: Product;
   loading = true;
   quantity = 1;
+  deliveryAddress = '';
+  shippingFee = 0;
   isSubmitting = false;
   isAddingToCart = false;
   errorMessage = '';
@@ -61,13 +63,28 @@ export class ProductDetailsComponent implements OnInit {
       return;
     }
 
+    if (!this.deliveryAddress.trim()) {
+      this.errorMessage = 'Please enter a delivery address.';
+      return;
+    }
+
     this.quantity = requestedQuantity;
     this.errorMessage = '';
     this.successMessage = '';
     this.isSubmitting = true;
 
     this.orderService
-      .createOrder([{ produitId: this.product.id, quantite: this.quantity }])
+      .createOrder({
+        articles: [
+          {
+            produitId: this.product.id,
+            quantite: this.quantity,
+            prixUnitaire: this.product.price
+          }
+        ],
+        adresseLivraison: this.deliveryAddress.trim(),
+        fraisLivraison: this.shippingFee
+      })
       .pipe(finalize(() => (this.isSubmitting = false)))
       .subscribe({
         next: ({ orderId }) => {

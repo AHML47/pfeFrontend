@@ -1,11 +1,11 @@
 import { CommonModule, CurrencyPipe, DecimalPipe } from '@angular/common';
+import { HttpErrorResponse } from '@angular/common/http';
 import {
   AfterViewInit,
   Component,
   ElementRef,
   OnInit,
   QueryList,
-  ViewChild,
   ViewChildren,
   inject
 } from '@angular/core';
@@ -19,9 +19,9 @@ import { CategoryService } from '../../core/services/category.service';
 import { ProductService } from '../../core/services/product.service';
 import { AchatLotService, CreateAchatLotDto } from '../../core/services/achat-lot.service';
 import { TranslateModule } from '@ngx-translate/core';
-import { AchatLot, Category, DashboardStats, Order, Product, Reclamation, StockItem } from '../../user.products';
+import { AchatLot, Category, DashboardStats, Order, OrderStatus, Product, Reclamation, StockItem } from '../../user.products';
 
-type TabKey = 'overview' | 'orders' | 'products' | 'reclamations' | 'categories' | 'achats';
+type TabKey = 'overview' | 'orders' | 'products' | 'stock' | 'reclamations' | 'categories' | 'achats';
 
 @Component({
   selector: 'app-admin-dashboard',
@@ -39,8 +39,6 @@ export class AdminDashboardComponent implements OnInit, AfterViewInit {
   private readonly productService = inject(ProductService);
   private readonly achatLotService = inject(AchatLotService);
 
-  @ViewChild('activeIndicator') activeIndicator?: ElementRef<HTMLElement>;
-  @ViewChildren('tabItem') tabItems?: QueryList<ElementRef<HTMLElement>>;
   @ViewChildren('statCard') statCards?: QueryList<ElementRef<HTMLElement>>;
 
   isSidebarOpen = false;
@@ -49,7 +47,8 @@ export class AdminDashboardComponent implements OnInit, AfterViewInit {
   readonly tabs: { key: TabKey; label: string; icon: string }[] = [
     { key: 'overview', label: 'ADMIN.OVERVIEW', icon: '◈' },
     { key: 'orders', label: 'ADMIN.ORDERS', icon: '⎘' },
-    { key: 'products', label: 'ADMIN.INVENTORY', icon: '◫' },
+    { key: 'products', label: 'ADMIN.PRODUCTS', icon: '◫' },
+    { key: 'stock', label: 'ADMIN.STOCK', icon: '▦' },
     { key: 'reclamations', label: 'ADMIN.RECLAMATIONS', icon: '⚑' },
     { key: 'categories', label: 'ADMIN.CATEGORIES', icon: '⊞' },
     { key: 'achats', label: 'ADMIN.ACHAT_LOTS', icon: '⊕' }
@@ -57,6 +56,8 @@ export class AdminDashboardComponent implements OnInit, AfterViewInit {
 
   stats: DashboardStats = { revenue: 0, totalOrders: 0, activeUsers: 0 };
   orders: Order[] = [];
+  readonly orderStatuses: OrderStatus[] = ['EnAttente', 'Confirmee', 'Livree', 'Annulee'];
+  private readonly orderStatusDrafts = new Map<number, OrderStatus>();
   inventory: StockItem[] = [];
   reclamations: Reclamation[] = [];
   categories: Category[] = [];
@@ -72,6 +73,7 @@ export class AdminDashboardComponent implements OnInit, AfterViewInit {
 
   showProductForm = false;
   editingProductId: number | null = null;
+  productFormError = '';
   productDraft: {
     libelle: string;
     prixVente: number | null;
@@ -95,7 +97,7 @@ export class AdminDashboardComponent implements OnInit, AfterViewInit {
       }
     });
 
-    this.orderService.getOrders().subscribe({ next: (o) => (this.orders = o) });
+    this.orderService.getAdminOrders().subscribe({ next: (o) => (this.orders = o) });
     this.stockService.getStock().subscribe({ next: (s) => (this.inventory = s) });
     this.reclamationService.getAllReclamations().subscribe({ next: (r) => (this.reclamations = r) });
     this.loadCategories();
@@ -105,23 +107,30 @@ export class AdminDashboardComponent implements OnInit, AfterViewInit {
 
   ngAfterViewInit(): void {
     this.animateCards();
-    this.moveIndicator();
   }
 
   selectTab(tab: TabKey): void {
     this.activeTab = tab;
     this.isSidebarOpen = false;
-    setTimeout(() => this.moveIndicator(), 0);
   }
 
-  private moveIndicator(): void {
-    const indicator = this.activeIndicator?.nativeElement;
-    const tabs = this.tabItems?.toArray() ?? [];
-    const target = tabs.find(
-      (tabRef) => tabRef.nativeElement.dataset['tab'] === this.activeTab
-    )?.nativeElement;
-    if (!indicator || !target) return;
-    gsap.to(indicator, { y: target.offsetTop, duration: 0.35 });
+  getOrderStatusDraft(order: Order): OrderStatus {
+    return this.orderStatusDrafts.get(order.id) ?? (order.statut as OrderStatus) ?? 'EnAttente';
+  }
+
+  setOrderStatusDraft(orderId: number, value: string): void {
+    if (this.orderStatuses.includes(value as OrderStatus)) {
+      this.orderStatusDrafts.set(orderId, value as OrderStatus);
+    }
+  }
+
+  updateOrderStatus(order: Order): void {
+    const status = this.getOrderStatusDraft(order);
+    this.orderService.updateOrderStatus(order.id, status).subscribe({
+      next: () => {
+        this.orderService.getAdminOrders().subscribe({ next: (orders) => (this.orders = orders) });
+      }
+    });
   }
 
   private animateCards(): void {
@@ -133,12 +142,15 @@ export class AdminDashboardComponent implements OnInit, AfterViewInit {
     this.productService.getProducts().subscribe({ next: (p) => (this.products = p) });
   }
 
+  
+
   getCategoryName(id: number): string {
     return this.categories.find((c) => c.id === id)?.name ?? '—';
   }
 
   openNewProductForm(): void {
     this.editingProductId = null;
+    this.productFormError = '';
     this.productDraft = { libelle: '', prixVente: null, idCategorie: null, description: '', nbUnite: null, seuil: null, prixModifiable: false };
     this.productImageFile = null;
     this.showProductForm = true;
@@ -146,6 +158,7 @@ export class AdminDashboardComponent implements OnInit, AfterViewInit {
 
   editProduct(prod: Product): void {
     this.editingProductId = prod.id;
+    this.productFormError = '';
     this.productDraft = {
       libelle: prod.name,
       prixVente: prod.price,
@@ -166,9 +179,12 @@ export class AdminDashboardComponent implements OnInit, AfterViewInit {
 
   saveProduct(): void {
     if (!this.productDraft.libelle.trim()) return;
+    this.productFormError = '';
     const fd = new FormData();
     fd.append('Libelle', this.productDraft.libelle);
-    if (this.productDraft.prixVente !== null) fd.append('PrixVente', String(this.productDraft.prixVente));
+    if (this.productDraft.prixVente !== null) {
+      fd.append(this.editingProductId !== null ? 'NouveauPrixVente' : 'PrixVente', String(this.productDraft.prixVente));
+    }
     if (this.productDraft.idCategorie !== null) fd.append('IdCategorie', String(this.productDraft.idCategorie));
     if (this.productDraft.description) fd.append('Description', this.productDraft.description);
     if (this.productDraft.nbUnite !== null) fd.append('NbUnite', String(this.productDraft.nbUnite));
@@ -177,21 +193,54 @@ export class AdminDashboardComponent implements OnInit, AfterViewInit {
     if (this.productImageFile) fd.append('Image', this.productImageFile);
     if (this.editingProductId !== null) {
       this.productService.updateProduct(this.editingProductId, fd).subscribe({
-        next: () => { this.showProductForm = false; this.loadProducts(); }
+        next: () => { this.showProductForm = false; this.productFormError = ''; this.loadProducts(); },
+        error: (error) => {
+          this.productFormError = this.getProductSaveErrorMessage(error);
+        }
       });
     } else {
       this.productService.createProduct(fd).subscribe({
-        next: () => { this.showProductForm = false; this.loadProducts(); }
+        next: () => { this.showProductForm = false; this.productFormError = ''; this.loadProducts(); },
+        error: (error) => {
+          this.productFormError = this.getProductSaveErrorMessage(error, 'La création du produit a échoué.');
+        }
       });
     }
   }
 
   cancelProductForm(): void {
     this.showProductForm = false;
+    this.productFormError = '';
   }
 
   deleteProduct(id: number): void {
     this.productService.deleteProduct(id).subscribe({ next: () => this.loadProducts() });
+  }
+
+  private getProductSaveErrorMessage(error: unknown, fallback = 'Le prix de ce produit n\'est pas modifiable.'): string {
+    if (error instanceof HttpErrorResponse) {
+      const backendMessage = this.extractBackendErrorMessage(error.error);
+      if (error.status === 400) {
+        return backendMessage || fallback;
+      }
+      return backendMessage || 'Une erreur est survenue lors de l\'enregistrement du produit.';
+    }
+
+    return fallback;
+  }
+
+  private extractBackendErrorMessage(payload: unknown): string {
+    if (typeof payload === 'string') {
+      return payload.trim();
+    }
+
+    if (payload && typeof payload === 'object') {
+      const candidate = payload as { message?: unknown; Message?: unknown; error?: unknown; Error?: unknown };
+      const value = candidate.message ?? candidate.Message ?? candidate.error ?? candidate.Error;
+      return typeof value === 'string' ? value.trim() : '';
+    }
+
+    return '';
   }
 
   getProductName(id: number): string {

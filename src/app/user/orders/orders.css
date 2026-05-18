@@ -1,0 +1,130 @@
+:host { display: block; }
+
+.orders-shell {
+  display: grid;
+  gap: 1rem;
+  padding: 1rem 0 2rem;
+}
+
+.orders-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+  padding: 1.2rem 1.4rem;
+  border-radius: 1.5rem;
+  background: rgba(255, 255, 255, 0.72);
+  backdrop-filter: blur(18px);
+}
+
+.eyebrow {
+  margin: 0 0 .25rem;
+  text-transform: uppercase;
+  letter-spacing: .18em;
+  font-size: .72rem;
+  color: rgba(0, 0, 0, .52);
+}
+
+.orders-header h1 {
+  margin: 0;
+  font-size: clamp(1.6rem, 2.5vw, 2.4rem);
+}
+
+.refresh-btn {
+  border: none;
+  border-radius: 999px;
+  padding: .75rem 1rem;
+  background: #5a7a40;
+  color: #fff;
+  font-weight: 600;
+}
+
+.status-card {
+  padding: 1.25rem 1.4rem;
+  border-radius: 1.2rem;
+  background: rgba(255, 255, 255, 0.72);
+}
+
+.status-card.error { color: #b42318; }
+
+.orders-grid {
+  display: grid;
+  gap: 1rem;
+}
+
+.order-card {
+  padding: 1.2rem 1.3rem;
+  border-radius: 1.5rem;
+  background: rgba(255, 255, 255, 0.8);
+  box-shadow: 0 16px 32px rgba(0, 0, 0, 0.06);
+}
+
+.card-head {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 1rem;
+  margin-bottom: 1rem;
+}
+
+.card-head p,
+.card-head h2 {
+  margin: 0;
+}
+
+.card-head p { color: rgba(0, 0, 0, .55); }
+
+.meta-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: .85rem 1rem;
+  margin: 0;
+}
+
+.meta-grid div {
+  padding: .8rem .85rem;
+  border-radius: 1rem;
+  background: rgba(90, 122, 64, 0.08);
+}
+
+.meta-grid dt {
+  margin-bottom: .25rem;
+  font-size: .78rem;
+  text-transform: uppercase;
+  letter-spacing: .06em;
+  color: rgba(0, 0, 0, .52);
+}
+
+.meta-grid dd {
+  margin: 0;
+  font-weight: 600;
+}
+
+.items-list {
+  list-style: none;
+  margin: 1rem 0 0;
+  padding: 0;
+  display: grid;
+  gap: .5rem;
+}
+
+.items-list li {
+  display: flex;
+  justify-content: space-between;
+  gap: 1rem;
+  padding: .65rem .8rem;
+  border-radius: .9rem;
+  background: rgba(0, 0, 0, .03);
+}
+
+@media (max-width: 720px) {
+  .orders-header,
+  .card-head,
+  .items-list li {
+    flex-direction: column;
+  }
+
+  .meta-grid {
+    grid-template-columns: 1fr;
+  }
+}

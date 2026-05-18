@@ -1,0 +1,61 @@
+<section class="orders-shell">
+  <header class="orders-header">
+    <div>
+      <p class="eyebrow">{{ 'NAV.ORDERS' | translate }}</p>
+      <h1>{{ 'ADMIN.MY_ORDERS' | translate }}</h1>
+    </div>
+    <button class="refresh-btn" type="button" (click)="loadOrders()">{{ 'ADMIN.RELOAD' | translate }}</button>
+  </header>
+
+  @if (loading) {
+    <div class="status-card">Chargement...</div>
+  } @else if (errorMessage) {
+    <div class="status-card error">{{ errorMessage }}</div>
+  } @else if (!orders.length) {
+    <div class="status-card">{{ 'ADMIN.NO_ORDERS' | translate }}</div>
+  } @else {
+    <div class="orders-grid">
+      @for (order of orders; track order.id) {
+        <article class="order-card">
+          <div class="card-head">
+            <div>
+              <p>{{ 'ADMIN.ORDER_NUMBER' | translate }}{{ order.id }}</p>
+              <h2>{{ order.statut }}</h2>
+            </div>
+            <strong>{{ (order.totalFinal ?? order.total ?? 0) | currency }}</strong>
+          </div>
+
+          <dl class="meta-grid">
+            <div>
+              <dt>{{ 'ADMIN.CLIENT' | translate }}</dt>
+              <dd>{{ order.clientNom ?? ('User #' + (order.userId ?? '—')) }}</dd>
+            </div>
+            <div>
+              <dt>{{ 'ADMIN.DELIVERY_ADDRESS' | translate }}</dt>
+              <dd>{{ getDeliveryAddress(order) }}</dd>
+            </div>
+            <div>
+              <dt>Date</dt>
+              <dd>{{ order.dateCommande ? (order.dateCommande | date:'medium') : '—' }}</dd>
+            </div>
+            <div>
+              <dt>{{ 'ADMIN.ITEMS' | translate }}</dt>
+              <dd>{{ order.items?.length ?? order.orderDetails?.length ?? 0 }}</dd>
+            </div>
+          </dl>
+
+          @if (order.items?.length) {
+            <ul class="items-list">
+              @for (item of order.items; track trackOrderItem($index)) {
+                <li>
+                  <span>{{ getItemLabel(item) }}</span>
+                  <span>x{{ item.quantite }}</span>
+                </li>
+              }
+            </ul>
+          }
+        </article>
+      }
+    </div>
+  }
+</section>

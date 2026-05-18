@@ -32,6 +32,10 @@ export class NavbarComponent {
   readonly cartCount = this.panierService.count;
   currentLanguage: 'en' | 'fr' | 'ar' = 'en';
 
+  get isAdminRoute(): boolean {
+    return this.router.url.startsWith('/admin');
+  }
+
   get isDarkMode(): boolean {
     return this.app.isDarkMode();
   }
@@ -41,6 +45,10 @@ export class NavbarComponent {
     { key: 'NAV.PRODUCTS', route: '/products' },
     { key: 'NAV.CART', route: '/cart' }
   ];
+
+  get showOrdersLink(): boolean {
+    return this.auth.isAuthenticated() && !this.auth.isAdmin();
+  }
 
   constructor() {
     afterNextRender(() => {

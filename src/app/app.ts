@@ -5,11 +5,10 @@ import { TranslateService } from '@ngx-translate/core';
 import { animate, query, style, transition, trigger } from '@angular/animations';
 import { FooterComponent } from './shared/footer/footer';
 import { NavbarComponent } from './shared/navbar/navbar';
-import { CustomCursorComponent } from './shared/custom-cursor/custom-cursor';
 
 @Component({
   selector: 'app-root',
-  imports: [RouterOutlet, NavbarComponent, FooterComponent, CustomCursorComponent],
+  imports: [RouterOutlet, NavbarComponent, FooterComponent],
   templateUrl: './app.html',
   styleUrl: './app.css',
   animations: [
@@ -31,6 +30,8 @@ export class App implements AfterViewInit, OnDestroy {
   private currentScroll = 0;
   private targetScroll = 0;
   private resizeObserver?: ResizeObserver; 
+  private isAnimating = false;
+  private onScroll?: () => void;
 
   constructor(
     private readonly translate: TranslateService,
@@ -56,6 +57,9 @@ export class App implements AfterViewInit, OnDestroy {
   ngOnDestroy(): void {
     if (this.frameId !== null) {
       cancelAnimationFrame(this.frameId);
+    }
+    if (this.onScroll) {
+      window.removeEventListener('scroll', this.onScroll);
     }
     this.resizeObserver?.disconnect();
     this.document.body.style.height = '';
@@ -115,16 +119,30 @@ export class App implements AfterViewInit, OnDestroy {
 
     const onScroll = () => {
       this.targetScroll = window.scrollY;
+      if (!this.isAnimating) {
+        this.isAnimating = true;
+        this.frameId = requestAnimationFrame(render);
+      }
     };
 
     const render = () => {
       this.currentScroll += (this.targetScroll - this.currentScroll) * 0.09;
       const y = Math.round(this.currentScroll * 100) / 100;
       content.style.transform = `translate3d(0, -${y}px, 0)`;
+
+      if (Math.abs(this.targetScroll - this.currentScroll) < 0.5) {
+        this.currentScroll = this.targetScroll;
+        content.style.transform = `translate3d(0, -${this.currentScroll}px, 0)`;
+        this.isAnimating = false;
+        this.frameId = null;
+        return;
+      }
+
       this.frameId = requestAnimationFrame(render);
     };
 
+    this.onScroll = onScroll;
     window.addEventListener('scroll', onScroll, { passive: true });
-    render();
+    onScroll();
   }
 }

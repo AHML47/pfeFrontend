@@ -3,7 +3,6 @@
 
   <aside class="sidebar" [class.open]="isSidebarOpen">
     <h2>{{ 'ADMIN.CONTROL_CENTER' | translate }}</h2>
-    <div #activeIndicator class="active-indicator"></div>
     @for (tab of tabs; track tab.key) {
       <button
         #tabItem
@@ -51,8 +50,17 @@
           <article class="row">
             <span>#{{ order.id }}</span>
             <span>{{ order.clientNom ?? '—' }}</span>
-            <span>{{ order.statut }}</span>
-            <span>{{ (order.total ?? 0) | currency }}</span>
+            <span class="order-status-cell">
+              <select [ngModel]="getOrderStatusDraft(order)" (ngModelChange)="setOrderStatusDraft(order.id, $event)">
+                @for (status of orderStatuses; track status) {
+                  <option [value]="status">{{ status }}</option>
+                }
+              </select>
+            </span>
+            <span class="row-actions order-actions">
+              <span>{{ (order.total ?? 0) | currency }}</span>
+              <button class="btn-primary" type="button" (click)="updateOrderStatus(order)">{{ 'ADMIN.SAVE' | translate }}</button>
+            </span>
           </article>
         }
         @if (!orders.length) {
@@ -117,6 +125,9 @@
               </button>
               <button class="btn-ghost" (click)="cancelProductForm()">{{ 'ADMIN.CANCEL' | translate }}</button>
             </div>
+            @if (productFormError) {
+              <p class="form-error">{{ productFormError }}</p>
+            }
           </div>
         }
 
@@ -142,6 +153,30 @@
         }
       </section>
     }
+
+      @if (activeTab === 'stock') {
+        <section class="data-list">
+          <div class="section-toolbar">
+            <h2>{{ 'ADMIN.STOCK' | translate }}</h2>
+          </div>
+
+          <div class="list-head">
+            <span>{{ 'ADMIN.PRODUCT' | translate }}</span>
+            <span>{{ 'ADMIN.STOCK' | translate }}</span>
+          </div>
+
+          @for (item of inventory; track item.produitId) {
+            <article class="row">
+              <span>{{ item.libelle ?? getProductName(item.produitId) }}</span>
+              <span>{{ item.quantiteDisponible }}</span>
+            </article>
+          }
+
+          @if (!inventory.length) {
+            <p class="empty-state">Aucun stock disponible.</p>
+          }
+        </section>
+      }
 
     @if (activeTab === 'reclamations') {
       <section class="data-list">

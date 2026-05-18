@@ -29,7 +29,10 @@ export class LoginComponent {
     this.errorMessage = '';
 
     this.auth.login(this.email, this.password).subscribe({
-      next: () => this.router.navigateByUrl('/'),
+      next: () => {
+        const target = this.auth.isAdmin() ? '/admin' : '/';
+        this.router.navigateByUrl(target);
+      },
       error: () => {
         this.errorMessage = 'Email ou mot de passe incorrect.';
         this.isLoading = false;

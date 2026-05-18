@@ -73,6 +73,20 @@ export interface OrderItemPayload {
   quantite: number;
 }
 
+export interface CreateOrderArticle {
+  produitId: number;
+  quantite: number;
+  prixUnitaire: number;
+}
+
+export interface CreateOrderDto {
+  articles: CreateOrderArticle[];
+  adresseLivraison: string;
+  fraisLivraison: number;
+}
+
+export type OrderStatus = 'EnAttente' | 'Confirmee' | 'Livree' | 'Annulee';
+
 export interface Order {
   id: number;
   statut: string;
@@ -81,7 +95,10 @@ export interface Order {
   userId?: number;
   totalProduits?: number;
   totalFinal?: number;
+  fraisLivraison?: number;
   dateCommande?: string;
+  delivery?: Delivery;
+  orderDetails?: OrderDetail[];
   items?: { produit?: BackendProduct; quantite: number }[];
 }
 
@@ -227,7 +244,9 @@ export interface AchatLot {
 export interface Delivery {
   id: number;
   orderId: number;
+  adresse?: string;
   adresseLivraison: string;
+  dateCreation?: string;
   dateLivraisonPrevue: string;
   statut?: string;
   dateLivraisonReelle?: string;
